@@ -10,7 +10,7 @@ use johnitvn\ajaxcrud\BulkButtonWidget;
 /* @var $searchModel backend\models\searchs\HelpsSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = 'Ombor';
+$this->title = 'Yuk jo\'natuvchilar';
 $this->params['breadcrumbs'][] = $this->title;
 
 CrudAsset::register($this);
@@ -19,15 +19,7 @@ CrudAsset::register($this);
 <div class="panel panel-inverse user-index">
     <div class="panel-heading">
         <div class="panel-heading-btn">
-            <!-- <?php if(Yii::$app->user->identity->permission == 1){?>
-                <a href="/check/create" role="modal-remote" class="btn btn-xs  btn-warning">Tekshirildi <i class="fa fa-check"></i> </a>
-            <?php }?> -->
-            <?php if(Yii::$app->user->identity->permission == 1){?>
-                <!-- <a href="/check/create" role="modal-remote" class="btn btn-xs  btn-warning">Tekshirildi <i class="fa fa-check"></i> </a> -->
-            
-                <a href="/sklad/create" class="btn btn-xs  btn-success">Qo'shish <i class="fa fa-plus"></i> </a>
-            <?php }?>
-            <!-- <a href="/warehouse/create" class="btn btn-xs  btn-success">Qo'shish <i class="fa fa-plus"></i> </a> -->
+            <a href="/consignor/create" role="modal-remote" class="btn btn-xs  btn-success">Qo'shish <i class="fa fa-plus"></i> </a>
             <a href="javascript:;" title="Во весь экран" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
             <a href="javascript:;" title="Обновить" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-repeat"></i></a>
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
@@ -67,6 +59,5 @@ CrudAsset::register($this);
 <?php Modal::begin([
     "id"=>"ajaxCrudModal",
     "footer"=>"",// always need it for jquery plugin
-    'options' => ['tabindex' => false], // MUHIM
 ])?>
 <?php Modal::end(); ?>

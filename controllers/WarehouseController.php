@@ -24,6 +24,7 @@ use app\models\MyTotalDebtHistory;
 use app\models\ElegantHistoryUpdate;
 use app\models\TypeSklad;
 use app\models\BrandsSize;
+use app\models\ExchangeRate;
 
 /**
  * WarehouseController implements the CRUD actions for Warehouse model.
@@ -117,7 +118,7 @@ class WarehouseController extends Controller
 
 
 
-    public function actionAccept(){
+     public function actionAccept(){
         // Requestni chop etish
         
         $request = Yii::$app->request;
@@ -128,6 +129,10 @@ class WarehouseController extends Controller
 
         $discount_amounts = $request->post('chegirma_summa');
         $sum_dollars = $request->post('summa_dollor');
+        $dollar_sumda = $request->post('dollar_sumda');
+        // $sum_soms = $request->post('summa_som');
+        // $sum_carts = $request->post('summa_karta');
+        // $sum_transferss = $request->post('summa_transfer');
         $comments = $request->post('comment');
         $tasdiq_check = $request->post('tasdiq_check');
         
@@ -151,6 +156,7 @@ class WarehouseController extends Controller
         $sklad->cr_date = date('Y-m-d',strtotime($dates));
         $sklad->consignor_id = $consignor->id;
         $sklad->status = 1;
+        $sklad->actived = 1;
         $sklad->save(false);
 
         
@@ -164,8 +170,8 @@ class WarehouseController extends Controller
             // print_r("value['type'] ". $value['type']."<br/>");
             // print_r("value['size'] ". $value['size']."<br/>");
             // echo '</pre>';
-            $brand_list = Brands::find()->where(['name' => $value['marka']])->one();
-            $product_category_list = ProductCategory::find()->where(['name' => $value['name']])->andWhere(['<>', 'sup_status', 0])->one();
+            $brand_list = Brands::find()->where(['id' => $value['brand_id']])->one();
+            $product_category_list = ProductCategory::find()->where(['id' => $value['product_category_id']])->one();
             $type_sklad_list = TypeSklad::find()->where(['name' => $value['joy']])->one();
 
 
@@ -205,6 +211,7 @@ class WarehouseController extends Controller
                 $relativeHistory->cr_date_time = date('Y-m-d H:i:s');
                 $relativeHistory->save(false);
                 $error = $relativeHistory->errors;
+                // $sum_all_product = $sum_all_product + float($value['price']) * float($value['count']);
 
             }else {
                 
@@ -226,6 +233,7 @@ class WarehouseController extends Controller
                 $relativeHistory->cr_date = date('Y-m-d H:i:s');
                 $relativeHistory->save(false);
                 $error = $relativeHistory->errors;
+                // $sum_all_product = $sum_all_product + float($value['price']) * float($value['count']);
             }
                 
         }
@@ -251,6 +259,7 @@ class WarehouseController extends Controller
         return $this->redirect(['/sklad/index']);
     }
 
+
     public function actionQarztul(){
         // Requestni chop etish
         
@@ -262,19 +271,26 @@ class WarehouseController extends Controller
 
         $tul_qarz_sikidka = $request->post('tul_qarz_sikidka');
         $tul_qarz_sum_dollar = $request->post('tul_qarz_sum_dollar');
+        // $tul_qarz_sum_som = $request->post('tul_qarz_sum_som');
+        // $tul_qarz_summ_cart = $request->post('tul_qarz_summ_cart');
+        // $tul_qarz_sum_transfer = $request->post('tul_qarz_sum_transfer');
         $all_tulangan_summa_dollar = round($tul_qarz_sum_dollar + $tul_qarz_sikidka,2);
 
         $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $clients_id])->one();
+        $exchangeRate = ExchangeRate::find()->where(['id' => 1])->one();
+        $dollar_kurs =  $exchangeRate->dollar;
+
         $myTotalDebt->total_debt = $myTotalDebt->total_debt - $all_tulangan_summa_dollar;
+        $myTotalDebt->cr_date = $qarz_tul_date;
         $myTotalDebt->save(false);
         
         $myTotalDebtHistory = new MyTotalDebtHistory();  
         $myTotalDebtHistory->my_total_debt_id = $myTotalDebt->id;
-        $myTotalDebtHistory->exchange_rate = $dollar_kurs;
+        $myTotalDebtHistory->exchange_rate = $qarz_client_summ - ($tul_qarz_sum_dollar + $tul_qarz_sikidka);
         $myTotalDebtHistory->cr_date = $qarz_tul_date;
-        $myTotalDebtHistory->all_summ_dollar = $all_tulangan_summa_dollar;
+        $myTotalDebtHistory->all_summ_dollar = $tul_qarz_sum_dollar;
         $myTotalDebtHistory->discount_amount = $tul_qarz_sikidka;
-        $myTotalDebtHistory->total_debt = $tul_qarz_sum_dollar;
+        $myTotalDebtHistory->total_debt = $qarz_client_summ;
         $myTotalDebtHistory->save(false);
 
         return $this->redirect(['/my-total-debt/index']);

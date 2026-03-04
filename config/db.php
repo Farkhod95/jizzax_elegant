@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_elegantnew',
+    'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_jizzaxdb',
     'username' => 'host1836067_user',
     'password' => 'elegant@q12we3',
     'charset' => 'utf8',
@@ -14,7 +14,7 @@ return [
     // 'charset' => 'utf8',
 
     // 'class' => 'yii\db\Connection',
-    // 'dsn' => 'mysql:host=localhost;dbname=elegant_chinni_22_01',
+    // 'dsn' => 'mysql:host=localhost;dbname=jizzaxdb',
     // 'username' => 'root',
     // 'password' => 'root',
     // 'charset' => 'utf8',

@@ -8,7 +8,7 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'language' =>'uz-UZ',
-    'name' => 'Elegant Do\'kon',
+    'name' => 'Optom Do\'kon',
     'timeZone' =>'Asia/Tashkent',
     // 'defaultRoute' => \Yii::$app->user->permission == 1 ? '/site/index':'/site/product-list',
     'defaultRoute' => '/site/index',

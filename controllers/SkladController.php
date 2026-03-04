@@ -278,7 +278,7 @@ class SkladController extends Controller
             $importProducts = $post['Sklad']['allValue'];
 
             // $my_total_debts = $post['Sklad']['my_total_debts'];
-            $consignor_id = 31;
+            // $consignor_id = 45;
             $dates = $post['Sklad']['dates'];
             $exchange_rates = $post['Sklad']['exchange_rates'];
             // $given_sum_dollars = $post['Sklad']['given_sum_dollars'];
@@ -289,16 +289,16 @@ class SkladController extends Controller
             $discount_amounts = 0;
             $comments = $post['Sklad']['comments'];
             
-            $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $consignor_id])->one();
+            // $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $consignor_id])->one();
         
-            $my_total_debts = 0;
-            if ($myTotalDebt) {
-                $my_total_debts = $myTotalDebt->total_debt;
-            }
+            // $my_total_debts = 0;
+            // if ($myTotalDebt) {
+            //     $my_total_debts = $myTotalDebt->total_debt;
+            // }
 
             // $order_account_statuses = $post['Sklad']['order_account_statuses'];
             
-            $consignor = Consignor::find()->where(['id' => $consignor_id])->one();
+            // $consignor = Consignor::find()->where(['id' => $consignor_id])->one();
             
             $sklad = new Sklad();
             $sklad->created_by = Yii::$app->user->identity->id;
@@ -308,10 +308,10 @@ class SkladController extends Controller
             $sklad->exchange_rate = $exchange_rates;
             $sklad->discount_amount = $discount_amounts;
             $sklad->my_total_debt = 0;
-            $sklad->old_my_total_debt = $my_total_debts;
+            // $sklad->old_my_total_debt = $my_total_debts;
             $sklad->cr_date_time = date('Y-m-d H:i:s');
             $sklad->cr_date = date('Y-m-d',strtotime($dates));
-            $sklad->consignor_id = $consignor->id;
+            // $sklad->consignor_id = $consignor->id;
             $sklad->status = 1;
             $sklad->actived = 0;
             $sklad->save(false);
@@ -410,20 +410,20 @@ class SkladController extends Controller
             $sklad->my_total_debt = $given_sum_dollars -  ($sum_dollars -  $discount_amounts);
             $sklad->save(false);
 
-            $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $consignor->id])->one();
-            if ($myTotalDebt) {
-                $myTotalDebt->total_debt = $my_total_debts + ($given_sum_dollars -  $sum_dollars - $discount_amounts);
-                $myTotalDebt->update_by = Yii::$app->user->identity->id;
-                $myTotalDebt->cr_date = date('Y-m-d H:i:s');
-                $myTotalDebt->save(false);
-            }else{
-                $myTotalDebt = new MyTotalDebt();
-                $myTotalDebt->consignor_id = $consignor->id;
-                $myTotalDebt->total_debt = $my_total_debts + ($given_sum_dollars -  $sum_dollars - $discount_amounts);
-                $myTotalDebt->update_by = Yii::$app->user->identity->id;
-                $myTotalDebt->cr_date = date('Y-m-d H:i:s');
-                $myTotalDebt->save(false);
-            }
+            // $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $consignor->id])->one();
+            // if ($myTotalDebt) {
+            //     $myTotalDebt->total_debt = $my_total_debts + ($given_sum_dollars -  $sum_dollars - $discount_amounts);
+            //     $myTotalDebt->update_by = Yii::$app->user->identity->id;
+            //     $myTotalDebt->cr_date = date('Y-m-d H:i:s');
+            //     $myTotalDebt->save(false);
+            // }else{
+            //     $myTotalDebt = new MyTotalDebt();
+            //     $myTotalDebt->consignor_id = $consignor->id;
+            //     $myTotalDebt->total_debt = $my_total_debts + ($given_sum_dollars -  $sum_dollars - $discount_amounts);
+            //     $myTotalDebt->update_by = Yii::$app->user->identity->id;
+            //     $myTotalDebt->cr_date = date('Y-m-d H:i:s');
+            //     $myTotalDebt->save(false);
+            // }
             return $this->redirect(['warehouse/index']);
         }
 

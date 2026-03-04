@@ -24,14 +24,16 @@ class Consignor extends \yii\db\ActiveRecord
         return 'consignor';
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    var $my_all_total_debt = null;
+    var $total_debts = null;
+
     public function rules()
     {
         return [
             [['address'], 'string'],
             [['name', 'phone'], 'string', 'max' => 250],
+            [['name'] ,'unique'],
+            [['name', 'phone'],'required'],
         ];
     }
 
@@ -45,6 +47,8 @@ class Consignor extends \yii\db\ActiveRecord
             'name' => 'Nomi',
             'phone' => 'Telefon nomeri',
             'address' => 'Manzili',
+            'total_debts' => 'Mening qarzim ($)',
+            'my_all_total_debt' => 'Mening qarzim ($)',
         ];
     }
 

@@ -105,6 +105,12 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         'url' => ['/warehouse/index'],
                         'visible' => $model->permission == 1 || $model->permission == 5|| $model->permission == 2 ? true : false,
                     ],
+                                        [
+                        'label' => 'Import qilish', 
+                        'icon' => 'truck', 
+                        'url' => ['/warehouse/import-product'],
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 ? true : false,
+                    ],
                     [
                         'label' => 'Omborxona hisobi', 
                         'icon' => 'university', 
@@ -162,13 +168,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'visible' => $model->permission == 1 ? true : false,
                             ],
                     
-                         
-                            [
-                                'label' => 'Foydalanuvchilar', 
-                                'icon' => 'users', 
-                                'url' => ['/users/index'],
-                                'visible' => $model->permission == 1 ? true : false,
-                            ],
+                          
                             [
                                 'label' => 'Foyda va zarar', 
                                 'icon' => 'bar-chart', 
@@ -199,7 +199,19 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'url' => ['/about/index'],
                                 'visible' => $model->permission == 1  ? true : false,
                             ],
-                            
+                             [
+                                'label' => 'Yuk jo\'natuvchilar', 
+                                'icon' => 'truck', 
+                                'url' => ['/consignor/index'],
+                                'visible' => $model->permission == 1 || $model->permission == 2  ? true : false,
+                            ],
+                              
+                            [
+                                'label' => 'Foydalanuvchilar', 
+                                'icon' => 'users', 
+                                'url' => ['/users/index'],
+                                'visible' => $model->permission == 1 ? true : false,
+                            ],
                         ],
                     ],
                     [
