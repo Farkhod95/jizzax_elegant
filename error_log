@@ -1,0 +1,16 @@
+[26-Oct-2022 05:47:03 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/public_html/config/params.php on line 5
+[03-Nov-2022 07:39:23 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/public_html/config/params.php on line 5
+[09-Nov-2022 05:11:44 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/public_html/config/params.php on line 5
+[04-Mar-2023 06:15:50 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[19-Mar-2023 16:31:20 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[20-Mar-2023 16:05:29 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[20-Mar-2023 16:07:24 UTC] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[04-Nov-2024 13:17:33 Asia/Tashkent] PHP Warning:  require(/home/elegant1/hisob.elegantchinni.uz/vendor/autoload.php): failed to open stream: No such file or directory in /home/elegant1/hisob.elegantchinni.uz/yii on line 14
+[04-Nov-2024 13:17:33 Asia/Tashkent] PHP Fatal error:  require(): Failed opening required '/home/elegant1/hisob.elegantchinni.uz/vendor/autoload.php' (include_path='.:/opt/alt/php74/usr/share/pear') in /home/elegant1/hisob.elegantchinni.uz/yii on line 14
+[04-Nov-2024 13:18:50 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[13-May-2025 17:28:54 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[14-May-2025 10:40:31 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[14-May-2025 10:40:57 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[14-May-2025 12:05:22 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[14-May-2025 19:29:14 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5
+[29-May-2025 14:27:35 Asia/Tashkent] PHP Notice:  Undefined index: SERVER_NAME in /home/elegant1/hisob.elegantchinni.uz/config/params.php on line 5

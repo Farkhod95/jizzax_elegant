@@ -1,0 +1,25 @@
+<?php
+
+use yii\db\Migration;
+
+/**
+ * Handles adding columns to table `{{%brands}}`.
+ */
+class m210108_093404_add_total_debt_today_column_to_order_account_history_table extends Migration
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        $this->addColumn('{{%order_account_history}}', 'total_debt_today', $this->float());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        $this->dropColumn('{{%order_account_history}}', 'total_debt_today');
+    }
+}

@@ -1,0 +1,10 @@
+.idea
+/vendor
+/web/ClientOrderList.pdf
+/web/DebtRepaymentList.pdf
+/web/MyDebtRepaymentList.pdf
+/web/VozvratOrderList.pdf
+/web/orderList.pdf
+/web/uploads/product
+/web/uploads/video
+/web/uploads/avatars
