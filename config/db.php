@@ -7,16 +7,16 @@ return [
     'password' => 'elegant@q12we3',
     'charset' => 'utf8',
 
-    // 'class' => 'yii\db\Connection',
+    // 'class' => 'yii\db\Connection',sdfsdfs
     // 'dsn' => 'mysql:host=localhost;dbname=host1836067_elegant',
     // 'username' => 'host1836067_chinni',
     // 'password' => 'root_chinni',
-    // 'charset' => 'utf8',
+    // 'charset' => 'utf8', 
 
     // 'class' => 'yii\db\Connection',
     // 'dsn' => 'mysql:host=localhost;dbname=jizzaxdb',
     // 'username' => 'root',
     // 'password' => 'root',
-    // 'charset' => 'utf8',
+    // 'charset' => 'utf8', 
 ];
 
