@@ -175,6 +175,19 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'url' => ['/loss-of-profit/index'],
                                 'visible' => $model->permission == 1  ? true : false,
                             ],
+                              [
+                                'label' => 'Yuk jo\'natuvchilar', 
+                                'icon' => 'truck', 
+                                'url' => ['/consignor/index'],
+                                'visible' => $model->permission == 1 || $model->permission == 2  ? true : false,
+                            ],
+                              
+                            [
+                                'label' => 'Foydalanuvchilar', 
+                                'icon' => 'users', 
+                                'url' => ['/users/index'],
+                                'visible' => $model->permission == 1 ? true : false,
+                            ],
                             [
                                 'label' => 'Xarajatlar', 
                                 'icon' => 'align-left', 
@@ -199,19 +212,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'url' => ['/about/index'],
                                 'visible' => $model->permission == 1  ? true : false,
                             ],
-                             [
-                                'label' => 'Yuk jo\'natuvchilar', 
-                                'icon' => 'truck', 
-                                'url' => ['/consignor/index'],
-                                'visible' => $model->permission == 1 || $model->permission == 2  ? true : false,
-                            ],
-                              
-                            [
-                                'label' => 'Foydalanuvchilar', 
-                                'icon' => 'users', 
-                                'url' => ['/users/index'],
-                                'visible' => $model->permission == 1 ? true : false,
-                            ],
+                           
                         ],
                     ],
                     [
