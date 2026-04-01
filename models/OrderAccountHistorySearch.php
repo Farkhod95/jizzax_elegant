@@ -23,7 +23,7 @@ class OrderAccountHistorySearch extends OrderAccountHistory
             [['id', 'client_id', 'created_by', 'update_status', 'status_order_dukon', 'status_order_sklad', 'is_debt', 'is_delete', 'is_worker', 'large_price', 'fast_order', 'is_debtor', 'client_type'], 'integer'],
             [['order_account_status'], 'boolean'],
             [['date', 'date_last_debt_payment', 'last_order_date', 'cr_date', 'cr_date_time', 'order_commit', 'driver_info', 'date_from', 'date_to'], 'safe'],
-            [['exchange_rate', 'all_product_sum', 'discount_amount', 'all_summ_dollar', 'all_profit_dollar', 'total_debt', 'total_debt_today', 'dollar_sumda', 'total_debt_old', 'number_of_orders', 'sum_som', 'sum_dollar', 'sum_cart', 'sum_transfers', 'zdacha_sum', 'zdacha_dollar'], 'number'],
+            [['exchange_rate', 'all_product_sum', 'discount_amount', 'all_summ_dollar', 'all_profit_dollar', 'total_debt', 'total_debt_today', 'dollar_sumda', 'total_debt_old', 'number_of_orders', 'sum_som', 'sum_dollar', 'sum_cart', 'sum_otkazma', 'sum_transfers', 'zdacha_sum', 'zdacha_dollar'], 'number'],
         ];
     }
 
@@ -138,6 +138,7 @@ class OrderAccountHistorySearch extends OrderAccountHistory
             'oah.sum_dollar' => $this->sum_dollar,
             'oah.sum_cart' => $this->sum_cart,
             'oah.sum_transfers' => $this->sum_transfers,
+            'oah.sum_otkazma' => $this->sum_otkazma,
             'oah.created_by' => $this->created_by,
             'oah.cr_date' => $this->cr_date,
             'oah.update_status' => $this->update_status,
@@ -222,6 +223,7 @@ class OrderAccountHistorySearch extends OrderAccountHistory
             'sum_dollar' => $this->sum_dollar,
             'sum_cart' => $this->sum_cart,
             'sum_transfers' => $this->sum_transfers,
+            'sum_otkazma' => $this->sum_otkazma,
             'created_by' => $this->created_by,
             'cr_date' => $this->cr_date,
             'update_status' => $this->update_status,
@@ -296,6 +298,7 @@ class OrderAccountHistorySearch extends OrderAccountHistory
             'sum_dollar' => $this->sum_dollar,
             'sum_cart' => $this->sum_cart,
             'sum_transfers' => $this->sum_transfers,
+            'sum_otkazma' => $this->sum_otkazma,
             'created_by' => $this->created_by,
             'cr_date' => $this->cr_date,
             'update_status' => $this->update_status,
@@ -350,6 +353,7 @@ class OrderAccountHistorySearch extends OrderAccountHistory
             'sum_dollar' => $this->sum_dollar,
             'sum_cart' => $this->sum_cart,
             'sum_transfers' => $this->sum_transfers,
+            'sum_otkazma' => $this->sum_otkazma,
             'created_by' => $this->created_by,
             'cr_date' => $this->cr_date,
         ]);

@@ -95,7 +95,10 @@ $allMarkCount = 0
                                 <th nowrap style="text-align: left; color:#474ba0">To'langan summa kartada:</th>
                                 <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_carts, 2)?></b></td>
                             </tr>
-                           
+                            <tr>
+                                <th nowrap style="text-align: left; color:#474ba0">To'langan summa transferda:</th>
+                                <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_otkazmas, 2)?></b></td>
+                            </tr>
                              <tr>
                                 <td  style="background-color:#edb0b0a1;"><b style="color:black">Jami to'langan summa dollarda ($):</b></td>
                                 <td style="background-color:#edb0b0a1;"><b style="color:black"><?= Yii::$app->formatter->asDecimal($sum_dollars,2) ?></b></td>
@@ -172,7 +175,10 @@ $allMarkCount = 0
                                 <th nowrap style="text-align: left; color:#474ba0">To'langan qarz kartada:</th>
                                 <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_carts, 2)?></b></td>
                             </tr>
-                            
+                              <tr>
+                                <th nowrap style="text-align: left; color:#474ba0">To'langan qarz transferda:</th>
+                                <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_otkazmas, 2)?></b></td>
+                            </tr>
                             <tr>
                                 <td  style="background-color:#edb0b0a1;"><b style="color:black">Jami to'langan qarz dollarda ($):</b></td>
                                 <td style="background-color:#edb0b0a1;"><b style="color:black"><?= Yii::$app->formatter->asDecimal($debt_sum_dollars,2) ?></b></td>

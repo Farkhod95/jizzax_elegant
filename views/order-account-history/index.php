@@ -68,6 +68,7 @@ $totals = (clone $dataProvider->query)
         'sum_all_profit'  => 'SUM(all_profit_dollar)',
         'sum_all_dollar'  => 'SUM(sum_dollar)',
         'sum_all_som'     => 'SUM(sum_som)',
+        'sum_all_otkazma' => 'SUM(sum_otkazma)',
         'sum_all_cart'    => 'SUM(sum_cart)',
     ])
     ->asArray()

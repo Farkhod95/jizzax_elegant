@@ -25,11 +25,23 @@ $this->title = 'Mahsulotlar ro\'yxati';
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table">
+                           <tr>
+                                <th nowrap style="text-align: left; width: 150px; color:#f59c1a"></th>
+                                <td ><b style="color:#f59c1a"></b></td>
+                                <td style="width: 10px;"></td>
+                                <th nowrap style="text-align:left;color:#474ba0">Qaytim:</th>
+                                    <td>
+                                        <b style="color:#474ba0">
+                                            <?= Yii::$app->formatter->asDecimal(($zdacha_sum?$zdacha_sum:''), 0) ?>
+                                            (<?= Yii::$app->formatter->asDecimal(($zdacha_dollar?$zdacha_dollar:''), 2) ?> $)
+                                        </b>
+                                    </td>
+                            </tr>
                         <tr>
                             <th nowrap style="text-align:left;width:150px;color:#f59c1a">Jami to'lanadigan summa ($):</th>
                             <td><b style="color:#f59c1a"><?= Yii::$app->formatter->asDecimal($all_product_sum, 2) ?> $</b></td>
                             <td style="width:10px;"></td>
-                            <th nowrap style="text-align:left;color:#474ba0">To'langan summa transferda ($):</th>
+                            <th nowrap style="text-align:left;color:#474ba0">To'langan summa ($):</th>
                             <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_transfers, 2) ?> $</b></td>
                         </tr>
 
@@ -53,13 +65,8 @@ $this->title = 'Mahsulotlar ro\'yxati';
                             <th nowrap style="text-align:left;width:150px;color:#f59c1a">To'lanmagan summa ($):</th>
                             <td><b style="color:#f59c1a"><?= Yii::$app->formatter->asDecimal($total_debt, 2) ?> $</b></td>
                             <td style="width:10px;"></td>
-                            <th nowrap style="text-align:left;color:#474ba0">Qaytim:</th>
-                            <td>
-                                <b style="color:#474ba0">
-                                    <?= Yii::$app->formatter->asDecimal($zdacha_sum, 0) ?>
-                                    (<?= Yii::$app->formatter->asDecimal($zdacha_dollar, 2) ?> $)
-                                </b>
-                            </td>
+                            <th nowrap style="text-align:left;color:#474ba0">To'langan summa transferda:</th>
+                            <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_otkazma, 0) ?></b></td>
                         </tr>
                     </table>
 
@@ -107,6 +114,10 @@ $this->title = 'Mahsulotlar ro\'yxati';
                         <tr>
                             <th nowrap style="text-align:left;color:#474ba0">To'langan qarz summa kartada:</th>
                             <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_carts, 0) ?></b></td>
+                        </tr>
+                          <tr>
+                            <th nowrap style="text-align:left;color:#474ba0">To'langan qarz summa transferda:</th>
+                            <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_otkazmas, 0) ?></b></td>
                         </tr>
 
                         <tr>

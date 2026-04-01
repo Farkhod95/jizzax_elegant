@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_jizzaxdb',
-    'username' => 'host1836067_user',
-    'password' => 'elegant@q12we3',
-    'charset' => 'utf8',
+    // 'class' => 'yii\db\Connection',
+    // 'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_jizzaxdb',
+    // 'username' => 'host1836067_user',
+    // 'password' => 'elegant@q12we3',
+    // 'charset' => 'utf8',
 
     // 'class' => 'yii\db\Connection',sdfsdfs
     // 'dsn' => 'mysql:host=localhost;dbname=host1836067_elegant',
@@ -13,10 +13,10 @@ return [
     // 'password' => 'root_chinni',
     // 'charset' => 'utf8', 
 
-    // 'class' => 'yii\db\Connection',
-    // 'dsn' => 'mysql:host=localhost;dbname=jizzaxdb',
-    // 'username' => 'root',
-    // 'password' => 'root',
-    // 'charset' => 'utf8', 
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=localhost;dbname=jizzaxdb',
+    'username' => 'root',
+    'password' => 'root',
+    'charset' => 'utf8', 
 ];
 

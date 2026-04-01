@@ -19,7 +19,7 @@ class DebtRepaymentSearch extends DebtRepayment
     {
         return [
             [['id', 'order_account_id', 'client_id', 'created_by', 'is_delete', 'is_worker'], 'integer'],
-            [['summa', 'total_debt_old', 'sum_som', 'summ_dollar', 'summ_cart', 'sum_transfers', 'total_debt', 'exchange_rate', 'discount_amount', 'all_summ_dollar', 'zdacha_sum', 'zdacha_dollar'], 'number'],
+            [['summa', 'total_debt_old', 'sum_som', 'summ_dollar', 'summ_cart', 'sum_otkazma', 'sum_transfers', 'total_debt', 'exchange_rate', 'discount_amount', 'all_summ_dollar', 'zdacha_sum', 'zdacha_dollar'], 'number'],
             [['text', 'date', 'cr_date_time'], 'safe'],
         ];
     }
@@ -87,6 +87,7 @@ class DebtRepaymentSearch extends DebtRepayment
             'created_by' => $this->created_by,
             'zdacha_sum' => $this->zdacha_sum,
             'zdacha_dollar' => $this->zdacha_dollar,
+            'sum_otkazma' => $this->sum_otkazma,
         ]);
 
         $query->andFilterWhere(['like', 'text', $this->text]);
@@ -134,6 +135,7 @@ class DebtRepaymentSearch extends DebtRepayment
             'total_debt_old' => $this->total_debt_old,
             'all_summ_dollar' => $this->all_summ_dollar,
             'created_by' => $this->created_by,
+            'sum_otkazma' => $this->sum_otkazma,
         ]);
 
         $query->andFilterWhere(['like', 'text', $this->text]);

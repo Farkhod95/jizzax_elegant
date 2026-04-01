@@ -260,6 +260,7 @@ class OrderAccountHistoryController extends Controller
             ->select([
                 'id',
                 'sum_som',
+                'sum_otkazma',
                 'sum_cart',
                 'sum_transfers',
                 'cr_date_time AS datetime',
@@ -309,6 +310,7 @@ class OrderAccountHistoryController extends Controller
                 'created_by', // ✅ agar DebtRepayment jadvalida bo‘lsa; bo‘lmasa pastdagi 0 expression bilan almashtiring
 
                 new \yii\db\Expression('0 AS sum_som'),
+                new \yii\db\Expression('0 AS sum_otkazma'),
                 new \yii\db\Expression('0 AS sum_cart'),
                 new \yii\db\Expression('0 AS sum_transfers'),
                 new \yii\db\Expression('0 AS all_product_sum'),
@@ -496,6 +498,7 @@ class OrderAccountHistoryController extends Controller
                 new \yii\db\Expression('0 AS debt_sum_som'),
                 new \yii\db\Expression('0 AS debt_summ_cart'),
                 new \yii\db\Expression('0 AS debt_sum_transfers'),
+                new \yii\db\Expression('0 AS debt_sum_otkazmas'),
                 new \yii\db\Expression('0 AS paid_debt'),
 
                 new \yii\db\Expression("'Buyurtma qilgan' AS action")
@@ -527,10 +530,12 @@ class OrderAccountHistoryController extends Controller
                 new \yii\db\Expression('0 AS sum_som'),
                 new \yii\db\Expression('0 AS sum_cart'),
                 new \yii\db\Expression('0 AS sum_transfers'),
+                new \yii\db\Expression('0 AS sum_otkazma'),
 
                 'sum_som AS debt_sum_som',
                 'summ_cart AS debt_summ_cart',
                 'sum_transfers AS debt_sum_transfers',
+                'sum_otkazma AS debt_sum_otkazmas',
                 'summ_dollar AS paid_debt',
 
                 new \yii\db\Expression("'Qarz to‘lagan' AS action")
@@ -1002,6 +1007,7 @@ class OrderAccountHistoryController extends Controller
             'discount_amount'   => 'COALESCE(SUM(discount_amount),0)',
             'sum_dollar'        => 'COALESCE(SUM(sum_dollar),0)',
             'sum_som'           => 'COALESCE(SUM(sum_som),0)',
+            'sum_otkazma'       => 'COALESCE(SUM(sum_otkazma),0)',
             'dollar_sumda'      => 'COALESCE(SUM(dollar_sumda),0)',
             'sum_cart'          => 'COALESCE(SUM(sum_cart),0)',
             'sum_transfers'     => 'COALESCE(SUM(sum_transfers),0)',
@@ -1017,6 +1023,7 @@ class OrderAccountHistoryController extends Controller
         $dollar_sumda     = (float)$orderAgg['dollar_sumda'];
         $sum_cart         = (float)$orderAgg['sum_cart'];
         $sum_transfers    = (float)$orderAgg['sum_transfers'];
+        $sum_otkazma      = (float)$orderAgg['sum_otkazma'];
         $zdacha_sum       = (float)$orderAgg['zdacha_sum'];
         $zdacha_dollar    = (float)$orderAgg['zdacha_dollar'];
 
@@ -1079,10 +1086,12 @@ class OrderAccountHistoryController extends Controller
             'all_summ_dollars'  => 'COALESCE(SUM(all_summ_dollar),0)',
             'all_summ_zdacha_sum'  => 'COALESCE(SUM(zdacha_sum),0)',
             'all_summ_zdacha_dollar'  => 'COALESCE(SUM(zdacha_dollar),0)',
+            'sum_otkazmas'          => 'COALESCE(SUM(sum_otkazma),0)',
         ])->asArray()->one();
 
         $debt_sum_dollars    = (float)$debtAgg['debt_sum_dollars'];
         $debt_sum_soms       = (float)$debtAgg['debt_sum_soms'];
+        $debt_sum_otkazmas    = (float)$debtAgg['sum_otkazmas'];
         $debt_sum_carts      = (float)$debtAgg['debt_sum_carts'];
         $debt_sum_transferss = (float)$debtAgg['debt_sum_transferss'];
         $debt_sum_all_dollars = (float)$debtAgg['all_summ_dollars'];
@@ -1109,6 +1118,7 @@ class OrderAccountHistoryController extends Controller
             'sum_som'             => $sum_som,
             'dollar_sumda'        => $dollar_sumda,
             'sum_cart'            => $sum_cart,
+            'sum_otkazma'         => $sum_otkazma,
             'sum_transfers'       => $sum_transfers,
             'zdacha_sum'          => $zdacha_sum,
             'zdacha_dollar'       => $zdacha_dollar,
@@ -1119,6 +1129,7 @@ class OrderAccountHistoryController extends Controller
             'debt_sum_dollars'    => $debt_sum_dollars,
             'debt_sum_soms'       => $debt_sum_soms,
             'debt_sum_carts'      => $debt_sum_carts,
+            'debt_sum_otkazmas'   => $debt_sum_otkazmas,
             'debt_sum_transferss' => $debt_sum_transferss,
             'debt_sum_all_zdacha_sum' => $debt_sum_all_zdacha_sum,
             'debt_sum_all_zdacha_dollar' => $debt_sum_all_zdacha_dollar,
@@ -1317,6 +1328,7 @@ class OrderAccountHistoryController extends Controller
 
         $sum_dollars = 0;
         $sum_soms = 0;
+        $sum_otkazmas = 0;
         $dollar_sumdas = 0;
         $dollar_sumda = 0;
         $sum_carts = 0;
@@ -1328,27 +1340,30 @@ class OrderAccountHistoryController extends Controller
             $dollar_sumda = $dollar_sumda + $value['dollar_sumda'];
             $sum_carts= $sum_carts + $value['sum_cart'];
             $sum_transferss = $sum_transferss + $value['sum_transfers'];
+            $sum_otkazmas = $sum_otkazmas + $value['sum_otkazma'];
         }
 
         $exchangeRate = ExchangeRate::find()->orderBy(['id' => SORT_ASC])->one();
         $debtRepayments = DebtRepayment::find()
             ->where(['date' => $cr_date])
             ->andWhere(['or',
-        ['!=', 'is_worker', 1],
-        ['is', 'is_worker', null]
-    ])
+                ['!=', 'is_worker', 1],
+                ['is', 'is_worker', null]
+            ])
             ->orderBy(['date' => SORT_DESC])
             ->all();
 
         $debt_sum_dollars = 0;
         $debt_sum_soms = 0;
         $debt_sum_carts = 0;
+        $debt_sum_otkazmas = 0;
         $debt_sum_transferss = 0;
         $rep_total_debt = 0;
         foreach ($debtRepayments as $value) {
             $debt_sum_dollars = $debt_sum_dollars + $value['summ_dollar'];
             $debt_sum_soms = $debt_sum_soms + $value['sum_som'];
             $debt_sum_carts= $debt_sum_carts + $value['summ_cart'];
+            $debt_sum_otkazmas = $debt_sum_otkazmas + $value['sum_otkazma'];
             $debt_sum_transferss = $debt_sum_transferss + $value['sum_transfers'];
             $rep_total_debt = $debt_sum_dollars + $debt_sum_soms/$exchangeRate->dollar + $debt_sum_carts/$exchangeRate->dollar + $debt_sum_transferss/$exchangeRate->dollar;
         }
@@ -1359,6 +1374,7 @@ class OrderAccountHistoryController extends Controller
 
             'sum_dollars' => $sum_dollars, 
             'sum_soms' => $sum_soms, 
+            'sum_otkazmas' => $sum_otkazmas, 
             'dollar_sumdas' => $dollar_sumdas, 
             'dollar_sumda' => $dollar_sumda, 
             'sum_carts' => $sum_carts, 
@@ -1369,6 +1385,7 @@ class OrderAccountHistoryController extends Controller
             'debt_sum_dollars' => $debt_sum_dollars, 
             'debt_sum_soms' => $debt_sum_soms, 
             'debt_sum_carts' => $debt_sum_carts, 
+            'debt_sum_otkazmas' => $debt_sum_otkazmas,
             'debt_sum_transferss' => $debt_sum_transferss, 
             'rep_total_debt' => $rep_total_debt, 
 

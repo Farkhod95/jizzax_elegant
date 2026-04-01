@@ -164,9 +164,10 @@ class DebtRepaymentController extends Controller
             $model->total_debt = $orderAccount->total_debt;
             $model->save();
             $dollar_sum_soms = $model->sum_som/$model->exchange_rate;
+            $dollar_sum_otkazma = $model->sum_otkazma/$model->exchange_rate;
             $dollar_sum_carts = $model->summ_cart/$model->exchange_rate;
             $dollar_transferss = $model->sum_transfers/$model->exchange_rate;
-            $summa_all = $model->summ_dollar + $dollar_sum_soms + $dollar_sum_carts + $dollar_transferss;
+            $summa_all = $model->summ_dollar + $dollar_sum_soms + $dollar_sum_otkazma + $dollar_sum_carts + $dollar_transferss;
             $model->all_summ_dollar = $summa_all;
             $model->save();
             $orderAccount->total_debt = $orderAccount->total_debt - $summa_all - $model->discount_amount;

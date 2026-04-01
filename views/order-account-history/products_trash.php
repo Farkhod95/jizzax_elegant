@@ -78,7 +78,7 @@ $allMarkSumm = 0;
                                 <td ><b style="color:#f59c1a"><?=  Yii::$app->formatter->asDecimal($orderAccount2->total_debt, 2) ?> $</b></td>
                                 <td style="width: 10px;"></td>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan summa transferda:</th>
-                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($orderAccount->sum_transfers,2)?></b></td>
+                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($orderAccount->sum_otkazma,2)?></b></td>
                             </tr>
                             <tr>                            
                         </table>

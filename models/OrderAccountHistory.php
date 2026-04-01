@@ -56,7 +56,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
             [['client_id', 'created_by', 'update_status', 'status_order_dukon', 'status_order_sklad', 'is_debt', 'is_delete', 'is_worker', 'large_price', 'fast_order', 'is_debtor'], 'integer'],
             [['order_account_status'], 'boolean'],
             [['date', 'date_last_debt_payment', 'last_order_date', 'cr_date', 'cr_date_time', 'order_commit', 'driver_info', 'day_seq'], 'safe'],
-            [['exchange_rate', 'all_product_sum', 'discount_amount', 'all_summ_dollar', 'all_profit_dollar', 'total_debt', 'total_debt_today','dollar_sumda', 'all_total_debt_sum', 'total_debt_old', 'number_of_orders', 'sum_som', 'sum_dollar', 'sum_cart', 'sum_transfers', 'zdacha_sum', 'zdacha_dollar'], 'number'],
+            [['exchange_rate', 'all_product_sum', 'discount_amount', 'all_summ_dollar', 'all_profit_dollar', 'total_debt', 'total_debt_today','dollar_sumda', 'all_total_debt_sum', 'total_debt_old', 'number_of_orders', 'sum_som', 'sum_dollar', 'sum_cart', 'sum_transfers', 'sum_otkazma', 'zdacha_sum', 'zdacha_dollar'], 'number'],
             [['client_id'], 'exist', 'skipOnError' => true, 'targetClass' => Client::className(), 'targetAttribute' => ['client_id' => 'id']],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => Users::className(), 'targetAttribute' => ['created_by' => 'id']],
             // [['comment'], 'required'],
@@ -93,6 +93,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
             'sum_cart' => 'Summa kartada',
             'dollar_sumda' => 'So\'m dollarda',
             'sum_transfers' => 'Summa transferda',
+            'sum_otkazma' => 'Otkazma summa',
             'created_by' => 'Kim buyurtma oldi',
             'cr_date' => 'Yaratilgan vaqt',
             'cr_date_time' => 'Yaratilgan vaqt',
@@ -236,7 +237,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $allSumm = 0;
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->sum_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa transfer:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $table .= '<table style="width: 100%; border-collapse: collapse; margin-top: 15px;font-size:12px">
@@ -324,6 +326,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{all_summ_dollar}", Yii::$app->formatter->asDecimal($model->all_summ_dollar,2) , $text);
         $text = str_replace ("{sum_som}", $model->sum_som?Yii::$app->formatter->asDecimal($model->sum_som,2):' ' , $text);
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):' ' , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):' ' , $text);
         $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):' ' , $text);
         $text = str_replace ("{all_product_sum}", Yii::$app->formatter->asDecimal($model->all_product_sum, 2) , $text);
         $text = str_replace ("{date}", $model->date , $text);
@@ -355,7 +358,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $allSumm = 0;
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->sum_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa transfer:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $table .= '<table style="width: 100%; border-collapse: collapse; margin-top: 15px;font-size:12px">
@@ -485,6 +489,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):'0' , $text);
         $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):'0' , $text);
         $text = str_replace ("{all_product_sum}", $model->all_product_sum?Yii::$app->formatter->asDecimal($model->all_product_sum, 2): 0 , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):' ' , $text);
         $text = str_replace ("{date}", $model->date , $text);
         $text = str_replace ("{cr_date_time}", date('d.m.Y H:i', strtotime($model->cr_date_time)) , $text);
 
@@ -514,7 +519,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $allSumm = 0;
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->sum_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa transfer:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $table .= '<table style="width: 100%; border-collapse: collapse; margin-top: 15px;font-size:12px">
@@ -642,6 +648,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{all_summ_dollar}", Yii::$app->formatter->asDecimal($model->all_summ_dollar,2) , $text);
         $text = str_replace ("{sum_som}", $model->sum_som?Yii::$app->formatter->asDecimal($model->sum_som,2):'0' , $text);
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):' ' , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):' ' , $text);
         $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):' ' , $text);
         $text = str_replace ("{all_product_sum}", Yii::$app->formatter->asDecimal($model->all_product_sum, 2) , $text);
         $text = str_replace ("{date}", $model->date , $text);
@@ -688,7 +695,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $allSumm = 0;
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->sum_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa transfer:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $debtRepaymentall_sum = $debtRepaymentall != 0 ?'To\'langan qarz ($):': '';
@@ -798,16 +806,16 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
                     <td ><b style="color:#f59c1">{all_product_sum} $,</b></td>
                     
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left;color:#474ba0"></th>
-                    <td  ><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_som.'</th>
+                    <td ><b style="color:#474ba0" >{sum_som} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">Jami to\'langan summa ($):</th>
                     <td ><b style="color:#f59c1" >{all_summ_dollar} $,</b></td>
         
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left; color:#474ba0"></th>
-                    <td ><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_karta.'</th>
+                    <td ><b style="color:#474ba0" >{sum_cart} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">'.$discount_amount_sum.'</th>
@@ -816,6 +824,9 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
                 <tr>
                     <th nowrap style="font-size:16px;text-align: left; width: 150px;color:red">Qolgan qarz ($): </th>
                     <td ><b style="font-size:16px;color:red" >{all_total_debt} $,</b></td>
+                    <td style="width: 10px;"></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_otkazma.'</th>
+                    <td ><b style="color:#474ba0" >{sum_otkazma} </b></td>
                     
                 </tr>
             </table> 
@@ -838,7 +849,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{all_summ_dollar}", Yii::$app->formatter->asDecimal($model->all_summ_dollar,2) , $text);
         $text = str_replace ("{sum_som}", $model->sum_som?Yii::$app->formatter->asDecimal($model->sum_som,2):' ' , $text);
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):'0' , $text);
-        $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):'0' , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):'0' , $text);
+        $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):' ' , $text);
         $text = str_replace ("{all_product_sum}", $model->all_product_sum?Yii::$app->formatter->asDecimal($model->all_product_sum, 2):'0' , $text);
         $text = str_replace ("{date}", $model->date , $text);
         $text = str_replace ("{debt_repayment_all}", Yii::$app->formatter->asDecimal($debtRepaymentall, 2), $text);
@@ -940,6 +952,7 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{all_summ_dollar}", Yii::$app->formatter->asDecimal($model->all_summ_dollar, 2) , $text);
         $text = str_replace ("{sum_som}", Yii::$app->formatter->asDecimal($model->sum_som,2) , $text);
         $text = str_replace ("{sum_transfers}", Yii::$app->formatter->asDecimal($model->sum_transfers,2) , $text);
+        $text = str_replace ("{sum_otkazma}", Yii::$app->formatter->asDecimal($model->sum_otkazma,2) , $text);
         $text = str_replace ("{sum_cart}", Yii::$app->formatter->asDecimal($model->sum_cart, 2) , $text);
         $text = str_replace ("{all_product_sum}", Yii::$app->formatter->asDecimal($model->all_product_sum, 2) , $text);
         $text = str_replace ("{date}", $model->date , $text);
@@ -987,7 +1000,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $allProfitSumm = 0;
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->sum_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa transfer:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $debtRepaymentall_sum = $debtRepaymentall != 0 ?'To\'langan qarz ($):': '';
@@ -1096,16 +1110,16 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
                     <td ><b style="color:#f59c1">{all_product_sum} $,</b></td>
                     
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left;color:#474ba0"></th>
-                    <td  ><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_som.'</th>
+                    <td ><b style="color:#474ba0" >{sum_som} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">Jami to\'langan summa ($):</th>
                     <td ><b style="color:#f59c1" >{all_summ_dollar} $,</b></td>
         
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left; color:#474ba0"></th>
-                    <td ><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_karta.'</th>
+                    <td ><b style="color:#474ba0" >{sum_cart} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">'.$discount_amount_sum.'</th>
@@ -1114,6 +1128,9 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
                 <tr>
                     <th nowrap style="font-size:16px;text-align: left; width: 150px;color:red">Qolgan qarz ($): </th>
                     <td ><b style="font-size:16px;color:red" >{all_total_debt} $,</b></td>
+                    <td style="width: 10px;"></td>
+                    <th nowrap style="text-align: left; width: 150px;color:#474ba0">'.$tulan_sum_otkazma.'</th>
+                    <td ><b style="color:#474ba0" >{sum_otkazma} </b></td>
                     
                 </tr>
             </table> 
@@ -1135,7 +1152,8 @@ class OrderAccountHistory extends \yii\db\ActiveRecord
         $text = str_replace ("{all_summ_dollar}", Yii::$app->formatter->asDecimal($model->all_summ_dollar,2) , $text);
         $text = str_replace ("{sum_som}", $model->sum_som?Yii::$app->formatter->asDecimal($model->sum_som,2):' ' , $text);
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):'0' , $text);
-        $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):'0' , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):'0' , $text);
+        $text = str_replace ("{sum_cart}", $model->sum_cart?Yii::$app->formatter->asDecimal($model->sum_cart, 2):' ' , $text);
         $text = str_replace ("{all_product_sum}", $model->all_product_sum?Yii::$app->formatter->asDecimal($model->all_product_sum, 2):'0' , $text);
         $text = str_replace ("{date}", $model->date , $text);
         $text = str_replace ("{debt_repayment_all}", Yii::$app->formatter->asDecimal($debtRepaymentall, 2), $text);

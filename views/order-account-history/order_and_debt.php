@@ -152,6 +152,7 @@ $rows = $provider->getModels();
                                     $sum_paid_som = 0;
                                     $sum_paid_cart = 0;
                                     $sum_paid_transfers = 0;
+                                    $sum_paid_otkazma = 0;
 
                                     $sum_paid_debt_som = 0;
                                     $sum_paid_debt_cart = 0;
@@ -227,7 +228,8 @@ $rows = $provider->getModels();
                                             $sum_paid_som += $row['sum_som'];
                                             $sum_paid_cart += $row['sum_cart'];
                                             $sum_paid_transfers += $row['sum_transfers'];
-                                            
+                                            $sum_paid_otkazma += $row['sum_otkazma'];
+
                                             $sum_paid_debt += $row['paid_debt'];
                                             $sum_paid_debt_som += $row['debt_sum_som'];
                                             $sum_paid_debt_cart += $row['debt_summ_cart'];
@@ -260,6 +262,9 @@ $rows = $provider->getModels();
                                                     <span style="color: #007bff;">
                                                     Karta: <?= number_format($sum_paid_cart ?? 0, 2) ?>
                                                     </span>
+                                                     <span style="color: #007bff;">
+                                                    Transfer: <?= number_format($sum_paid_otkazma ?? 0, 2) ?>
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -277,6 +282,7 @@ $rows = $provider->getModels();
                                                     <span style="color: #333;"> Naqt: <?= number_format($sum_paid_debt_som ?? 0, 2) ?></span>
 
                                                     <span style="color: #007bff;"> Karta: <?= number_format($sum_paid_debt_cart ?? 0, 2) ?></span>
+                                                     <span style="color: #007bff;"> Transfer: <?= number_format($sum_paid_debt_otkazmas ?? 0, 2) ?></span>
                                                 </div>
                                                 </div>
                                         </td>

@@ -68,11 +68,16 @@ CrudAsset::register($this);
                     <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                         <table class="table">   
                             <tr>
-                                <th nowrap style="text-align: left; width: 300px; color:#f59c1a">Dollar kursi:</th>
+                                <th nowrap style="text-align: left; width: 150px; color:#f59c1a">Dollar kursi:</th>
                                 <td ><b style="color:#f59c1a"><?= $orderAccount->exchange_rate ?></b></td>
                                 <td style="width: 10px;"></td>
-                                <th nowrap style="text-align: left; color:#474ba0">  </th>
-                                <td ><b style="color:#474ba0"> </b></td>
+                                <th nowrap style="text-align:left;color:#474ba0">Qaytim:</th>
+                                    <td>
+                                        <b style="color:#474ba0">
+                                            <?= Yii::$app->formatter->asDecimal(($orderAccount->zdacha_sum?$orderAccount->zdacha_sum:''), 0) ?>
+                                            (<?= Yii::$app->formatter->asDecimal(($orderAccount->zdacha_dollar?$orderAccount->zdacha_dollar:''), 2) ?> $)
+                                        </b>
+                                    </td>
                             </tr>
                             <tr>
                                 <th nowrap style="text-align: left; width: 150px; color:#f59c1a">Jami to'lanadigan summa ($):</th>
@@ -99,14 +104,10 @@ CrudAsset::register($this);
                             <tr>
                                 <th nowrap style="text-align: left; width: 150px;color:#f59c1a">Qolgan qarz ($):</th>
                                 <td ><b style="color:#f59c1a"><?=  Yii::$app->formatter->asDecimal($orderAccount2->total_debt, 2) ?> $</b></td>
-                                <td style="width: 10px;"></td>
-                                <th nowrap style="text-align:left;color:#474ba0">Qaytim:</th>
-                                <td>
-                                    <b style="color:#474ba0">
-                                        <?= Yii::$app->formatter->asDecimal(($orderAccount->zdacha_sum?$orderAccount->zdacha_sum:''), 0) ?>
-                                        (<?= Yii::$app->formatter->asDecimal(($orderAccount->zdacha_dollar?$orderAccount->zdacha_dollar:''), 2) ?> $)
-                                    </b>
-                                </td>
+                                  <td style="width: 10px;"></td>
+                                <th nowrap style="text-align: left; color:#474ba0">To'langan summa transferda:</th>
+                                <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($orderAccount->sum_otkazma, 2)?></b></td>
+                                
                             </tr>
                             <tr>                            
                         </table>

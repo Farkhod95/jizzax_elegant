@@ -37,6 +37,7 @@ $all_product_sum = 0;
 $sum_dollar = 0;
 $all_summ_dollar = 0;
 $sum_som = 0;
+$sum_otkazma = 0;
 $discount_amount = 0;
 $sum_cart = 0;
 $sum_transfers = 0;
@@ -49,6 +50,7 @@ foreach ($orderAccountSumm as $orderAccountValue) {
     $discount_amount = $discount_amount + $orderAccountValue->discount_amount;
     $sum_cart = $sum_cart + $orderAccountValue->sum_cart;
     $sum_transfers = $sum_transfers + $orderAccountValue->sum_transfers;
+    $sum_otkazma = $sum_otkazma + $orderAccountValue->sum_otkazma;
 }
 ?>
 <div class="row">
@@ -121,7 +123,7 @@ foreach ($orderAccountSumm as $orderAccountValue) {
                                 <td ><b style="color:#f59c1a"><?=  Yii::$app->formatter->asDecimal($orderAccount->total_debt, 2) ?> $</b></td>
                                 <td style="width: 10px;"></td>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan summa transferda:</th>
-                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_transfers,2)?></b></td>
+                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_otkazma,2)?></b></td>
                             </tr>
                             <tr>                            
                         </table>

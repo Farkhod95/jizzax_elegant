@@ -31,7 +31,7 @@ class DebtRepayment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['summa', 'sum_som', 'summ_dollar', 'summ_cart', 'sum_transfers', 'total_debt', 'exchange_rate', 'discount_amount', 'all_summ_dollar', 'total_debt_old', 'zdacha_sum', 'zdacha_dollar'], 'number'],
+            [['summa', 'sum_som', 'summ_dollar', 'summ_cart', 'sum_otkazma', 'sum_transfers', 'total_debt', 'exchange_rate', 'discount_amount', 'all_summ_dollar', 'total_debt_old', 'zdacha_sum', 'zdacha_dollar'], 'number'],
             [['text'], 'string'],
             [['date', 'cr_date_time'], 'safe'],
             [['order_account_id', 'client_id', 'created_by', 'is_delete', 'is_worker'], 'integer'],
@@ -70,6 +70,7 @@ class DebtRepayment extends \yii\db\ActiveRecord
             'is_worker' => 'Ishchilar Qarzi',
             'zdacha_sum' => 'Qaytim so\'mda',
             'zdacha_dollar' => 'Qaytim',
+            'sum_otkazma' => 'O\'tkazma',
         ];
     }
 
@@ -112,7 +113,8 @@ class DebtRepayment extends \yii\db\ActiveRecord
         $about = About::find()->where(['id' => 1])->one();
         $tulan_sum_som = $model->sum_som?'To\'langan summa so\'mda:': '';
         $tulan_sum_karta = $model->summ_cart?'To\'langan summa kartada:': '';
-        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa transferda:': '';
+        $tulan_sum_transfer = $model->sum_transfers?'To\'langan summa ($):': '';
+        $tulan_sum_otkazma = $model->sum_otkazma?'To\'langan summa o\'tkazma:': '';
         $discount_amount_sum = $model->discount_amount?'Jami chegirma ($):': '';
         $discount_amount_sum_val = $model->discount_amount?$model->discount_amount.' $,': '';
         $text = '   
@@ -193,6 +195,7 @@ class DebtRepayment extends \yii\db\ActiveRecord
         $text = str_replace ("{summ_dollar}", $model->summ_dollar?Yii::$app->formatter->asDecimal($model->summ_dollar,2): '0' , $text);
         $text = str_replace ("{summ_cart}", $model->summ_cart?Yii::$app->formatter->asDecimal($model->summ_cart,2):' ' , $text);
         $text = str_replace ("{sum_transfers}", $model->sum_transfers?Yii::$app->formatter->asDecimal($model->sum_transfers,2):' ' , $text);
+        $text = str_replace ("{sum_otkazma}", $model->sum_otkazma?Yii::$app->formatter->asDecimal($model->sum_otkazma,2):' ' , $text);
         $text = str_replace ("{total_debt}", $model->total_debt?Yii::$app->formatter->asDecimal($model->total_debt,2):'0' , $text);
         $text = str_replace ("{total_debt_old}", $model->total_debt_old?Yii::$app->formatter->asDecimal($model->total_debt_old,2):'0' , $text);
         $text = str_replace ("{exchange_rate}", $model->exchange_rate?Yii::$app->formatter->asDecimal($model->exchange_rate,0):' ' , $text);

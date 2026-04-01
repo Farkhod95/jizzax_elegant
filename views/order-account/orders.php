@@ -317,6 +317,11 @@ input:checked + .slider:before {
               </div>
 
               <div class="row">
+                 <div class="col-sm-4">
+                  <label><h5><b>Summa transfer:</b></h5></label>
+                  <input type="number" class="form-control" name="tul_qarz_summ_otkazma"/>
+                  <span class="error_tul_qarz_summ_otkazma text-danger err-space"></span>
+                </div>
                 <div class="col-sm-4">
                   <label><h5><b>Qaytim ($)</b></h5></label>
                   <input type="number" class="form-control" name="tul_qarz_zdacha_dollar" step="0.01" min="0" inputmode="decimal">
@@ -327,10 +332,6 @@ input:checked + .slider:before {
                   <label><h5><b>Qaytim so'm</b></h5></label>
                   <input type="number" class="form-control" name="tul_qarz_zdacha_sum"/>
                   <span class="error_tul_qarz_zdacha_sum text-danger err-space"></span>
-                </div>
-
-                <div class="col-sm-4">
-                  <!-- bo‘sh joy (3 ta ustun to‘lsin) -->
                 </div>
               </div>
 
@@ -388,6 +389,7 @@ input:checked + .slider:before {
           <input type="hidden" name="maxsulot_tipi">
           <input type="hidden" name="brand_id">
           <input type="hidden" name="product_category_id">
+          <input type="hidden" name="max_count">
 
           <div class="form-group row m-b-15">
             <label class="col-sm-4 col-form-label"><h5><b>Model:</b></h5></label>
@@ -480,22 +482,28 @@ input:checked + .slider:before {
           <hr/>
 
           <div class="form-group row m-b-15">
-            <div class="col-sm-12">
+            <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Jami summa ($)</b></h5></label>
               <input class="form-control" name="summa_dollor" id="dollarToSum"/>
               <span class="error_summa_dollor text-danger"></span>
             </div>
-          </div>
-
-          <div class="form-group row m-b-15">
-            <div class="col-sm-6">
+              <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Chegirma ($)</b></h5></label>
               <input type="number" class="form-control" name="chegirma_summa" value="0"/>
             </div>
+          </div>
+
+          <div class="form-group row m-b-15">
+          
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>To'langan summa ($)</b></h5></label>
               <input class="form-control" name="summa_transfer"/>
               <span class="error_summa_transfer text-danger"></span>
+            </div>
+               <div class="col-sm-6">
+              <label class="col-sm-8 col-form-label"><h5><b>Summa so'mda</b></h5></label>
+              <input type="number" class="form-control" name="summa_som"/>
+              <span class="error_summa_som text-danger"></span>
             </div>
           </div>
 
@@ -506,9 +514,9 @@ input:checked + .slider:before {
               <span class="error_summa_karta text-danger"></span>
             </div>
             <div class="col-sm-6">
-              <label class="col-sm-8 col-form-label"><h5><b>Summa so'mda</b></h5></label>
-              <input type="number" class="form-control" name="summa_som"/>
-              <span class="error_summa_som text-danger"></span>
+              <label class="col-sm-8 col-form-label"><h5><b>Summa transferda</b></h5></label>
+              <input type="number" class="form-control" name="summa_otkazma"/>
+              <span class="error_summa_otkazma text-danger"></span>
             </div>
           </div>
           <div class="form-group row m-b-15">
@@ -686,6 +694,7 @@ $("#qarztul").submit(function(event){
     tul_qarz_sikidka: $('input[name="tul_qarz_sikidka"]').val(),
     tul_qarz_sum_som: $('input[name="tul_qarz_sum_som"]').val(),
     tul_qarz_summ_cart: $('input[name="tul_qarz_summ_cart"]').val(),
+    tul_qarz_summ_otkazma: $('input[name="tul_qarz_summ_otkazma"]').val(),
     tul_qarz_sum_transfer: $('input[name="tul_qarz_sum_transfer"]').val(),
     tul_qarz_zdacha_dollar: $('input[name="tul_qarz_zdacha_dollar"]').val(),
     tul_qarz_zdacha_sum: $('input[name="tul_qarz_zdacha_sum"]').val(),
@@ -708,12 +717,16 @@ $("#qarztul").submit(function(event){
   if (isNaN(v4) || v4 < 0) { $(".error_tul_qarz_summ_cart").text("Summa karta ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_summ_cart").text(""); }
 
-  let v5 = parseFloat($('input[name="tul_qarz_zdacha_dollar"]').val());
-  if (isNaN(v5) || v5 < 0) { $(".error_tul_qarz_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; }
+  let v5 = parseFloat($('input[name="tul_qarz_summ_otkazma"]').val());
+  if (isNaN(v5) || v5 < 0) { $(".error_tul_qarz_summ_otkazma").text("Summa transfer ni kiriting."); hasError = true; }
+  else { $(".error_tul_qarz_summ_otkazma").text(""); }
+
+  let v6 = parseFloat($('input[name="tul_qarz_zdacha_dollar"]').val());
+  if (isNaN(v6) || v6 < 0) { $(".error_tul_qarz_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_zdacha_dollar").text(""); }
 
-  let v6 = parseFloat($('input[name="tul_qarz_zdacha_sum"]').val());
-  if (isNaN(v6) || v6 < 0) { $(".error_tul_qarz_zdacha_sum").text("Qaytim so'm ni kiriting."); hasError = true; }
+  let v7 = parseFloat($('input[name="tul_qarz_zdacha_sum"]').val());
+  if (isNaN(v7) || v7 < 0) { $(".error_tul_qarz_zdacha_sum").text("Qaytim so'm ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_zdacha_sum").text(""); }
 
   if (hasError) {
@@ -745,6 +758,7 @@ $("#buy").submit(function(event){
     dollar_sumda: $('input[name="dollar_sumda"]').val(),
     summa_som: $('input[name="summa_som"]').val(),
     summa_karta: $('input[name="summa_karta"]').val(),
+    summa_otkazma: $('input[name="summa_otkazma"]').val(),
     summa_transfer: $('input[name="summa_transfer"]').val(),
     zdacha_dollar: $('input[name="zdacha_dollar"]').val(),
     zdacha_sum: $('input[name="zdacha_sum"]').val(),
@@ -771,11 +785,14 @@ $("#buy").submit(function(event){
   let s4 = parseFloat($('input[name="summa_karta"]').val());
   if (isNaN(s4) || s4 < 0) { $(".error_summa_karta").text("To'langan summa kartada ni kiriting."); hasError = true; } else { $(".error_summa_karta").text(""); }
 
-  let s5 = parseFloat($('input[name="zdacha_dollar"]').val());
-  if (isNaN(s5) || s5 < 0) { $(".error_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; } else { $(".error_zdacha_dollar").text(""); }
+  let s5 = parseFloat($('input[name="summa_otkazma"]').val());
+  if (isNaN(s5) || s5 < 0) { $(".error_summa_otkazma").text("To'langan summa o'tkazmada ni kiriting."); hasError = true; } else { $(".error_summa_otkazma").text(""); }
 
-  let s6 = parseFloat($('input[name="zdacha_sum"]').val());
-  if (isNaN(s6) || s6 < 0) { $(".error_zdacha_sum").text("Qaytim (so'mda) ni kiriting."); hasError = true; } else { $(".error_zdacha_sum").text(""); }
+  let s6 = parseFloat($('input[name="zdacha_dollar"]').val());
+  if (isNaN(s6) || s6 < 0) { $(".error_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; } else { $(".error_zdacha_dollar").text(""); }
+
+  let s7 = parseFloat($('input[name="zdacha_sum"]').val());
+  if (isNaN(s7) || s7 < 0) { $(".error_zdacha_sum").text("Qaytim (so'mda) ni kiriting."); hasError = true; } else { $(".error_zdacha_sum").text(""); }
 
   if (hasError) return false;
 
@@ -874,14 +891,22 @@ $('.handle').on("click", function(){
   $('input[name="brand_id"]').val(brand_id);
   $('input[name="product_category_id"]').val(product_category_id);
 
+    // MUHIM: warehouse count ni hidden inputga yozamiz
+  $('input[name="max_count"]').val(count);
+    // inputga ham max va min beramiz
+  $('input[name="soni"]').attr('max', count);
+  $('input[name="soni"]').attr('min', 1);
+
   $("#modal-dialog2").modal();
 });
 
 $(".submit").on("click", function(event){
   event.preventDefault();
   $(".error_message").text("");
+  $(".error_message_narx").text("");
 
   let count_product   = parseInt($('input[name="soni"]').val() || '0', 10);
+  let max_count     = parseInt($('input[name="max_count"]').val() || '0', 10);
   let price           = $('input[name="maxsulot_narxi"]').val();
   let maxsulot_joyi   = $('select[name="maxsulot_joyi"]').val();
   let name            = $('#name').text();
@@ -895,20 +920,34 @@ $(".submit").on("click", function(event){
   let all_sum   = parseFloat($("#backet").attr("data-count-sum") || '0');
   let increment = parseInt($("#backet").attr("data-increment") || '0', 10) + 1;
 
-  countAll = countAll + count_product;
-  all_sum  = all_sum + (parseFloat(price || '0') * count_product);
-
-  let count_old = parseInt($("#" + key).children().eq(4).text() || '0', 10);
-
-  if(count_product === 0){
-    $(".error_message").text("0 ta buyurtma berib bo'lmaydi");
+  if (isNaN(count_product) || count_product <= 0) {
+    $(".error_message").text("Mahsulot soni 0 dan katta bo'lishi kerak.");
     return false;
   }
+
+  if (count_product > max_count) {
+    $(".error_message").text("Mahsulot soni ombordagi sondan katta bo'lishi mumkin emas. Maksimal: " + max_count);
+    return false;
+  }
+
   if (!String(price || '').length) {
     $(".error_message_narx").text("Mahsulot narxini kiriting.");
     return false;
   }
+
+  countAll = countAll + count_product;
+  all_sum  = all_sum + (parseFloat(price || '0') * count_product);
+
+  let count_old = parseInt($("#" + key).children().eq(4).text() || '0', 10);
   count_old = count_old - count_product;
+
+  if (count_old < 0) {
+    $(".error_message").text("Mahsulot soni ombordagi sondan katta bo'lishi mumkin emas.");
+    return false;
+  }
+
+    // jadvaldagi warehouse count ni kamaytirish
+  $("#" + key).children().eq(4).text(count_old);
 
   var id = (key || '').split("_");
   var aVal = $("." + id[0] + "-amount").children().eq(2).text();
@@ -945,6 +984,22 @@ $(".submit").on("click", function(event){
   $("#all_sum").text(all_sum);
 
   $("#modal-dialog2").modal('toggle');
+});
+
+$(document).on('input', 'input[name="soni"]', function () {
+  let val = parseInt($(this).val() || '0', 10);
+  let max = parseInt($('input[name="max_count"]').val() || '0', 10);
+  let maxsulot_tipi   = $('input[name="maxsulot_tipi"]').val();
+
+  $(".error_message").text("");
+
+  if ($(this).val() === '') return;
+
+  if (val <= 0) {
+    $(".error_message").text("Mahsulot soni 0 dan katta bo'lishi kerak.");
+  } else if (val > max) {
+    $(".error_message").text("Omborda " + val + " " + maxsulot_tipi + " mahsulot chiqmaydi. Maksimal: " + max);
+  }
 });
 
 $(document).on("click", ".delete-product", function() {

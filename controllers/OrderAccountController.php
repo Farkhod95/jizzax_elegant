@@ -124,6 +124,7 @@ class OrderAccountController extends Controller
         $tul_qarz_sum_dollar = $request->post('tul_qarz_sum_dollar');
         $tul_qarz_sum_som = $request->post('tul_qarz_sum_som');
         $tul_qarz_summ_cart = $request->post('tul_qarz_summ_cart');
+        $tul_qarz_summ_otkazma = $request->post('tul_qarz_summ_otkazma');
         $tul_qarz_sum_transfer = $request->post('tul_qarz_sum_transfer');
         $tul_qarz_zdacha_dollar = $request->post('tul_qarz_zdacha_dollar');
         $tul_qarz_zdacha_sum = $request->post('tul_qarz_zdacha_sum');
@@ -163,6 +164,7 @@ class OrderAccountController extends Controller
         $model->summ_dollar = $tul_qarz_sum_dollar;
         $model->sum_som = $tul_qarz_sum_som;
         $model->summ_cart = $tul_qarz_summ_cart;
+        $model->sum_otkazma = $tul_qarz_summ_otkazma;
         $model->sum_transfers = $tul_qarz_sum_transfer;
         $model->zdacha_dollar = $tul_qarz_zdacha_dollar;
         $model->zdacha_sum = $tul_qarz_zdacha_sum;
@@ -203,6 +205,7 @@ class OrderAccountController extends Controller
         $sum_soms = $request->post('summa_som');
         $sum_carts = $request->post('summa_karta');
         $sum_transferss = $request->post('summa_transfer');
+        $sum_otkazmas = $request->post('summa_otkazma');
         $zdacha_dollar = $request->post('zdacha_dollar');
         $zdacha_sum = $request->post('zdacha_sum');
         $comment = $request->post('comment');
@@ -246,6 +249,7 @@ class OrderAccountController extends Controller
             $orderAccount->sum_dollar = $orderAccount->sum_dollar + (float)$sum_dollars;
             $orderAccount->dollar_sumda = $orderAccount->dollar_sumda + (float)$dollar_sumda;
             $orderAccount->sum_som = $orderAccount->sum_som + (float)$sum_soms;
+            $orderAccount->sum_otkazma = $orderAccount->sum_otkazma + (float)$sum_otkazmas;
             $orderAccount->sum_cart = $orderAccount->sum_cart + (float)$sum_carts;
             $orderAccount->sum_transfers = $orderAccount->sum_transfers + (float)$sum_transferss;
             $orderAccount_id =$orderAccount->id;
@@ -264,6 +268,7 @@ class OrderAccountController extends Controller
             $orderAccountCrHistory->sum_dollar = $sum_dollars;
             $orderAccountCrHistory->dollar_sumda = $dollar_sumda;
             $orderAccountCrHistory->sum_som = $sum_soms;
+            $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
             $orderAccountCrHistory->order_account_status = $tasdiq_check;
             $orderAccountCrHistory->sum_cart = $sum_carts;
             $orderAccountCrHistory->sum_transfers = $sum_transferss;
@@ -308,6 +313,7 @@ class OrderAccountController extends Controller
             $orderAccountCrHistory->sum_dollar = $sum_dollars;
             $orderAccountCrHistory->dollar_sumda = $dollar_sumda;
             $orderAccountCrHistory->sum_som = $sum_soms;
+            $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
             $orderAccountCrHistory->order_account_status = $tasdiq_check;
             $orderAccountCrHistory->sum_cart = $sum_carts;
             $orderAccountCrHistory->sum_transfers = $sum_transferss;
@@ -632,6 +638,7 @@ class OrderAccountController extends Controller
             $sum_dollars = $post['OrderAccount']['sum_dollars'];
             $dollar_sumdas = $post['OrderAccount']['dollar_sumdas'];
             $sum_soms = $post['OrderAccount']['sum_soms'];
+            $sum_otkazmas = $post['OrderAccount']['summa_otkazma'];
             $sum_carts = $post['OrderAccount']['sum_carts'];
             $sum_transferss = $post['OrderAccount']['sum_transferss'];
             $order_account_statuses = $post['OrderAccount']['order_account_statuses'];
@@ -668,6 +675,7 @@ class OrderAccountController extends Controller
                 $orderAccount->sum_dollar = $orderAccount->sum_dollar + $sum_dollars;
                 $orderAccount->dollar_sumda = $orderAccount->dollar_sumda + $dollar_sumdas;
                 $orderAccount->sum_som = $orderAccount->sum_som + $sum_soms;
+                $orderAccount->sum_otkazma = $orderAccount->sum_otkazma + (float)$sum_otkazmas;
                 $orderAccount->sum_cart = $orderAccount->sum_cart + $sum_carts;
                 $orderAccount->sum_transfers = $orderAccount->sum_transfers + $sum_transferss;
                 $orderAccount_id =$orderAccount->id;
@@ -685,6 +693,7 @@ class OrderAccountController extends Controller
                 $orderAccountCrHistory->sum_dollar = $sum_dollars;
                 $orderAccountCrHistory->dollar_sumda = $dollar_sumdas;
                 $orderAccountCrHistory->sum_som = $sum_soms;
+                $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
                 $orderAccountCrHistory->sum_cart = $sum_carts;
                 $orderAccountCrHistory->sum_transfers = $sum_transferss;
 
@@ -708,6 +717,7 @@ class OrderAccountController extends Controller
                 $orderAccountCr->sum_dollar = $sum_dollars;
                 $orderAccountCr->dollar_sumda = $dollar_sumdas;
                 $orderAccountCr->sum_som = $sum_soms;
+                $orderAccountCr->sum_otkazma = $sum_otkazmas;
                 $orderAccountCr->sum_cart = $sum_carts;
                 $orderAccountCr->sum_transfers = $sum_transferss;
                 $orderAccountCr->cr_date = date('Y-m-d',strtotime($dates));
@@ -727,6 +737,7 @@ class OrderAccountController extends Controller
                 $orderAccountCrHistory->sum_dollar = $sum_dollars;
                 $orderAccountCrHistory->dollar_sumda = $dollar_sumdas;
                 $orderAccountCrHistory->sum_som = $sum_soms;
+                $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
                 $orderAccountCrHistory->sum_cart = $sum_carts;
                 $orderAccountCrHistory->sum_transfers = $sum_transferss;
 

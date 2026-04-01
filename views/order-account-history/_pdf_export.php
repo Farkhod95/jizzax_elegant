@@ -39,10 +39,12 @@ use yii\helpers\Html;
             $sum_paid_som = 0;
             $sum_paid_cart = 0;
             $sum_paid_transfers = 0;
+            $sum_paid_otkazma = 0;
 
             $sum_paid_debt_som = 0;
             $sum_paid_debt_cart = 0;
             $sum_paid_debt_transfers = 0;
+            $sum_paid_debt_otkazma = 0;
         ?>
             <tr>
                 <td colspan="10" style="background-color:#e9f7fc;">
@@ -96,11 +98,13 @@ use yii\helpers\Html;
                 $sum_paid_som += ($row['sum_som'] ?? 0);
                 $sum_paid_cart += ($row['sum_cart'] ?? 0);
                 $sum_paid_transfers += ($row['sum_transfers'] ?? 0);
+                $sum_paid_otkazma += ($row['sum_otkazma'] ?? 0);
 
                 $sum_paid_debt += ($row['paid_debt'] ?? 0);
                 $sum_paid_debt_som += ($row['debt_sum_som'] ?? 0);
                 $sum_paid_debt_cart += ($row['debt_summ_cart'] ?? 0);
                 $sum_paid_debt_transfers += ($row['debt_sum_transfers'] ?? 0);
+                $sum_paid_debt_otkazma += ($row['debt_sum_otkazmas'] ?? 0);
 
                 $sum_total_debt += ($row['total_debt'] ?? 0);
                 ?>
@@ -117,6 +121,7 @@ use yii\helpers\Html;
                     <div><span style="color:rgb(184, 27, 22);"><b>$:</b> <?= number_format($sum_paid_transfers ?? 0, 2) ?></span></div>
                     <div><span style="color:#333;"><b>N:</b> <?= number_format($sum_paid_som ?? 0, 2) ?></span></div>
                     <div><span style="color:#007bff;"><b>K:</b> <?= number_format($sum_paid_cart ?? 0, 2) ?></span></div>
+                    <div><span style="color:#007bff;"><b>T:</b> <?= number_format($sum_paid_otkazma ?? 0, 2) ?></span></div>
                 </td>
 
                 <td style="font-weight: bold; font-size:12px;">
@@ -124,6 +129,7 @@ use yii\helpers\Html;
                     <div><span style="color:rgb(184, 27, 22);"><b>$:</b> <?= number_format($sum_paid_debt_transfers ?? 0, 2) ?></span></div>
                     <div><span style="color:#333;"><b>N:</b> <?= number_format($sum_paid_debt_som ?? 0, 2) ?></span></div>
                     <div><span style="color:#007bff;"><b>K:</b> <?= number_format($sum_paid_debt_cart ?? 0, 2) ?></span></div>
+                    <div><span style="color:#007bff;"><b>T:</b> <?= number_format($sum_paid_debt_otkazma ?? 0, 2) ?></span></div>
                 </td>
 
                 <td><?= number_format($sum_total_debt, 2) ?></td>

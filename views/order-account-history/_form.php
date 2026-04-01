@@ -324,6 +324,17 @@ $urlTypesBySz = Url::to(['order-account-history/types-by-size']);           // b
           ])->label("Summa kartada");
           ?>
         </div>
+              <div class="col-md-2">
+          <?php
+          $sumSomVal = ($model->sum_otkazma && $model->sum_otkazma != 0) ? $model->sum_otkazma : '';
+          echo $form->field($model, 'sum_otkazma')->textInput([
+              'type' => 'number',
+              'id' => 'sum-otkazma',
+              'value' => $sumSomVal,
+              'required' => true,
+          ])->label("Summa transferda");
+          ?>
+        </div>
       </div>
 
       <div class="row">
@@ -411,7 +422,7 @@ $this->registerJs(
 $this->registerJs(<<<'JS'
 // --- 0, 0.00 bo'lsa kirishda bo'shatamiz ---
 (function clearZerosOnLoad(){
-  ['#all-sum-dollar', '#sum-dollar', '#sum-som', '#sum-cart', '#qaytim-som', '#qaytim-dollar'].forEach(function(id){
+  ['#all-sum-dollar', '#sum-dollar', '#sum-som', '#sum-cart', '#sum-otkazma', '#qaytim-som', '#qaytim-dollar'].forEach(function(id){
     const $i = $(id);
     if(!$i.length) return;
     const v = ($i.val()||'').trim();
@@ -432,7 +443,7 @@ function clearInputInvalid($inp){
   $inp.removeClass('is-invalid');
   $inp.next('.mi-row-error').remove();
 }
-$(document).on('input', '#all-sum-dollar, #sum-dollar, #sum-som, #sum-cart, #id-comment, #qaytim-som, #qaytim-dollar', function(){
+$(document).on('input', '#all-sum-dollar, #sum-dollar, #sum-som, #sum-cart, #sum-otkazma, #id-comment, #qaytim-som, #qaytim-dollar', function(){
   clearInputInvalid($(this));
 });
 
@@ -630,7 +641,7 @@ $('#order-form').on('submit', function(e){
   $('.mi-row-error').remove();
   $('.select2-selection').removeClass('is-invalid');
 
-  ['#all-sum-dollar','#sum-dollar','#sum-som','#sum-cart','#id-comment','#qaytim-som','#qaytim-dollar'].forEach(function(id){
+  ['#all-sum-dollar','#sum-dollar','#sum-som','#sum-cart','#sum-otkazma','#id-comment','#qaytim-som','#qaytim-dollar'].forEach(function(id){
     const $i=$(id);
     if($i.length && ($.trim($i.val())==='')){
       hasError=true;

@@ -117,7 +117,7 @@ $this->title = Yii::$app->formatter->asDate($cr_date, 'php:d.m.Y') . ' sanadagi 
                                                 <th style="color:#f59c1a;">Chegirma ($)</th>
                                                 <td><b style="color:#f59c1a"><?= Yii::$app->formatter->asDecimal($order->discount_amount, 2) ?></b></td>
                                                 <th style="color:#474ba0;">To‘langan summa transferda</th>
-                                                <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($order->sum_transfers, 2) ?></b></td>
+                                                <td><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($order->sum_otkazma, 2) ?></b></td>
                                             </tr>
                                             <tr>
                                                 <th style="color:#f59c1a;">Qolgan qarz ($)</th>
