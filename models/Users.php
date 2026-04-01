@@ -49,8 +49,8 @@ class Users extends \yii\db\ActiveRecord
     /**
      * role value description
      */
-    const ADMIN_DESC = "Administrator";
-    const MENEJER_DESC = "Menejer";
+    const ADMIN_DESC = "Super Admin";
+    const MENEJER_DESC = "Admin";
     const WORKER_DESC = "Xodim";
     const CLIENT_DESC = "Mijoz";
     const OMBOR_MENEJER_DESC = "Ombor Menejeri";
@@ -195,8 +195,8 @@ class Users extends \yii\db\ActiveRecord
         return [
             self::ADMIN => self::ADMIN_DESC,
             self::MENEJER => self::MENEJER_DESC,
-            self::WORKER => self::WORKER_DESC,
-            self::CLIENT => self::CLIENT_DESC,
+            // self::WORKER => self::WORKER_DESC,
+            // self::CLIENT => self::CLIENT_DESC,
             self::OMBOR_MENEJER => self::OMBOR_MENEJER_DESC,
             self::SUPER_MENEJER => self::SUPER_MENEJER_DESC,
             self::SELLER => self::SELLER_DESC,
@@ -212,8 +212,8 @@ class Users extends \yii\db\ActiveRecord
         switch ($this->permission){
             case self::ADMIN : return  self::ADMIN_DESC;
             case self::MENEJER : return  self::MENEJER_DESC;
-            case self::WORKER : return  self::WORKER_DESC;
-            case self::CLIENT : return  self::CLIENT_DESC;
+            // case self::WORKER : return  self::WORKER_DESC;
+            // case self::CLIENT : return  self::CLIENT_DESC;
             case self::OMBOR_MENEJER : return  self::OMBOR_MENEJER_DESC;
             case self::SUPER_MENEJER : return  self::SUPER_MENEJER_DESC;
             case self::SELLER : return  self::SELLER_DESC;

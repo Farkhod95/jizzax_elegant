@@ -73,7 +73,7 @@ return [
         'group' => true, // Sanalar bo'yicha guruhlash
         'format' => ['date', 'php:d.m.Y'],
         'label' => 'Sana',
-        'visible' => \Yii::$app->user->identity->permission == 1 ? true : false,
+        'visible' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2? true : false,
     ],
     [
         'class'=>'\kartik\grid\DataColumn', 
@@ -102,7 +102,7 @@ return [
  
         },
         'content' => function ($data) {
-            if(\Yii::$app->user->identity->permission == 1){
+            if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                 $largePrice = $data->large_price ?  '<i class="fa fa-exclamation-triangle" style="color: orange; font-size: 22px; cursor: pointer;" data-toggle="tooltip" title="Mahsulot narxida tafovuti aniqlangan"></i>':'';
             }else{
                 $largePrice = '';
@@ -509,31 +509,31 @@ return [
             }
         },
     ], 
-    [
-        'class' => '\kartik\grid\DataColumn',
-        'header' => 'Keshbek ($)',
-        'format' => 'raw',
-        'visible' => \Yii::$app->user->identity->isAdminRight(\Yii::$app->user->identity->id),
-         'contentOptions' => function ($model, $key, $index, $column) use ($dataProvider) {
-            if ($model->fast_order == 1){
-                if ($model->status_order_dukon == 1 || $model->status_order_sklad == 1){
-                    return ['style' => 'background-color: #bfeeb7ff; font-weight: bold;', 'title' => "Tezda buyurtmani tayyorlash kerak",];
-                }
-            }else{
-                return [];
-            }
+    // [
+    //     'class' => '\kartik\grid\DataColumn',
+    //     'header' => 'Keshbek ($)',
+    //     'format' => 'raw',
+    //     'visible' => \Yii::$app->user->identity->isAdminRight(\Yii::$app->user->identity->id),
+    //      'contentOptions' => function ($model, $key, $index, $column) use ($dataProvider) {
+    //         if ($model->fast_order == 1){
+    //             if ($model->status_order_dukon == 1 || $model->status_order_sklad == 1){
+    //                 return ['style' => 'background-color: #bfeeb7ff; font-weight: bold;', 'title' => "Tezda buyurtmani tayyorlash kerak",];
+    //             }
+    //         }else{
+    //             return [];
+    //         }
  
-        },
-        'value' => function($data){
-            $sum = (float) KeshbekHistory::find()
-                ->where(['client_id' => $data->client_id])
-                ->sum('keshbek_sum');
+    //     },
+    //     'value' => function($data){
+    //         $sum = (float) KeshbekHistory::find()
+    //             ->where(['client_id' => $data->client_id])
+    //             ->sum('keshbek_sum');
 
-            return '<b style="color:green;font-size:14px">'
-                . Yii::$app->formatter->asDecimal($sum, 2)
-                . ' $</b>';
-        }
-    ],
+    //         return '<b style="color:green;font-size:14px">'
+    //             . Yii::$app->formatter->asDecimal($sum, 2)
+    //             . ' $</b>';
+    //     }
+    // ],
     [
         'class' => 'kartik\grid\ActionColumn',
         'dropdown' => false,
@@ -561,7 +561,7 @@ return [
                 }
             },
            'leadUpdateStatus' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     if ($model->update_status == 2){
                         $url = Url::to(['/order-account-history/update-status', 'id' => $model->id]);
                         return Html::a('<span class="glyphicon glyphicon-check"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgarishni tasdiqlash','class'=>'btn btn-warning btn-xs']);
@@ -569,7 +569,7 @@ return [
                 }
             },
             'leadUpdateStatus1' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $latestRecord = ElegantHistoryUpdate::find()
                                                         ->where(['order_account_history_id' => $model->id])
                                                         ->orderBy(['id' => SORT_DESC])  // id bo'yicha kamayish tartibida saralash
@@ -636,8 +636,8 @@ return [
                     ($model->order_account_status == 0) || // order_account_status = 0 bo'lgan buyurtma
                     ($model->update_status == 2)
                 ) {
-                    if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->id == $model->created_by) {
-                        if (\Yii::$app->user->identity->permission == 1 || (\Yii::$app->user->identity->permission != 1 && $model->date === $today)) {
+                    if (\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2|| \Yii::$app->user->identity->id == $model->created_by) {
+                        if (\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 || (\Yii::$app->user->identity->permission != 1 && $model->date === $today)) {
                         $url = Url::to(['/order-account-history/update', 'id' => $model->id, 'type' => 'index']);
                         return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
                             'data-pjax' => 0,
@@ -668,7 +668,7 @@ return [
             // },
             'leadDelete' => function ($url, $model) {
                
-                if(Yii::$app->user->identity->permission == 1){
+                if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/order-account-history/trash', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', $url, [
                         'role'=>'modal-remote','title'=>'Buyurtmani bekor qilish','class'=>'btn btn-danger btn-xs' ,
@@ -681,7 +681,7 @@ return [
                 }
             },
             'leadDeleteOld' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     // Create the button to trigger the modal
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', '#', [
                         'data-toggle' => 'modal',

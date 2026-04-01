@@ -62,7 +62,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'real_price',
-        'visible' => \Yii::$app->user->identity->permission == 1 ? true : false,
+        'visible' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2? true : false,
         'content' => function ($data) {
             return '<b style="font-size: 14px">'.$data->real_price.'</b>';
         },

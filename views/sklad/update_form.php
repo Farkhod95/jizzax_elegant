@@ -62,7 +62,7 @@ foreach ($warehouseHistory as $warehouse_history) {
                     ])->label('Yuk jo\'natuvchi <b style="color:red">(Kiritilish majburiy)</b>'); ?> 
                 </div>
                 <div class="col-md-3">
-                    <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                    <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                         <?= $form->field($model, 'my_total_debt')->textInput(['value' => $my_total_debt, 'id' => 'total_debts', 'readonly' => true,])->label("Mening qarzim ($)") ?>
                     <?php }else{?>
                         <?= $form->field($model, 'my_total_debt')->textInput(['value' => $my_total_debt, 'id' => 'total_debts', 'style' => 'display:none;'])->label("") ?>
@@ -83,7 +83,7 @@ foreach ($warehouseHistory as $warehouse_history) {
                 <div class="col-md-1">
                 </div>
                 <div class="col-md-2">
-                    <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                    <?php if (\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2) {?>
                         <?= $form->field($model, 'exchange_rate')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar])->label("Dollar kursi") ?>
                     <?php }else{?>
                         <?= $form->field($model, 'exchange_rate')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar, 'style' => 'display:none;'])->label("") ?>
@@ -181,12 +181,12 @@ foreach ($warehouseHistory as $warehouse_history) {
                             ],   
                             [
                                 'name'  => 'price',
-                                'title' => \Yii::$app->user->identity->permission == 1 ? 'Narxi ($)' : '',
+                                'title' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2? 'Narxi ($)' : '',
                                 'enableError' => true,
                                 'options' => [ 
                                     // 'type' =>'number',
                                     'class' => 'input-priority',
-                                    'style' => \Yii::$app->user->identity->permission == 1 ? '' : 'display: none;',
+                                    'style' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 ? '' : 'display: none;',
                                     'options' => [
                                         'id' => 'price',
                                     ], 
@@ -211,7 +211,7 @@ foreach ($warehouseHistory as $warehouse_history) {
                     <div class="col-md-10">
                     </div>
                     <div class="col-md-2">
-                        <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                        <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                             <?= $form->field($model, 'sum_all_pro')->textInput([
                                 'readonly' => true, // readonly qilib qo'yamiz
                                 'style' => 'margin-top:-30px; margin-left:0px;width:170px',
@@ -234,14 +234,14 @@ foreach ($warehouseHistory as $warehouse_history) {
                         <?= $form->field($model, 'given_sum_dollar')->textInput(['style' => 'display:none;'])->label("<b style='color:#1748d3'></b>") ?> 
                     </div>
                     <div class="col-md-2">
-                        <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                        <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                             <?= $form->field($model, 'sum_dollar')->textInput(['type' => 'number'])->label("<b style='color:#31701b'>Berilgan Summa ($) </b>") ?> 
                         <?php }else{?>
                             <?= $form->field($model, 'sum_dollar')->textInput(['type' => 'number', 'style' => 'display:none;'])->label("<b style='color:#31701b'> </b>") ?> 
                         <?php }?>
                     </div>
                     <div class="col-md-2">
-                        <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                        <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                             <?= $form->field($model, 'discount_amount')->textInput(['type' => 'number'])->label("<b style='color:#f59c1a'>Jami chegirma ($) </b>") ?>
                         <?php }else{?>
                             <?= $form->field($model, 'discount_amount')->textInput(['type' => 'number', 'style' => 'display:none;'])->label("<b style='color:#f59c1a'> </b>") ?>

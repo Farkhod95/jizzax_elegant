@@ -146,7 +146,7 @@ return [
                 return Html::a('<span class="glyphicon glyphicon-print"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Chop qilish','class'=>'btn btn-warning btn-xs', 'target' => '_blank']);
             },
             'leadTrash' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                 $url = Url::to(['/debt-repayment/trash', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', $url, [
                         'role'=>'modal-remote','title'=>'O\'chirish','class'=>'btn btn-danger btn-xs' ,
@@ -160,7 +160,7 @@ return [
             },
             'leadReturn' => function ($url, $model) {
                
-                if(Yii::$app->user->identity->permission == 1){
+                if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/debt-repayment/return', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-refresh"></span>', $url, [
                         'role'=>'modal-remote','title'=>'Qarz to\'lovni tiklash','class'=>'btn btn-warning btn-xs' ,
@@ -173,7 +173,7 @@ return [
                 }
             },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                 $url = Url::to(['/debt-repayment/delete', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', $url, [
                         'role'=>'modal-remote','title'=>'O\'chirish','class'=>'btn btn-danger btn-xs' ,

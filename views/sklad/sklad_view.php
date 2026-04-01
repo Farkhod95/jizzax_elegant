@@ -29,7 +29,7 @@ $allMarkPrice = 0;
             <div class="panel-body">
                 <!-- begin table-responsive -->
                 <h5>Hisobot</h5>
-                <?php if(Yii::$app->user->identity->permission == 1){?>
+                <?php if(Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2){?>
                     <table class="table">   
                         <tr>
                             <th nowrap style="text-align: left; width: 40%; color:#f59c1a">Dollar kursi:</th>

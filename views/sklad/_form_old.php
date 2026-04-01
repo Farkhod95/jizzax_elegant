@@ -69,7 +69,7 @@ $exchangeRate = ExchangeRate::findOne(1);
                 <div class="col-md-1">
                 </div>
                 <div class="col-md-2" style="display:none;">
-                     <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                     <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                         <?= $form->field($model, 'exchange_rates')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar])->label("Dollar kursi") ?>
                     <?php }else{?>
                         <?= $form->field($model, 'exchange_rates')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar, 'style' => 'display:none;'])->label("") ?>
@@ -165,12 +165,12 @@ $exchangeRate = ExchangeRate::findOne(1);
                             // ],   
                             [
                                 'name'  => 'price',
-                                'title' => \Yii::$app->user->identity->permission == 1 ? 'Narxi ($)' : '',
+                                'title' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 ? 'Narxi ($)' : '',
                                 'enableError' => true,
                                 'options' => [ 
                                     // 'type' =>'number',
                                     'class' => 'input-priority',
-                                    'style' => \Yii::$app->user->identity->permission == 1 ? '' : 'display: none;',
+                                    'style' => \Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 ? '' : 'display: none;',
                                     'options' => [
                                         'id' => 'price',
                                     ], 

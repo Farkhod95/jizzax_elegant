@@ -234,7 +234,7 @@ input:checked + .slider:before {
                     ],
                 ]); ?>
             </div>
-            <?php if(\Yii::$app->user->identity->permission == 1 ||\Yii::$app->user->identity->permission == 6 || \Yii::$app->user->identity->permission == 5){?>
+            <?php if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2||\Yii::$app->user->identity->permission == 6 || \Yii::$app->user->identity->permission == 5){?>
                     <div class="col-sm-4">
                         <label class="col-form-label"><h5><b>Mening Qarzim ($): </b></h5></label>
                         <label ><h5><b style="color:red" id="qarz_client_summ"> </b></h5></label>

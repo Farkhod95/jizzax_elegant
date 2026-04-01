@@ -20,7 +20,7 @@ CrudAsset::register($this);
     <div class="panel-heading">
         <div class="panel-heading-btn">
             <a href="/warehouse/index" class="btn btn-xs  btn-warning"> <i class="fa fa-reply"></i> Orqaga qaytish </a>
-            <?php if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 6){?>
+            <?php if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 6){?>
                 <!-- <span class="btn btn-info btn-xs m-r-5"> $exchangeRate->dollar $</span> -->
                 <?= Html::a('<span class="btn btn-success btn-xs m-r-5"><i class="fa fa-plus"></i> Qo\'shish</span>', ['/warehouse-file/create', 'warehouse_id' => $warehouse_id], ['role'=>'modal-remote', 'data-toggle'=>'tooltip',]); ?>
             <?php }?>

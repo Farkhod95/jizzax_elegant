@@ -42,7 +42,7 @@ $allMarkSumm = 0;
                 <!-- begin table-responsive -->
                 <div class="table-responsive">
                     <h5>Hisobot</h5>
-                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                         <table class="table">   
                             <tr>
                                 <th nowrap style="text-align: left; width: 300px; color:#f59c1a">Dollar kursi:</th>
@@ -93,7 +93,7 @@ $allMarkSumm = 0;
                                 <th nowrap>Nomi</th>
                                 <th nowrap>O'lchami</th>
                                 <th nowrap>Soni</th>
-                                <?php if(Yii::$app->user->identity->permission == 1){?>
+                                <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                 <th nowrap>Narxi ($)</th>
                                 <?php }?>
                             </tr>
@@ -101,7 +101,7 @@ $allMarkSumm = 0;
                         <tbody>
                             <?php  foreach ($warehouse as $model) { $i = 1; $allCount = 0; $allSumm = 0;?>
                                 <tr>
-                                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                         <td colspan="7" style="background-color:#a0d9ea;" ><b style="color:red"><?= $model->brand->name ?></b></td>
                                         <td style="background-color:#a0d9ea;"></td>
                                     <?php }else{?>
@@ -154,7 +154,7 @@ $allMarkSumm = 0;
                                         <?php }else{?>
                                             <td> <b ><?= $model1->count ?></b></td>
                                         <?php }?>
-                                        <?php if(Yii::$app->user->identity->permission == 1){?>
+                                        <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                             <?php if($model1->type_sklad_id ==1){ ?> 
                                             <td style="background-color:#67a38569"> <b ><?= $model1->price ?></b></td>
                                             <?php }else{?>
@@ -170,7 +170,7 @@ $allMarkSumm = 0;
                                     $allMarkSumm = $allMarkSumm + ($model1->count  * $model1->price); 
                                     } ?>
                                 <tr>
-                                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                         <td colspan="5"  ><b ></b></td>
                                         <td ><b style="color:#000" >Jami:</b></td>
                                         <td ><b style="color:#000"><?= $allCount ?></b></td>
@@ -187,7 +187,7 @@ $allMarkSumm = 0;
                             
                          
                             <tr>
-                                <?php if(Yii::$app->user->identity->permission == 1){?>
+                                <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                     <td colspan="6" style="background-color:#2d353c;"><b style="color:white">Jami:</b></td>
                                     <td style="background-color:#2d353c;"><b style="color:white"><?= $allMarkCount ?></b></td>
                                     <td style="background-color:#2d353c;"><b style="color:white"><?= $allMarkSumm ?></b></td>

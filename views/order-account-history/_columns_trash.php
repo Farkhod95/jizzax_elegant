@@ -45,7 +45,7 @@ return [
         'group' => true, // Sanalar bo'yicha guruhlash
         'format' => ['date', 'php:d.m.Y'],
         'label' => 'Sana',
-        'visible' => \Yii::$app->user->identity->permission == 1 ? true : false,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
     ],
     [
         'class' => '\kartik\grid\DataColumn',
@@ -350,7 +350,7 @@ return [
                 }
             },
            'leadUpdateStatus' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     if ($model->update_status == 2){
                         $url = Url::to(['/order-account-history/update-status', 'id' => $model->id]);
                         return Html::a('<span class="glyphicon glyphicon-check"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgarishni tasdiqlash','class'=>'btn btn-warning btn-xs']);
@@ -358,7 +358,7 @@ return [
                 }
             },
             'leadUpdateStatus1' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $latestRecord = ElegantHistoryUpdate::find()
                                                         ->where(['order_account_history_id' => $model->id])
                                                         ->orderBy(['id' => SORT_DESC])  // id bo'yicha kamayish tartibida saralash
@@ -425,7 +425,7 @@ return [
                     ($model->order_account_status == 0) || // order_account_status = 0 bo'lgan buyurtma
                     ($model->update_status == 2)
                 ) {
-                    if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->id == $model->created_by) {
+                    if (\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->id == $model->created_by) {
                         $url = Url::to(['/order-account-history/update', 'id' => $model->id]);
                         return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
                             'data-pjax' => 0,
@@ -447,14 +447,14 @@ return [
             //     }
             // },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/order-account-history/one-delete', 'id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'chirish','class'=>'btn btn-danger btn-xs']);
                 }
             },
             'leadReturn' => function ($url, $model) {
                
-                if(Yii::$app->user->identity->permission == 1){
+                if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/order-account-history/return', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-refresh"></span>', $url, [
                         'role'=>'modal-remote','title'=>'Buyurtmani tiklash','class'=>'btn btn-warning btn-xs' ,
@@ -467,7 +467,7 @@ return [
                 }
             },
             'leadDeleteOld' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     // Create the button to trigger the modal
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', '#', [
                         'data-toggle' => 'modal',

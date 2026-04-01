@@ -157,14 +157,14 @@ return [
         },
         'buttons'=>[
             'leadPrice2' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/debt-repayment/create' , 'account_id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-usd"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Qarzni to\'lash','class'=>'btn btn-warning btn-xs']);
                 }
             },
             'leadPrice3' => function ($url, $model) {
                 if ($model->client) {
-                    if(\Yii::$app->user->identity->permission == 1){
+                    if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                         $url = Url::to(['/debt-repayment/client-debt' , 'client_id' => $model->client_id, 'customer_fio' => $model->client->fio]);
                         return Html::a('<span class="glyphicon glyphicon-transfer"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Qarzni to\'lash tarixi','class'=>'btn btn-primary btn-xs']);
                     }
@@ -183,13 +183,13 @@ return [
                 return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-success btn-xs']);
             },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/order-account/one-delete', 'id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-danger btn-xs']);
                 }
             },
             'leadDeleteOld' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     // Create the button to trigger the modal
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', '#', [
                         'data-toggle' => 'modal',

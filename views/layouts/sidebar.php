@@ -41,7 +41,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         'label' => 'Buyurtma qilish', 
                         'icon' => 'shopping-cart', 
                         'url' => ['/order-account/orders'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 ? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 || $model->permission == 7? true : false,
                     ],
 
                     // [
@@ -60,38 +60,38 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         'label' => 'Mijoz buyurtmalar tarixi', 
                         'icon' => 'list-ul', 
                         'url' => ['/order-account-history/index'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 || $model->permission == 7? true : false,
                     ],
-                    [
-                        'label' => 'Mijozdan qarzdorlik', 
-                        'icon' => 'balance-scale', 
-                        'url' => ['/order-account-history/index-deptor'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6? true : false,
-                    ],
+                    // [
+                    //     'label' => 'Mijozdan qarzdorlik', 
+                    //     'icon' => 'balance-scale', 
+                    //     'url' => ['/order-account-history/index-deptor'],
+                    //     'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6? true : false,
+                    // ],
                     [
                         'label' => 'Buyurtmalar va qarzlar', 
                         'icon' => 'pie-chart', 
                         'url' => ['/order-account-history/order-and-debt'],
-                        'visible' => $model->permission == 1  ? true : false,
+                        'visible' => $model->permission == 1|| $model->permission == 2  ? true : false,
                     ],
                      [
                         'label' => 'Vozvrat', 
                         'icon' => 'history', 
                         'url' => ['/vozvrat-order/vozvrat'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 ? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 || $model->permission == 7? true : false,
                     ],
                      [
                         'label' => 'Vozvrat buyurmalar tarixi', 
                         'icon' => 'list-alt', 
                         'url' => ['/vozvrat-order/index'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 ? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6 || $model->permission == 7? true : false,
                     ],
-                    [
-                        'label' => 'Mijoz umumiy buyurtmasi', 
-                        'icon' => 'shopping-basket', 
-                        'url' => ['/order-account/index'],
-                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6? true : false,
-                    ],
+                    // [
+                    //     'label' => 'Mijoz umumiy buyurtmasi', 
+                    //     'icon' => 'shopping-basket', 
+                    //     'url' => ['/order-account/index'],
+                    //     'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 5 || $model->permission == 6? true : false,
+                    // ],
                     
                     // [
                     //     'label' => 'Buyurtmalar tarixi', 
@@ -122,7 +122,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         'label' => 'Mening qarzlarim', 
                         'icon' => 'bookmark', 
                         'url' => ['/my-total-debt/index'],
-                        'visible' => $model->permission == 1  ? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
                     ],
                     
                     
@@ -165,7 +165,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'label' => 'O\'zgarishlar hisobi', 
                                 'icon' => 'warning', 
                                 'url' => ['/elegant-history-update/index'],
-                                'visible' => $model->permission == 1 ? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2? true : false,
                             ],
                     
                           
@@ -173,7 +173,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'label' => 'Foyda va zarar', 
                                 'icon' => 'bar-chart', 
                                 'url' => ['/loss-of-profit/index'],
-                                'visible' => $model->permission == 1  ? true : false,
+                                'visible' => $model->permission == 1  || $model->permission == 2? true : false,
                             ],
                               [
                                 'label' => 'Yuk jo\'natuvchilar', 
@@ -186,31 +186,31 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'label' => 'Foydalanuvchilar', 
                                 'icon' => 'users', 
                                 'url' => ['/users/index'],
-                                'visible' => $model->permission == 1 ? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
                             ],
                             [
                                 'label' => 'Xarajatlar', 
                                 'icon' => 'align-left', 
                                 'url' => ['/expenses/index'],
-                                'visible' => $model->permission == 1  ? true : false,
+                                'visible' => $model->permission == 1  || $model->permission == 2? true : false,
                             ],
                             [
                                 'label' => 'Yuk chiquvchi joy', 
                                 'icon' => 'th-large', 
                                 'url' => ['/type-sklad/index'],
-                                'visible' => $model->permission == 1 ? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
                             ],
                             [
                                 'label' => 'Xarajat turi', 
                                 'icon' => 'bars', 
                                 'url' => ['/type-expense/index'],
-                                'visible' => $model->permission == 1  ? true : false,
+                                'visible' => $model->permission == 1  || $model->permission == 2? true : false,
                             ],
                             [
                                 'label' => 'Biz haqimizda', 
                                 'icon' => 'home', 
                                 'url' => ['/about/index'],
-                                'visible' => $model->permission == 1  ? true : false,
+                                'visible' => $model->permission == 1  || $model->permission == 2? true : false,
                             ],
                            
                         ],
@@ -240,6 +240,12 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                             //     'url' => ['/keshbek-history/client-keshbek'],
                             //     'visible' => $model->permission == 1  || $model->permission == 6? true : false,
                             // ],
+                            [
+                                'label' => 'Sotilgan tovarlar soni', 
+                                'icon' => 'history', 
+                                'url' => ['/order-account-history/product-sell'],
+                                'visible' => $model->permission == 1 || $model->permission == 2  || $model->permission == 6? true : false,
+                            ],
                             [
                                 'label' => 'Sotilgan tovarlar tarixi', 
                                 'icon' => 'history', 
@@ -294,7 +300,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'label' => 'Top mijozlar', 
                                 'icon' => 'history', 
                                 'url' => ['/order-account/top-client'],
-                                'visible' => $model->permission == 1  ? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
                             ],
                             [
                                 'label' => 'Qarzdorlar ro\'yxati', 

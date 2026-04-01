@@ -15,6 +15,7 @@ use app\models\Regions;
 use app\models\Districts;
 use app\models\ExchangeRate;
 use app\models\OrderAccount;
+use yii\db\Transaction;
 /**
  * ClientController implements the CRUD actions for Client model.
  */
@@ -67,6 +68,62 @@ class ClientController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
+
+   public function actionQuickCreate()
+{
+    $request = Yii::$app->request;
+    $model = new Client();
+
+    if (!$request->isAjax) {
+        throw new \yii\web\BadRequestHttpException('Faqat AJAX so‘rov uchun.');
+    }
+
+    Yii::$app->response->format = Response::FORMAT_JSON;
+
+    if ($request->isGet) {
+        return [
+            'title' => "Yangi mijoz qo'shish",
+            'content' => $this->renderAjax('_quick_create', [
+                'model' => $model,
+            ]),
+        ];
+    }
+
+    if ($model->load($request->post())) {
+        $model->type = 1;
+        $model->total_debt = 0;
+
+        if ($model->validate()) {
+            $model->save(false);
+
+            $exchangeRate = ExchangeRate::find()->orderBy(['id' => SORT_ASC])->one();
+
+            $orderAccountCr = new OrderAccount();
+            $orderAccountCr->client_id = $model->id;
+            $orderAccountCr->last_order_date = date('Y-m-d');
+            $orderAccountCr->total_debt = 0;
+            $orderAccountCr->date = date('Y-m-d');
+            $orderAccountCr->exchange_rate = $exchangeRate ? $exchangeRate->dollar : 0;
+            $orderAccountCr->number_of_orders = 1;
+            $orderAccountCr->cr_date = date('Y-m-d');
+            $orderAccountCr->cr_date_time = date('Y-m-d H:i:s');
+            $orderAccountCr->save(false);
+
+            return [
+                'status' => 'success',
+                'id' => $model->id,
+                'fio' => $model->fio,
+            ];
+        }
+    }
+
+    return [
+        'status' => 'error',
+        'content' => $this->renderAjax('_quick_create', [
+            'model' => $model,
+        ]),
+    ];
+}
 
     public function actionClientKeshbekHisob($id)
     {
@@ -152,6 +209,104 @@ class ClientController extends Controller
      * and for non-ajax request if creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
+    public function actionCreateOne()
+    {
+        $request = Yii::$app->request;
+        $model = new Client();
+
+        if ($request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            if ($request->isGet) {
+                return [
+                    'title'   => "Mijoz qo'shish",
+                    'content' => $this->renderAjax('create_one', [
+                        'model' => $model,
+                    ]),
+                    'footer'  =>
+                        Html::button('Yopish', [
+                            'class' => 'btn btn-default pull-left',
+                            'data-dismiss' => 'modal',
+                        ]) .
+                        Html::button('Saqlash', [
+                            'class' => 'btn btn-primary',
+                            'type'  => 'submit',
+                        ]),
+                ];
+            }
+
+            if ($model->load($request->post()) && $model->validate()) {
+                $transaction = Yii::$app->db->beginTransaction(Transaction::SERIALIZABLE);
+                try {
+                    $model->save(false);
+
+                    $exchangeRate = ExchangeRate::find()->orderBy(['id' => SORT_ASC])->one();
+
+                    $orderAccountCr = new OrderAccount();
+                    $orderAccountCr->client_id = $model->id;
+                    $orderAccountCr->last_order_date = date('Y-m-d');
+                    $orderAccountCr->total_debt = $model->total_debt ?: 0;
+                    $orderAccountCr->date = date('Y-m-d');
+                    $orderAccountCr->exchange_rate = $exchangeRate ? $exchangeRate->dollar : 0;
+                    $orderAccountCr->number_of_orders = 1;
+                    $orderAccountCr->cr_date = date('Y-m-d');
+                    $orderAccountCr->cr_date_time = date('Y-m-d H:i:s');
+                    $orderAccountCr->save(false);
+
+                    $transaction->commit();
+
+                    return [
+                        'forceClose' => true,
+                        'message'    => 'Mijoz muvaffaqiyatli qo‘shildi',
+                    ];
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+
+                    return [
+                        'title'   => "Mijoz qo'shish",
+                        'content' => '<div class="alert alert-danger">' . $e->getMessage() . '</div>' .
+                            $this->renderAjax('create_one', [
+                                'model' => $model,
+                            ]),
+                        'footer'  =>
+                            Html::button('Yopish', [
+                                'class' => 'btn btn-default pull-left',
+                                'data-dismiss' => 'modal',
+                            ]) .
+                            Html::button('Saqlash', [
+                                'class' => 'btn btn-primary',
+                                'type'  => 'submit',
+                            ]),
+                    ];
+                }
+            }
+
+            return [
+                'title'   => "Mijoz qo'shish",
+                'content' => $this->renderAjax('create_one', [
+                    'model' => $model,
+                ]),
+                'footer'  =>
+                    Html::button('Yopish', [
+                        'class' => 'btn btn-default pull-left',
+                        'data-dismiss' => 'modal',
+                    ]) .
+                    Html::button('Saqlash', [
+                        'class' => 'btn btn-primary',
+                        'type'  => 'submit',
+                    ]),
+            ];
+        }
+
+        if ($model->load($request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        return $this->render('create_one', [
+            'model' => $model,
+        ]);
+    }
+
     public function actionCreate()
     {
         $request = Yii::$app->request;

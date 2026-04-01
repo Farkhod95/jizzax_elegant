@@ -50,7 +50,7 @@ $urlTypesBySz = Url::to(['order-account-history/types-by-size']);
                 <div class="col-md-1">
                 </div>
                 <div class="col-md-2" style="display:none;">
-                     <?php if (\Yii::$app->user->identity->permission == 1) {?>
+                     <?php if (\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2) {?>
                         <?= $form->field($model, 'exchange_rates')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar])->label("Dollar kursi") ?>
                     <?php }else{?>
                         <?= $form->field($model, 'exchange_rates')->textInput(['type' => 'number', 'required'=>True, 'value' => $exchangeRate->dollar, 'style' => 'display:none;'])->label("") ?>

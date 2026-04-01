@@ -4,9 +4,8 @@ use yii\bootstrap\ActiveForm;
 use app\models\Warehouse;
 use app\models\PriceProduct;
 use app\models\ExchangeRate;
-/* @var $this yii\web\View */
-/* @var $form yii\bootstrap\ActiveForm */
-/* @var $model \common\models\LoginForm */
+use yii\bootstrap\Modal;
+use johnitvn\ajaxcrud\CrudAsset;
 use yii\helpers\Url;
 use app\models\Brands;
 use app\models\Client;
@@ -29,6 +28,15 @@ $exchangeRate = ExchangeRate::find()->where(['id' => 1])->one();
 $this->registerJsVar('BRAND_MAP', ArrayHelper::map($brands, 'id', 'name'));
 $catAjaxUrl = Url::to(['product-category/by-brand']); // AJAX endpoint (absolyut/relative muhim emas)
 $isRole1 = !Yii::$app->user->isGuest && (int)Yii::$app->user->identity->permission === 1;
+
+CrudAsset::register($this);
+
+Modal::begin([
+    'id' => 'ajaxCrudModal',
+    'footer' => '',
+    'options' => ['tabindex' => false], // MUHIM
+]);
+Modal::end();
 ?>
 <style>
 .switch {
@@ -213,6 +221,14 @@ input:checked + .slider:before {
     <div class="panel panel-inverse">
       <div class="panel-heading">
         <div class="panel-heading-btn">
+          <?= Html::a(
+                '<span class="btn btn-warning btn-xs m-r-5"><i class="fa fa-plus"></i> Mijoz qo\'shish</span>',
+                ['/client/create-one'],
+                [
+                    'role' => 'modal-remote',
+                    'data-toggle' => 'tooltip',
+                ]
+            ); ?>
           <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
           <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
           <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
@@ -236,8 +252,9 @@ input:checked + .slider:before {
                 'options' => ['placeholder' => 'Mijoz tanlang','style' => 'text-align:right;'],
                 'pluginOptions' => ['allowClear' => true],
               ]); ?>
+
             </div>
-            <?php if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 6 || \Yii::$app->user->identity->permission == 5){ ?>
+            <?php if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 6 || \Yii::$app->user->identity->permission == 5){ ?>
               <div class="col-sm-4">
                 <label class="col-form-label"><h5><b>Qarzi ($): </b></h5></label>
                 <label><h5><b style="color:red" id="qarz_client_summ"></b></h5></label>
@@ -358,7 +375,6 @@ input:checked + .slider:before {
     </div>
   </div>
 </div>
-
 <!-- Modal #2 -->
 <div class="modal fade" id="modal-dialog2">
   <div class="modal-dialog">
@@ -563,6 +579,7 @@ $this->registerJsFile('/js/cookie.js');
 
 /** Qolgan JS (sizniki) — o‘zgartirmadim. Faqat brand→category filtri bo‘limini pastda qo‘shdim. */
 $this->registerJs(<<<'JS'
+
 function adjustTableClass() {
   var screenWidth = window.innerWidth;
   var table = document.querySelector('.table');
@@ -1100,5 +1117,10 @@ $(document).on('keydown', '#modal-dialog2 input', function(e) {
   }
 });
 
+$(document).on('hidden.bs.modal', '#ajaxCrudModal', function () {
+  location.reload();
+});
+
 JS
 );
+

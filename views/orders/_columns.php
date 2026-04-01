@@ -77,7 +77,7 @@ return [
             },
             'leadDelete' => function ($url, $model) {
                
-                if(Yii::$app->user->identity->permission == 1){
+                if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/orders/delete', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', $url, [
                         'role'=>'modal-remote','title'=>'Buyurtmani bekor qilish','class'=>'btn btn-danger btn-xs' ,

@@ -31,7 +31,7 @@ CrudAsset::register($this);
                 <div class="panel-heading-btn">
                     <a href="/order-account-history/<?= $type?>" class="btn btn-xs  btn-info"> <i class="fa fa-reply"></i> Orqaga qaytish </a>
                     <a href="<?= Url::to(['/order-account-history/print2', 'id' => $order_id]) ?>" target ="_blank" class="btn btn-xs  btn-warning"> <i class="fa fa-download"></i> Chop qilish Xodim uchun </a>
-                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                         <a href="<?= Url::to(['/order-account-history/print-sklad', 'id' => $order_id]) ?>" target ="_blank" class="btn btn-xs  btn-primary"> <i class="fa fa-download"></i> Chop qilish Sklad uchun</a>
                         
                     <?php }?>
@@ -43,7 +43,7 @@ CrudAsset::register($this);
                         ?>
                             <a href="<?= Url::to(['/order-account-history/print', 'id' => $order_id]) ?>" target ="_blank" class="btn btn-xs  btn-warning"> <i class="fa fa-download"></i> Chop qilish Mijoz uchun</a>
                     <?php } ?>
-                     <?php if(Yii::$app->user->identity->permission == 1){?>
+                     <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                         <a href="<?= Url::to(['/order-account-history/print-profit', 'id' => $order_id]) ?>" target ="_blank" class="btn btn-xs  btn-danger"> <i class="fa fa-download"></i> Chop qilish Admin uchun</a>
                         
                     <?php }?>
@@ -65,7 +65,7 @@ CrudAsset::register($this);
                 <!-- begin table-responsive -->
                 <div class="table-responsive">
                     <h5>Hisobot</h5>
-                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                         <table class="table">   
                             <tr>
                                 <th nowrap style="text-align: left; width: 300px; color:#f59c1a">Dollar kursi:</th>
@@ -127,7 +127,7 @@ CrudAsset::register($this);
                                 <th nowrap>Tip</th>
                                 <th nowrap>Soni</th>
                                 <th nowrap>Berilgan soni</th>
-                                <?php if(Yii::$app->user->identity->permission == 1){?>
+                                <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                 <th nowrap>Narxi ($)</th>
                                 <th nowrap>Asl Narxi ($)</th>
                                 <th nowrap>Foyda ($)</th>
@@ -138,7 +138,7 @@ CrudAsset::register($this);
                         <tbody>
                             <?php  foreach ($warehouse as $model) { $i = 1; $allCount = 0; $allGivenCount = 0; $allSumm = 0; $allRealSumm = 0;  $allProfitSumm = 0;?>
                                 <tr>
-                                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                         <td colspan="10" style="background-color:#a0d9ea;" ><b style="color:red"><?= $model->brand->name ?></b></td>
                                         <td style="background-color:#a0d9ea;"></td>
                                     <?php }else{?>
@@ -237,7 +237,7 @@ CrudAsset::register($this);
                                                     ) ?>
                                                 </td>
                                         <?php }?>
-                                        <?php if(Yii::$app->user->identity->permission == 1){?>
+                                        <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                             <?php if($model1->type_sklad_id ==1){ ?> 
                                             <td style="color:<?= ($model1->price < $model1->real_price) ? '#e70f0fff;font-size: 15px;' : ''?>"> <b > <?= $model1->price ?> <?= $largePrice ?></b></td>
                                             <td > <b ><?= $model1->real_price ?></b></td>
@@ -264,7 +264,7 @@ CrudAsset::register($this);
                                     $allMarkProfitSumm = $allMarkProfitSumm + $model1->profit; 
                                     } ?>
                                 <tr>
-                                    <?php if(Yii::$app->user->identity->permission == 1){?>
+                                    <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                         <td colspan="5"  ><b ></b></td>
                                         <td ><b style="color:#000;font-size: 15px" >Jami:</b></td>
                                         <td ><b style="color:#000;font-size: 15px"><?= $allCount ?></b></td>
@@ -286,7 +286,7 @@ CrudAsset::register($this);
                             
                          
                             <tr>
-                                <?php if(Yii::$app->user->identity->permission == 1){?>
+                                <?php if(Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                                     <td colspan="6" style="background-color:#2d353c;"><b style="color:white">Jami:</b></td>
                                     <td style="background-color:#2d353c;"><b style="color:white"><?= $allMarkCount ?></b></td>
                                     <td style="background-color:#2d353c;"><b style="color:white"><?= $allMarkGivenCount ?></b></td>

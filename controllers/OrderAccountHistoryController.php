@@ -618,6 +618,293 @@ class OrderAccountHistoryController extends Controller
         $mpdf->Output('Buyurtmalar_va_Qarzlar.pdf', 'I');
     }
 
+        public function actionProductSell()
+    {
+        $brands = Brands::find()
+            ->where(['sup_status' => 1])
+            ->orderBy(['sorting' => SORT_ASC, 'name' => SORT_ASC])
+            ->all();
+
+        return $this->render('product_sell', [
+            'brands' => $brands,
+        ]);
+    }
+
+    /**
+     * AJAX: brand bo'yicha category
+     */
+    public function actionProductSellCategoriesByBrand($brand_id)
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $rows = ProductCategory::find()
+            ->select(['id', 'name'])
+            ->where([
+                'brand_id' => (int)$brand_id,
+                'sup_status' => 1,
+            ])
+            ->orderBy(['sorting' => SORT_ASC, 'name' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        $results = [];
+        foreach ($rows as $row) {
+            $results[] = [
+                'id' => (int)$row['id'],
+                'text' => $row['name'],
+            ];
+        }
+
+        return ['results' => $results];
+    }
+
+    /**
+     * AJAX: brand + category bo'yicha size va type
+     */
+    public function actionProductSellSizesTypes($brand_id, $product_category_id)
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $brandId = (int)$brand_id;
+        $categoryId = (int)$product_category_id;
+
+        if (!$brandId || !$categoryId) {
+            return [
+                'sizes' => [],
+                'types' => [],
+            ];
+        }
+
+        $sizeRows = \app\models\BrandsSize::find()
+            ->select(['size'])
+            ->where([
+                'brand_id' => $brandId,
+                'product_category_id' => $categoryId,
+            ])
+            ->distinct()
+            ->orderBy(['size' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        $typeRows = \app\models\BrandsSize::find()
+            ->select(['type'])
+            ->where([
+                'brand_id' => $brandId,
+                'product_category_id' => $categoryId,
+            ])
+            ->distinct()
+            ->orderBy(['type' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        $sizes = [];
+        foreach ($sizeRows as $row) {
+            $sizes[] = [
+                'id' => (string)$row['size'],
+                'text' => (string)$row['size'],
+            ];
+        }
+
+        $types = [];
+        foreach ($typeRows as $row) {
+            $typeId = (int)$row['type'];
+            $types[] = [
+                'id' => $typeId,
+                'text' => ProductCategory::getTypeView($typeId),
+            ];
+        }
+
+        return [
+            'sizes' => $sizes,
+            'types' => $types,
+        ];
+    }
+
+    public function actionClientProductSell()
+    {
+        $request = Yii::$app->request;
+
+        $brand_id = (int)$request->post('brand_id');
+        $product_category_id = (int)$request->post('product_category_id');
+        $size = trim((string)$request->post('size'));
+        $type = (int)$request->post('type');
+        $start_date = $request->post('start_date');
+        $end_date = $request->post('end_date');
+
+        $brand = Brands::findOne($brand_id);
+        $product = ProductCategory::find()->where(['id' => $product_category_id])->one();
+
+        if (!$brand) {
+            Yii::$app->session->setFlash('error', 'Model topilmadi');
+            return $this->redirect(['product-sell']);
+        }
+
+        if (!$product) {
+            Yii::$app->session->setFlash('error', 'Mahsulot topilmadi');
+            return $this->redirect(['product-sell']);
+        }
+
+        $query = ProductAccountHistory::find()
+            ->alias('pah')
+            ->select([
+                'pah.cr_date',
+                'sold_count' => new \yii\db\Expression('SUM(pah.count)'),
+            ])
+            ->innerJoin(['oah' => OrderAccountHistory::tableName()], 'oah.id = pah.order_account_history_id')
+            ->where([
+                'pah.brand_id' => $brand_id,
+                'pah.product_category_id' => $product_category_id,
+            ])
+            ->andWhere(['between', 'pah.cr_date', $start_date, $end_date])
+            ->andWhere(['or',
+                ['!=', 'oah.is_worker', 1],
+                ['is', 'oah.is_worker', null]
+            ])
+            ->andWhere(['<>', 'oah.is_delete', 1]);
+
+        if ($size !== '') {
+            $query->andWhere(['pah.size' => $size]);
+        }
+
+        if ($type > 0) {
+            $query->andWhere(['pah.type' => $type]);
+        }
+
+        $orders = $query
+            ->groupBy(['pah.cr_date'])
+            ->orderBy(['pah.cr_date' => SORT_DESC])
+            ->asArray()
+            ->all();
+
+        return $this->render('client_product_sell', [
+            'orders' => $orders,
+            'brand_id' => $brand_id,
+            'product_category_id' => $product_category_id,
+            'size' => $size,
+            'type' => $type,
+            'brand_name' => $brand->name,
+            'product_name' => $product->name,
+            'type_name' => $type ? ProductCategory::getTypeView($type) : '',
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+        ]);
+    }
+
+    public function actionClientProductSellView($brand_id, $product_category_id, $cr_date, $start_date, $end_date, $size = null, $type = null)
+    {
+        $brand_id = (int)$brand_id;
+        $product_category_id = (int)$product_category_id;
+        $type = (int)$type;
+        $size = trim((string)$size);
+
+        $brand = Brands::findOne($brand_id);
+        $productCategory = ProductCategory::find()
+            ->with(['brand'])
+            ->where(['id' => $product_category_id])
+            ->one();
+
+        if (!$brand || !$productCategory) {
+            throw new \yii\web\NotFoundHttpException('Ma’lumot topilmadi');
+        }
+
+        $ordersQuery = OrderAccountHistory::find()
+            ->alias('oah')
+            ->innerJoin(['pah' => ProductAccountHistory::tableName()], 'pah.order_account_history_id = oah.id')
+            ->with(['client'])
+            ->where([
+                'pah.brand_id' => $brand_id,
+                'pah.product_category_id' => $product_category_id,
+                'pah.cr_date' => $cr_date,
+            ])
+            ->andWhere(['or',
+                ['!=', 'oah.is_worker', 1],
+                ['is', 'oah.is_worker', null]
+            ])
+            ->andWhere(['<>', 'oah.is_delete', 1]);
+
+        if ($size !== '') {
+            $ordersQuery->andWhere(['pah.size' => $size]);
+        }
+
+        if ($type > 0) {
+            $ordersQuery->andWhere(['pah.type' => $type]);
+        }
+
+        $orders = $ordersQuery
+            ->groupBy(['oah.id'])
+            ->orderBy(['oah.cr_date_time' => SORT_ASC])
+            ->all();
+
+        $orderIds = \yii\helpers\ArrayHelper::getColumn($orders, 'id');
+
+        $allProducts = [];
+        if (!empty($orderIds)) {
+            $allProducts = ProductAccountHistory::find()
+                ->alias('pah')
+                ->with(['brand', 'productCategory'])
+                ->where([
+                    'pah.order_account_history_id' => $orderIds,
+                    'pah.cr_date' => $cr_date,
+                ])
+                ->orderBy([
+                    'pah.order_account_history_id' => SORT_ASC,
+                    'pah.brand_id' => SORT_ASC,
+                    'pah.product_category_id' => SORT_ASC,
+                    'pah.id' => SORT_ASC,
+                ])
+                ->all();
+        }
+
+        $groupedOrders = [];
+        $totalHighlightedCount = 0;
+
+        foreach ($orders as $order) {
+            $groupedOrders[$order->id] = [
+                'order' => $order,
+                'items' => [],
+                'highlight_count' => 0,
+            ];
+        }
+
+        foreach ($allProducts as $item) {
+            $orderId = (int)$item->order_account_history_id;
+
+            if (!isset($groupedOrders[$orderId])) {
+                continue;
+            }
+
+            $isHighlight =
+                ((int)$item->brand_id === $brand_id) &&
+                ((int)$item->product_category_id === $product_category_id) &&
+                ($size === '' || (string)$item->size === (string)$size) &&
+                ($type <= 0 || (int)$item->type === $type);
+
+            $groupedOrders[$orderId]['items'][] = [
+                'model' => $item,
+                'highlight' => $isHighlight,
+            ];
+
+            if ($isHighlight) {
+                $groupedOrders[$orderId]['highlight_count'] += (int)$item->count;
+                $totalHighlightedCount += (int)$item->count;
+            }
+        }
+
+        return $this->render('client_product_sell_view', [
+            'groupedOrders' => $groupedOrders,
+            'brand' => $brand,
+            'productCategory' => $productCategory,
+            'brand_id' => $brand_id,
+            'product_category_id' => $product_category_id,
+            'size' => $size,
+            'type' => $type,
+            'type_name' => $type ? ProductCategory::getTypeView($type) : '',
+            'cr_date' => $cr_date,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'totalHighlightedCount' => $totalHighlightedCount,
+        ]);
+    }
     public function actionClientHistory()
     {    
         return $this->render('client_order_history');

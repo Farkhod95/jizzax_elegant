@@ -69,32 +69,32 @@ return [
     //         return   '<b style="color:green;font-size: 14px">'.($data->keshbek? $data->keshbek:0).' %</b>';
     //     }
     // ],
-      [
-        'class'=>'\kartik\grid\DataColumn', 
-        'attribute'=>'type',
-        // 'width' => '250px',
-        'filter' => (new \app\models\Client())->getType(),
-        'content' => function ($data) {
-            if ($data->type) {
-                return '<b style="font-size: 14px">'.$data->getTypeView($data->type).'</b>';
-            }
+    //   [
+    //     'class'=>'\kartik\grid\DataColumn', 
+    //     'attribute'=>'type',
+    //     // 'width' => '250px',
+    //     'filter' => (new \app\models\Client())->getType(),
+    //     'content' => function ($data) {
+    //         if ($data->type) {
+    //             return '<b style="font-size: 14px">'.$data->getTypeView($data->type).'</b>';
+    //         }
             
-        },
-    ],
-    [
-        'class'=>'\kartik\grid\DataColumn',
-        'attribute'=>'is_profit_loss',
-        'visible' => \Yii::$app->user->identity->isAdminRight(\Yii::$app->user->identity->id),
-        'width'=>'120px',
-        'content'=> function($data){
-            if ($data->is_profit_loss == 1) {
-                return   '<b style="color:red;font-size: 14px"> Hisoblanmasin </b>';
-            }else {
-                return   '<b style="color:green;font-size: 14px">Hisoblansin</b>';
-            }
+    //     },
+    // ],
+    // [
+    //     'class'=>'\kartik\grid\DataColumn',
+    //     'attribute'=>'is_profit_loss',
+    //     'visible' => \Yii::$app->user->identity->isAdminRight(\Yii::$app->user->identity->id),
+    //     'width'=>'120px',
+    //     'content'=> function($data){
+    //         if ($data->is_profit_loss == 1) {
+    //             return   '<b style="color:red;font-size: 14px"> Hisoblanmasin </b>';
+    //         }else {
+    //             return   '<b style="color:green;font-size: 14px">Hisoblansin</b>';
+    //         }
             
-        }
-    ],
+    //     }
+    // ],
      [
         'class'=>'\kartik\grid\DataColumn', 
         'attribute'=>'created_by',
@@ -119,20 +119,20 @@ return [
             }
         },
     ],
-    [
-        'class' => '\kartik\grid\DataColumn',
-        'header' => 'Keshbek ($)',
-        'format' => 'raw',
-        'value' => function($data){
-            $sum = (float) KeshbekHistory::find()
-                ->where(['client_id' => $data->id])
-                ->sum('keshbek_sum');
+    // [
+    //     'class' => '\kartik\grid\DataColumn',
+    //     'header' => 'Keshbek ($)',
+    //     'format' => 'raw',
+    //     'value' => function($data){
+    //         $sum = (float) KeshbekHistory::find()
+    //             ->where(['client_id' => $data->id])
+    //             ->sum('keshbek_sum');
 
-            return '<b style="color:green;font-size:14px">'
-                . Yii::$app->formatter->asDecimal($sum, 2)
-                . ' $</b>';
-        }
-    ],
+    //         return '<b style="color:green;font-size:14px">'
+    //             . Yii::$app->formatter->asDecimal($sum, 2)
+    //             . ' $</b>';
+    //     }
+    // ],
     // [
     //     'class' => 'kartik\grid\ActionColumn',
     //     'dropdown' => false,
@@ -156,7 +156,7 @@ return [
         'dropdown' => false,
         'width' => '180px',
         'header' => 'Harakatlar',
-        'template' => '{leadKeshbek} {leadUpdate}',
+        'template' => ' {leadUpdate}',
         'urlCreator' => function($action, $model, $key, $index) { 
                 return Url::to([$action,'id'=>$key]);
         },

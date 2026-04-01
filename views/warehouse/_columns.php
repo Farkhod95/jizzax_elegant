@@ -141,7 +141,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'price',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2,
         'content' => function ($data) {
             // if ($data->count > 0) {
                 $price = Prices::find()->where(['warehouse_id' => $data->id])->one();
@@ -159,7 +159,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'worker_price',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2,
         'content' => function ($data) {
             // if ($data->count > 0) {
             if ($data->worker_price>0) {
@@ -216,25 +216,25 @@ return [
         },
         'buttons'=>[
             'leadImage' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/warehouse-file/index' , 'warehouse_id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-picture"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Rasm yuklash','class'=>'btn btn-info btn-xs']);
                 }
             },
             'leadPrice' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/prices/update' , 'warehouse_id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-usd"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'Narx','class'=>'btn btn-warning btn-xs']);
                 }
             },
             'leadUpdate' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 5){
+                if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 5){
                     $url = Url::to(['/warehouse/update', 'id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-success btn-xs']);
                  }
              },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     $url = Url::to(['/warehouse/one-delete', 'id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-danger btn-xs']);
                 }

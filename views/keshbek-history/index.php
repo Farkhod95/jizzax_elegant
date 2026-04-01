@@ -24,7 +24,7 @@ $sumKeshbek = (float)(clone $dataProvider->query)->sum('keshbek_sum');
                 <i class="fa fa-reply"></i> Orqaga qaytish
             </a>
 
-            <?php if(\Yii::$app->user->identity->permission == 1){?>
+            <?php if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){?>
                 <?= Html::a(
                     "Qo'shish <i class='fa fa-plus'></i>",
                     ['/keshbek-history/create', 'client_id' => $client->id],

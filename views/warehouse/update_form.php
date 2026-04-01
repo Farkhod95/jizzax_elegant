@@ -116,7 +116,10 @@ use app\models\BrandsSize;
 
     <div class="row">
         <div class="col-md-6">
-            <?= $form->field($model, 'count')->textInput(['type' => 'number']) ?>
+            <?= $form->field($model, 'count')->textInput([
+                    'type' => 'number',
+                    'disabled' => \Yii::$app->user->identity->permission != 1
+                ]) ?>
         </div>
 
         <div class="col-md-6">

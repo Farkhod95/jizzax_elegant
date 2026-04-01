@@ -49,34 +49,22 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
         <div class="row"> 
-            <div class="col-md-6 col-xs-6">
+            <div class="col-md-12 col-xs-6">
                 <?= $form->field($model, 'total_debt')->textInput(['type' => 'number']) ?>
             </div>
-            <div class="col-md-6 col-xs-6">
+            <!-- <div class="col-md-6 col-xs-6">
                 <?= $form->field($model, 'keshbek')->textInput(['maxlength' => true]) ?>
-            </div>
+            </div> -->
         </div>
-         <div class="row"> 
-            <div class="col-md-12 col-xs-6">
-                <?= $form->field($model, 'type')->label()->widget(\kartik\select2\Select2::classname(), [
-                    'data' => $model->getType(),
-                    'options' => [
-                        'placeholder' => Yii::t('app','Tanlang...'),
-                        ],
-                    'pluginOptions' => [
-                        'allowClear' => true
-                    ],
-                ]); ?>
-            </div>
-        </div>
+        <?= $form->field($model, 'type')->hiddenInput(['value' => 1])->label(false) ?>
 
         <div class="row"> 
             <div class="col-md-12 col-xs-6">
                 <?= $form->field($model, 'address')->textInput(['maxlength' => true]) ?>
             </div>
         </div>
-         <div class="row">
-            <?php if(\Yii::$app->user->identity->permission == 1){?>
+         <!-- <div class="row">
+            <?php if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ){?>
             <div class="col-md-6 col-xs-6">
                 <?= $form->field($model, 'is_profit_loss')->checkbox([
                     // 'label' => Yii::t('app', 'Hamkor hisoblanadimi?'),
@@ -85,7 +73,7 @@ use yii\widgets\ActiveForm;
                 ]) ?>
             </div>
             <?php }?>
-        </div>
+        </div> -->
     
 
   

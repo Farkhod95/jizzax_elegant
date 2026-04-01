@@ -189,7 +189,7 @@ return [
                 return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-success btn-xs']);
             },
             'leadDeleteOld' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     // Create the button to trigger the modal
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', '#', [
                         'data-toggle' => 'modal',

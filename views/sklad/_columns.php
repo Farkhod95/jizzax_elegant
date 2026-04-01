@@ -77,7 +77,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'given_sum_dollar',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
         'width' => '180px',
         'content'=> function($data){
             // $orderAccount = OrderAccount::find()->where(['client_id' => $data->client_id])->one();
@@ -98,7 +98,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'sum_dollar',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
         'width' => '170px',
         'content'=> function($data){
             // $orderAccount = OrderAccount::find()->where(['client_id' => $data->client_id])->one();
@@ -119,7 +119,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'discount_amount',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
         'width' => '135px',
         'content'=> function($data){
             // $orderAccount = OrderAccount::find()->where(['client_id' => $data->client_id])->one();
@@ -141,7 +141,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'all_total_debt_sum',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
         'width' => '180px',
         'content'=> function($data){
             $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $data->consignor_id])->one();
@@ -210,7 +210,7 @@ return [
     [
         'class'=>'\kartik\grid\DataColumn',
         'attribute'=>'exchange_rate',
-        'visible' => \Yii::$app->user->identity->permission == 1,
+        'visible' => \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 ? true : false,
         'width' => '135px',
         'content'=> function($data){
             // $orderAccount = OrderAccount::find()->where(['client_id' => $data->client_id])->one();
@@ -291,7 +291,7 @@ return [
         },
         'buttons'=>[
             'leadOrderStatus' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 5 || \Yii::$app->user->identity->permission == 1){
+                if(\Yii::$app->user->identity->permission == 5 || \Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
                     if ($model->status == 1){
                         $url = Url::to(['/sklad/import-check' , 'id' => $model->id]);
                         return Html::a('<span class="glyphicon glyphicon-check"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Qabul qilingan mahsulotni tasdiqlash','class'=>'btn btn-xs','style' => 'background-color: #a71629; color: white;']);
@@ -303,7 +303,7 @@ return [
             },
             'leadUpdate' => function ($url, $model) {
                 if ($model->actived == 1) {
-                    if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 5|| $model->created_by == \Yii::$app->user->identity->id){
+                    if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 5|| $model->created_by == \Yii::$app->user->identity->id){
                         $url = Url::to(['/sklad/update', 'id' => $model->id]);
                         return Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Chop qilish','class'=>'btn btn-warning btn-xs']);
                     }
@@ -323,7 +323,7 @@ return [
             //     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Buyurtmani bekor qilish','class'=>'btn btn-danger btn-xs']);
             // },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 5|| $model->created_by == \Yii::$app->user->identity->id){
+                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 5|| $model->created_by == \Yii::$app->user->identity->id){
                     $consignor_name = "";
                     if ($model->consignor_id) {
                         $consignor_name = $model->consignor0->name;
