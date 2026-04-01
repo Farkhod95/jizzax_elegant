@@ -263,6 +263,7 @@ class OrderAccountHistoryController extends Controller
                 'sum_otkazma',
                 'sum_cart',
                 'sum_transfers',
+                'sum_otkazma',
                 'cr_date_time AS datetime',
                 'client_id',
 
@@ -280,6 +281,7 @@ class OrderAccountHistoryController extends Controller
                 new \yii\db\Expression('0 AS sum_paid_som'),
                 new \yii\db\Expression('0 AS sum_paid_cart'),
                 new \yii\db\Expression('0 AS sum_paid_transfers'),
+                new \yii\db\Expression('0 AS sum_paid_otkazma'),
                 new \yii\db\Expression('0 AS paid_debt'),
 
                 new \yii\db\Expression("'Buyurtma qilgan' AS action")
@@ -304,6 +306,7 @@ class OrderAccountHistoryController extends Controller
                 'sum_som AS debt_sum_som',
                 'summ_cart AS debt_summ_cart',
                 'sum_transfers AS debt_sum_transfers',
+                'sum_otkazma AS debt_sum_otkazmas',
                 'cr_date_time AS datetime',
                 'client_id',
 
@@ -313,6 +316,7 @@ class OrderAccountHistoryController extends Controller
                 new \yii\db\Expression('0 AS sum_otkazma'),
                 new \yii\db\Expression('0 AS sum_cart'),
                 new \yii\db\Expression('0 AS sum_transfers'),
+                new \yii\db\Expression('0 AS sum_otkazma'),
                 new \yii\db\Expression('0 AS all_product_sum'),
                 new \yii\db\Expression('0 AS all_summ_dollar'),
 

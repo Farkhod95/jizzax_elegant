@@ -265,6 +265,13 @@ $rows = $provider->getModels();
                                                      <span style="color: #007bff;">
                                                     Transfer: <?= number_format($sum_paid_otkazma ?? 0, 2) ?>
                                                     </span>
+                                                    <span style="color: #ff9800;">
+                                                        Qaytim (so‘m): <?= number_format($sum_zdacha_sum ?? 0, 2) ?>
+                                                    </span>
+
+                                                    <span style="color: #ff5722;">
+                                                        Qaytim ($): <?= number_format($sum_zdacha_dollar ?? 0, 2) ?>
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -283,6 +290,13 @@ $rows = $provider->getModels();
 
                                                     <span style="color: #007bff;"> Karta: <?= number_format($sum_paid_debt_cart ?? 0, 2) ?></span>
                                                      <span style="color: #007bff;"> Transfer: <?= number_format($sum_paid_debt_otkazmas ?? 0, 2) ?></span>
+                                                     <span style="color: #ff9800;">
+                                                        Qaytim (so‘m): <?= number_format($sum_zdacha_sum ?? 0, 2) ?>
+                                                    </span>
+
+                                                    <span style="color: #ff5722;">
+                                                        Qaytim ($): <?= number_format($sum_zdacha_dollar ?? 0, 2) ?>
+                                                    </span>
                                                 </div>
                                                 </div>
                                         </td>
