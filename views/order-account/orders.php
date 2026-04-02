@@ -26,6 +26,8 @@ $exchangeRate = ExchangeRate::find()->where(['id' => 1])->one();
 
 /** Brand id=>name xaritasi JS ga chiqsin */
 $this->registerJsVar('BRAND_MAP', ArrayHelper::map($brands, 'id', 'name'));
+$this->registerJsVar('CLIENT_CREATE_ONE_URL', Url::to(['/client/create-one']));
+
 $catAjaxUrl = Url::to(['product-category/by-brand']); // AJAX endpoint (absolyut/relative muhim emas)
 $isRole1 = !Yii::$app->user->isGuest && (int)Yii::$app->user->identity->permission === 1;
 
@@ -1629,8 +1631,21 @@ $(document).on('keydown', '#modal-dialog2 input', function(e) {
   }
 });
 
-$(document).on('hidden.bs.modal', '#ajaxCrudModal', function () {
-  location.reload();
+$(document).ajaxSuccess(function(event, xhr, settings) {
+  try {
+    var response = xhr.responseJSON || JSON.parse(xhr.responseText || '{}');
+    var requestUrl = settings.url || '';
+
+    if (
+      requestUrl.indexOf(CLIENT_CREATE_ONE_URL) !== -1 &&
+      response &&
+      response.forceClose === true
+    ) {
+      location.reload();
+    }
+  } catch (e) {
+    // hech narsa qilmaymiz
+  }
 });
 
 JS
