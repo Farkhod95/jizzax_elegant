@@ -189,25 +189,39 @@ class OrderAccountController extends Controller
         return $this->redirect(['/debt-repayment/index']);
     }
 
+    private function moneyToFloat($value): float
+    {
+        if ($value === null) {
+            return 0.0;
+        }
+
+        $value = (string)$value;
+        $value = str_replace([' ', "\xc2\xa0", '$'], '', $value); // oddiy va nbsp probel, $ ni olib tashlash
+        $value = str_replace(',', '.', $value);
+
+        return round((float)$value, 2);
+    }
+
     public function actionAccept()
     {
         // Requestni chop etish
         
         $request = Yii::$app->request;
         $clients_id = $request->post('customer_name');
-        $total_debts = $request->post('jami_qarzi');
+        $total_debts      = $this->moneyToFloat($request->post('jami_qarzi'));
         $dates = $request->post('order_date');
-        $exchange_rates = $request->post('dollar_kurs');
+        $exchange_rates   = $this->moneyToFloat($request->post('dollar_kurs'));
 
-        $discount_amounts = $request->post('chegirma_summa');
-        $sum_dollars = $request->post('summa_dollor');
-        $dollar_sumda = $request->post('dollar_sumda');
-        $sum_soms = $request->post('summa_som');
-        $sum_carts = $request->post('summa_karta');
-        $sum_transferss = $request->post('summa_transfer');
-        $sum_otkazmas = $request->post('summa_otkazma');
-        $zdacha_dollar = $request->post('zdacha_dollar');
-        $zdacha_sum = $request->post('zdacha_sum');
+        $discount_amounts = $this->moneyToFloat($request->post('chegirma_summa'));
+        $sum_dollars      = $this->moneyToFloat($request->post('summa_dollor'));
+        $dollar_sumda     = $this->moneyToFloat($request->post('dollar_sumda'));
+        $sum_soms         = $this->moneyToFloat($request->post('summa_som'));
+        $sum_carts        = $this->moneyToFloat($request->post('summa_karta'));
+        $sum_transferss   = $this->moneyToFloat($request->post('summa_transfer'));
+        $sum_otkazmas     = $this->moneyToFloat($request->post('summa_otkazma'));
+        $zdacha_dollar    = $this->moneyToFloat($request->post('zdacha_dollar'));
+        $zdacha_sum       = $this->moneyToFloat($request->post('zdacha_sum'));
+
         $comment = $request->post('comment');
         $driver_info = $request->post('driver_info');
         $fastOrder = $request->post('fast_order');
@@ -249,7 +263,7 @@ class OrderAccountController extends Controller
             $orderAccount->sum_dollar = $orderAccount->sum_dollar + (float)$sum_dollars;
             $orderAccount->dollar_sumda = $orderAccount->dollar_sumda + (float)$dollar_sumda;
             $orderAccount->sum_som = $orderAccount->sum_som + (float)$sum_soms;
-            $orderAccount->sum_otkazma = $orderAccount->sum_otkazma + (float)$sum_otkazmas;
+            // $orderAccount->sum_otkazma = $orderAccount->sum_otkazma + (float)$sum_otkazmas;
             $orderAccount->sum_cart = $orderAccount->sum_cart + (float)$sum_carts;
             $orderAccount->sum_transfers = $orderAccount->sum_transfers + (float)$sum_transferss;
             $orderAccount_id =$orderAccount->id;
@@ -428,7 +442,8 @@ class OrderAccountController extends Controller
             $relativeHistory->save(false);
 
             // Ombor soni
-            if ($warehouseValue && $type_sklad_list->id == 1) {
+            // if ($warehouseValue && $type_sklad_list->id == 1) {
+            if ($warehouseValue) {
                 $warehouseValue->count = $warehouseValue->count - $count;
                 $warehouseValue->save(false);
             }
@@ -463,8 +478,24 @@ class OrderAccountController extends Controller
             }
             
             $orderAccountProf->all_product_sum = round($orderAccountProf->all_product_sum + $all_summ, 2);
+
+            $debt_delta = round($all_summ - $all_pay_summ - $discount_amounts, 2);
+            $new_total_debt = round($total_debts + $debt_delta, 2);
+
+            // juda kichik minus/plus qoldiq bo'lsa 0 qilamiz
+            if (abs($new_total_debt) <= 0.05) {
+                $new_total_debt = 0;
+            }
+
+            if (abs($debt_delta) <= 0.05) {
+                $debt_delta = 0;
+            }
+
             $orderAccountProf->total_debt_old = $total_debts;
-            $orderAccountProf->total_debt = round($total_debts + ($all_summ - $all_pay_summ -$discount_amounts), 2);
+            $orderAccountProf->total_debt = $new_total_debt;
+            // $orderAccountProf->total_debt_old = $total_debts;
+            // $orderAccountProf->total_debt = round($total_debts + ($all_summ - $all_pay_summ -$discount_amounts), 2);
+            
             $orderAccountProf->save();
 
             $orderAccountProfHistory = OrderAccountHistory::find()->where(['id' => $orderAccountHistory_id])->one();
@@ -475,8 +506,8 @@ class OrderAccountController extends Controller
             }
             
             // $orderAccountProfHistory->all_profit_dollar = round($orderAccountProfHistory->all_profit_dollar + array_sum($all_profit_array), 2);
-            $orderAccountProfHistory->total_debt_today = round(($all_summ - $all_pay_summ -$discount_amounts), 2);
-            $orderAccountProfHistory->total_debt = round($total_debts + ($all_summ - $all_pay_summ -$discount_amounts), 2);
+            $orderAccountProfHistory->total_debt_today = $debt_delta;
+            $orderAccountProfHistory->total_debt = $new_total_debt;
             $orderAccountProfHistory->all_product_sum = $all_summ;
             $orderAccountProfHistory->save();
 

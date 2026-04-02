@@ -275,6 +275,7 @@ input:checked + .slider:before {
 
           <div class="modal-body hidden" id="toggleContent">
             <form id="qarztul" action="<?= Url::toRoute(['order-account/qarztul'])?>" method="post">
+              <input type="hidden" name="tul_qarz_dollar_kurs" value="<?= $exchangeRate->dollar ?>">
               <div class="row">
                 <div class="col-sm-4">
                   <label><h5><b>Sana</b></h5></label>
@@ -285,13 +286,13 @@ input:checked + .slider:before {
 
                 <div class="col-sm-4">
                   <label><h5><b>Jami Summa ($):</b></h5></label>
-                  <input type="text" class="form-control" name="tul_qarz_sum_dollar"/>
+                  <input type="text" class="form-control js-format-number" name="tul_qarz_sum_dollar"/>
                   <span class="error_tul_qarz_sum_dollar text-danger err-space"></span>
                 </div>
 
                 <div class="col-sm-4">
                   <label><h5><b>Chegirma ($):</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_sikidka" value="0"/>
+                  <input type="number" class="form-control js-format-number" data-decimal="1" name="tul_qarz_sikidka" value="0"/>
                   <span class="text-danger err-space"></span>
                 </div>
               </div>
@@ -299,19 +300,19 @@ input:checked + .slider:before {
               <div class="row">
                 <div class="col-sm-4">
                   <label><h5><b>Summa ($):</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_sum_transfer" step="0.01" min="0" inputmode="decimal">
+                  <input type="text" class="form-control js-format-number" data-decimal="1" name="tul_qarz_sum_transfer">
                   <span class="error_tul_qarz_sum_transfer text-danger err-space"></span>
                 </div>
 
                 <div class="col-sm-4">
                   <label><h5><b>Summa so'm:</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_sum_som"/>
+                  <input type="number" class="form-control js-format-number" name="tul_qarz_sum_som"/>
                   <span class="error_tul_qarz_sum_som text-danger err-space"></span>
                 </div>
 
                 <div class="col-sm-4">
                   <label><h5><b>Summa karta:</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_summ_cart"/>
+                  <input type="number" class="form-control js-format-number" name="tul_qarz_summ_cart"/>
                   <span class="error_tul_qarz_summ_cart text-danger err-space"></span>
                 </div>
               </div>
@@ -319,24 +320,38 @@ input:checked + .slider:before {
               <div class="row">
                  <div class="col-sm-4">
                   <label><h5><b>Summa transfer:</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_summ_otkazma"/>
+                  <input type="number" class="form-control js-format-number" name="tul_qarz_summ_otkazma"/>
                   <span class="error_tul_qarz_summ_otkazma text-danger err-space"></span>
                 </div>
                 <div class="col-sm-4">
                   <label><h5><b>Qaytim ($)</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_zdacha_dollar" step="0.01" min="0" inputmode="decimal">
+                  <input type="text" class="form-control js-format-number" data-decimal="1" name="tul_qarz_zdacha_dollar">
                   <span class="error_tul_qarz_zdacha_dollar text-danger err-space"></span>
                 </div>
 
                 <div class="col-sm-4">
                   <label><h5><b>Qaytim so'm</b></h5></label>
-                  <input type="number" class="form-control" name="tul_qarz_zdacha_sum"/>
+                  <input type="number" class="form-control js-format-number" name="tul_qarz_zdacha_sum"/>
                   <span class="error_tul_qarz_zdacha_sum text-danger err-space"></span>
                 </div>
               </div>
 
               <div class="clearfix"></div>
+              <div class="row" style="margin-top:10px;">
+                <div class="col-sm-6">
+                  <label><h5><b>Qoldiq ($):</b></h5></label>
+                  <div>
+                    <h4><b style="color:red" id="qarz_qoldiq_dollar">0.00</b></h4>
+                  </div>
+                </div>
 
+                <div class="col-sm-6">
+                  <label><h5><b>Qoldiq (so'm):</b></h5></label>
+                  <div>
+                    <h4><b style="color:red" id="qarz_qoldiq_som">0</b></h4>
+                  </div>
+                </div>
+              </div>
               <div class="modal-footer">
                 <button id="payButton" type="submit" class="btn btn-danger" disabled>Qarzni to'lash</button>
               </div>
@@ -354,17 +369,20 @@ input:checked + .slider:before {
               <th nowrap style="background-color:#90e6e6;width: 15%;"><b>Nomi</b></th>
               <th nowrap style="background-color:#90e6e6;width: 10%;"><b>O'lcham</b></th>
               <th nowrap style="background-color:#90e6e6;width: 15%;"><b>Tip</b></th>
-              <th nowrap style="background-color:#90e6e6;width: 10%;"><b>Narxi ($)</b></th>
+              <th nowrap style="background-color:#90e6e6;width: 14%;"><b>Narxi ($ / so'm)</b></th>
               <th nowrap style="background-color:#90e6e6;width: 8%;"><b>Soni</b></th>
-              <th nowrap style="background-color:#90e6e6;width: 10%;"><b>Umum.narxi ($)</b></th>
+              <th nowrap style="background-color:#90e6e6;width: 18%;"><b>Umum.narxi ($ / so'm)</b></th>
               <th style="background-color:#90e6e6;"><b></b></th>
             </tr>
             </thead>
-            <tbody id="backet" data-count="0" data-increment="0" data-count-sum="0">
+            <tbody id="backet" data-count="0" data-increment="0" data-count-sum="0" data-count-sum-som="0">
             <tr id="add">
               <td colspan="7" style="background-color:#2d353c;"><b style="color:white">Jami</b></td>
               <td style="background-color:#2d353c;"><b style="color:white" id="all">0</b></td>
-              <td style="background-color:#2d353c;"><b style="color:white" id="all_sum">0</b></td>
+              <!-- <td style="background-color:#2d353c;"><b style="color:white" id="all_sum">0</b></td> -->
+              <td style="background-color:#2d353c;">
+                <b style="color:white" id="all_sum">0</b>
+              </td>
               <td style="background-color:#2d353c;"><b style="color:white"></b></td>
             </tr>
             </tbody>
@@ -390,19 +408,38 @@ input:checked + .slider:before {
           <input type="hidden" name="brand_id">
           <input type="hidden" name="product_category_id">
           <input type="hidden" name="max_count">
+        <div class="form-group row m-b-15">
+          <label class="col-sm-4 col-form-label"><h5><b>Dollar kursi:</b></h5></label>
+          <div class="col-sm-8">
+            <label>
+              <h5>
+                <b style="color:green" id="modalDollarKursView">
+                  <?= $exchangeRate->dollar ?>
+                </b>
+              </h5>
+            </label>
 
+            <!-- JS uchun yashirin qiymat -->
+            <input type="hidden"
+                  name="modal_dollar_kurs"
+                  value="<?= $exchangeRate->dollar ?>">
+          </div>
+        </div>
           <div class="form-group row m-b-15">
             <label class="col-sm-4 col-form-label"><h5><b>Model:</b></h5></label>
             <div class="col-sm-8"><label><h5><b style="color:red" id="marka">FD-2</b></h5></label></div>
           </div>
+
           <div class="form-group row m-b-15 align-items-center">
             <label class="col-sm-4 col-form-label"><h5><b>Nomi:</b></h5></label>
             <div class="col-sm-8"><label><h5><b style="color:red" id="name">Kosa</b></h5></label></div>
           </div>
+
           <div class="form-group row m-b-15 align-items-center">
             <label class="col-sm-4 col-form-label"><h5><b>O'lchami:</b></h5></label>
             <div class="col-sm-8"><label><h5><b style="color:red" id="size">12</b></h5></label></div>
           </div>
+
           <div class="form-group row m-b-15 align-items-center">
             <label class="col-sm-4 col-form-label"><h5><b>Tip:</b></h5></label>
             <div class="col-sm-8"><label><h5><b style="color:red" id="maxsulot_tipi">12</b></h5></label></div>
@@ -422,15 +459,30 @@ input:checked + .slider:before {
           <div class="form-group row m-b-15">
             <label class="col-sm-4 col-form-label"><h4><b>Soni</b></h4></label>
             <div class="col-sm-8">
-              <input type="number" class="form-control" name="soni" placeholder=""/>
+              <input type="number" class="form-control js-format-number" name="soni" placeholder=""/>
               <span class="error_message text-danger"></span>
             </div>
           </div>
 
           <div class="form-group row m-b-15">
+            <label class="col-sm-4 col-form-label"><h4><b>Narxi so'm</b></h4></label>
+            <div class="col-sm-8">
+              <input type="number" class="form-control js-format-number" name="maxsulot_narxi_som" placeholder=""/>
+              <span class="error_message_narx_som text-danger"></span>
+            </div>
+          </div>
+
+          <!-- <div class="form-group row m-b-15">
+            <label class="col-sm-4 col-form-label"><h4><b>Dollar kursi</b></h4></label>
+            <div class="col-sm-8">
+              <input type="number" step="0.01" class="form-control" name="modal_dollar_kurs" value="<?= $exchangeRate->dollar ?>" readonly/>
+            </div>
+          </div> -->
+
+          <div class="form-group row m-b-15">
             <label class="col-sm-4 col-form-label"><h4><b>Narxi ($)</b></h4></label>
             <div class="col-sm-8">
-              <input type="number" class="form-control" required name="maxsulot_narxi" placeholder=""/>
+              <input type="number" step="0.01" class="form-control js-format-number" required name="maxsulot_narxi" placeholder=""/>
               <span class="error_message_narx text-danger"></span>
             </div>
           </div>
@@ -451,11 +503,25 @@ input:checked + .slider:before {
       <div class="modal-header"><h4 class="modal-title">Sotish</h4></div>
       <div class="modal-body">
         <form id="buy" action="<?= Url::toRoute(['order-account/accept'])?>" method="post">
-          <div class="form-group row m-b-15 align-items-center">
-            <label class="col-sm-3 col-form-label"><h5><b>Umumiy soni:</b></h5></label>
-            <div class="col-sm-1"><label><h5><b style="color:red" id="total_product"></b></h5></label></div>
-            <label class="col-sm-3 col-form-label"><h5><b>Umumiy narxi ($):</b></h5></label>
-            <div class="col-sm-1"><label><h5><b style="color:red" id="total_product_sum"></b></h5></label></div>
+          <div class="form-group row m-b-10 align-items-center text-center" style="background:#f7f7f7; padding:5px; border-radius:4px;">
+
+            <div class="col-sm-2">
+              <small>Soni</small><br>
+              <b style="color:red; font-size:13px;" id="total_product">0</b>
+            </div>
+
+            <div class="col-sm-5">
+              <small>Jami ($)</small><br>
+              <b style="color:red; font-size:13px;" id="total_product_sum">0</b>
+            </div>
+
+          <div class="col-sm-5">
+            <small>Qoldiq</small><br>
+            <b style="color:#d9534f; font-size:13px;" id="sell_qoldiq_full">
+              0.00$ (0)
+            </b>
+          </div>
+
           </div>
           <hr/>
           <input type="hidden" class="form-control" name="product_details"/>
@@ -476,7 +542,7 @@ input:checked + .slider:before {
             </div>
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Dollar kursi</b></h5></label>
-              <input class="form-control" name="dollar_kurs" value="<?= $exchangeRate->dollar ?>"/>
+              <input class="form-control js-format-number"  data-decimal="1" name="dollar_kurs" value="<?= $exchangeRate->dollar ?>" readonly/>
             </div>
           </div>
           <hr/>
@@ -484,12 +550,12 @@ input:checked + .slider:before {
           <div class="form-group row m-b-15">
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Jami summa ($)</b></h5></label>
-              <input class="form-control" name="summa_dollor" id="dollarToSum"/>
+              <input class="form-control js-format-number" data-decimal="1" name="summa_dollor" id="dollarToSum" readonly/>
               <span class="error_summa_dollor text-danger"></span>
             </div>
               <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Chegirma ($)</b></h5></label>
-              <input type="number" class="form-control" name="chegirma_summa" value="0"/>
+              <input type="text" class="form-control js-format-number" data-decimal="1" name="chegirma_summa" value="0"/>
             </div>
           </div>
 
@@ -497,12 +563,12 @@ input:checked + .slider:before {
           
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>To'langan summa ($)</b></h5></label>
-              <input class="form-control" name="summa_transfer"/>
+              <input class="form-control js-format-number" data-decimal="1" name="summa_transfer"/>
               <span class="error_summa_transfer text-danger"></span>
             </div>
                <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Summa so'mda</b></h5></label>
-              <input type="number" class="form-control" name="summa_som"/>
+              <input type="number" class="form-control js-format-number" name="summa_som"/>
               <span class="error_summa_som text-danger"></span>
             </div>
           </div>
@@ -510,24 +576,24 @@ input:checked + .slider:before {
           <div class="form-group row m-b-15">
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Summa kartada</b></h5></label>
-              <input type="number" class="form-control" name="summa_karta"/>
+              <input type="number" class="form-control js-format-number" name="summa_karta"/>
               <span class="error_summa_karta text-danger"></span>
             </div>
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Summa transferda</b></h5></label>
-              <input type="number" class="form-control" name="summa_otkazma"/>
+              <input type="number" class="form-control js-format-number" name="summa_otkazma"/>
               <span class="error_summa_otkazma text-danger"></span>
             </div>
           </div>
           <div class="form-group row m-b-15">
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Qaytim ($)</b></h5></label>
-              <input type="number" class="form-control" name="zdacha_dollar"/>
+              <input type="number" class="form-control js-format-number" data-decimal="1" name="zdacha_dollar"/>
               <span class="error_zdacha_dollar text-danger"></span>
             </div>
             <div class="col-sm-6">
               <label class="col-sm-8 col-form-label"><h5><b>Qaytim so'm</b></h5></label>
-              <input type="number" class="form-control" name="zdacha_sum"/>
+              <input type="number" class="form-control js-format-number" data-decimal="1" name="zdacha_sum"/>
               <span class="error_zdacha_sum text-danger"></span>
             </div>
           </div>
@@ -614,15 +680,24 @@ $("#myselect").change(function () {
 });
 
 $("select#myselect").change(function(){
-  var client_id =$('select[name="customer_name"]').val();
   let action = $(this).attr("action");
   let payload = { client_id: $('select[name="customer_name"]').val() };
 
   $.ajax({ url: action, data: payload, method: "GET" })
     .done(function(data) {
       $("#qarz_client_summ").text(data);
+
       var payBtn = document.getElementById('payButton');
       if (payBtn) payBtn.disabled = (data == 0);
+
+      let kurs = toFloat($('input[name="tul_qarz_dollar_kurs"]').val() || '0');
+      let qarzDollar = toFloat(data || '0');
+      let qoldiqSom = kurs > 0 ? Math.round(qarzDollar * kurs) : 0;
+
+      $("#qarz_qoldiq_dollar").text(qarzDollar.toFixed(2));
+      $("#qarz_qoldiq_som").text(qoldiqSom.toLocaleString('ru-RU'));
+
+      calculateQarzQoldiq();
     });
 
   var sellButton = document.getElementById('sellButton');
@@ -670,12 +745,242 @@ $('#cars').on('change', function(e){
   }
 });
 
+function calculateSellQoldiq() {
+  let dollarKurs = toFloat($('input[name="dollar_kurs"]').val() || '0');
+
+  let jamiDollar = toFloat($('#backet').attr('data-count-sum') || '0');      // exact dollar total
+  let jamiSom    = parseInt($('#backet').attr('data-count-sum-som') || '0', 10); // exact som total
+
+  let chegirmaDollar = toFloat($('input[name="chegirma_summa"]').val() || '0');
+
+  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0'); // $
+  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');      // so'm
+  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');    // so'm
+  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');  // so'm
+
+  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');  // $
+  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');     // so'm
+
+  if (!dollarKurs || dollarKurs <= 0) {
+    $("#sell_qoldiq_full").html('0.00$ <span style="color:#888;">(0)</span>');
+    return;
+  }
+
+  // ===== DOLLAR BO'YICHA QOLDIQ =====
+  let jamiKerakDollar = jamiDollar - chegirmaDollar;
+  if (jamiKerakDollar < 0) jamiKerakDollar = 0;
+
+  let tulovDollarPart = summaTransfer + ((summaSom + summaKarta + summaOtkazma) / dollarKurs);
+  let qaytimDollarPart = zdachaDollar + (zdachaSom / dollarKurs);
+
+  let sofTulovDollar = tulovDollarPart - qaytimDollarPart;
+  if (sofTulovDollar < 0) sofTulovDollar = 0;
+
+  let qoldiqDollar = jamiKerakDollar - sofTulovDollar;
+  if (qoldiqDollar < 0) qoldiqDollar = 0;
+
+  qoldiqDollar = Math.round(qoldiqDollar * 100) / 100;
+
+  // ===== SO'M BO'YICHA QOLDIQ =====
+  let chegirmaSom = Math.round(chegirmaDollar * dollarKurs);
+  let jamiKerakSom = jamiSom - chegirmaSom;
+  if (jamiKerakSom < 0) jamiKerakSom = 0;
+
+  let tulovSomPart =
+      Math.round(summaTransfer * dollarKurs) +
+      Math.round(summaSom) +
+      Math.round(summaKarta) +
+      Math.round(summaOtkazma);
+
+  let qaytimSomPart =
+      Math.round(zdachaDollar * dollarKurs) +
+      Math.round(zdachaSom);
+
+  let sofTulovSom = tulovSomPart - qaytimSomPart;
+  if (sofTulovSom < 0) sofTulovSom = 0;
+
+  let qoldiqSom = jamiKerakSom - sofTulovSom;
+  if (qoldiqSom < 0) qoldiqSom = 0;
+
+  let dollarFormatted = qoldiqDollar.toFixed(2);
+  let somFormatted = qoldiqSom.toLocaleString('ru-RU');
+
+  $("#sell_qoldiq_full").html(
+    dollarFormatted + "$ <span style='color:#888;'>(" + somFormatted + ")</span>"
+  );
+}
+
+$(document).on(
+  'input',
+  'input[name="chegirma_summa"], input[name="summa_transfer"], input[name="summa_som"], input[name="summa_karta"], input[name="summa_otkazma"], input[name="zdacha_dollar"], input[name="zdacha_sum"]',
+  function () {
+    calculateJamiSummaDollar();
+    calculateSellQoldiq();
+  }
+);
+
+$('#modal-dialog').on('shown.bs.modal', function () {
+  calculateJamiSummaDollar();
+  calculateSellQoldiq();
+});
+
+
+function calculateQarzQoldiq() {
+  let jamiQarzDollar = toFloat($("#qarz_client_summ").text() || '0');
+  let dollarKurs = toFloat($('input[name="tul_qarz_dollar_kurs"]').val() || '0');
+
+  let skidkaDollar = toFloat($('input[name="tul_qarz_sikidka"]').val() || '0');
+  let transferDollar = toFloat($('input[name="tul_qarz_sum_transfer"]').val() || '0');
+  let sumSom = toFloat($('input[name="tul_qarz_sum_som"]').val() || '0');
+  let sumCart = toFloat($('input[name="tul_qarz_summ_cart"]').val() || '0');
+  let sumOtkazma = toFloat($('input[name="tul_qarz_summ_otkazma"]').val() || '0');
+
+  if (!dollarKurs || dollarKurs <= 0) {
+    $("#qarz_qoldiq_dollar").text("0.00");
+    $("#qarz_qoldiq_som").text("0");
+    $('input[name="tul_qarz_sum_dollar"]').val('');
+    return;
+  }
+
+  let somJami = sumSom + sumCart + sumOtkazma;
+  let somDollar = somJami / dollarKurs;
+
+  let paidDollar = skidkaDollar + transferDollar + somDollar;
+
+  // Jami summa ($) ni ham avtomatik yozamiz
+  $('input[name="tul_qarz_sum_dollar"]').val(
+    formatNumberWithSpaces(paidDollar.toFixed(2), true)
+  );
+
+  let qoldiqDollar = jamiQarzDollar - paidDollar;
+
+  if (qoldiqDollar < 0) qoldiqDollar = 0;
+
+  qoldiqDollar = Math.round(qoldiqDollar * 100) / 100;
+  let qoldiqSom = Math.round(qoldiqDollar * dollarKurs);
+
+  $("#qarz_qoldiq_dollar").text(qoldiqDollar.toFixed(2));
+  $("#qarz_qoldiq_som").text(qoldiqSom.toLocaleString('ru-RU'));
+}
+
+$(document).on(
+  'input',
+  'input[name="tul_qarz_sikidka"], input[name="tul_qarz_sum_transfer"], input[name="tul_qarz_sum_som"], input[name="tul_qarz_summ_cart"], input[name="tul_qarz_summ_otkazma"], input[name="tul_qarz_dollar_kurs"]',
+  function () {
+    calculateQarzQoldiq();
+  }
+);
+
+function calculateJamiSummaDollar() {
+  let dollarKurs    = toFloat($('input[name="dollar_kurs"]').val() || '0');
+  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0');
+  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');
+  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');
+  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');
+  let chegirma      = toFloat($('input[name="chegirma_summa"]').val() || '0');
+  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');
+  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');
+
+  if (!dollarKurs || dollarKurs <= 0) {
+    $('input[name="summa_dollor"]').val('');
+    return;
+  }
+
+  let jamiTulovDollar =
+      summaTransfer +
+      ((summaSom + summaKarta + summaOtkazma) / dollarKurs) +
+      chegirma -
+      zdachaDollar -
+      (zdachaSom / dollarKurs);
+
+  if (jamiTulovDollar < 0) jamiTulovDollar = 0;
+
+  jamiTulovDollar = Math.round(jamiTulovDollar * 100) / 100;
+
+  $('input[name="summa_dollor"]').val(
+    formatNumberWithSpaces(jamiTulovDollar.toFixed(2), true)
+  );
+}
+
+$(document).on(
+  'input',
+  'input[name="summa_transfer"], input[name="summa_som"], input[name="summa_karta"], input[name="summa_otkazma"], input[name="chegirma_summa"], input[name="dollar_kurs"]',
+  function () {
+    calculateJamiSummaDollar();
+  }
+);
+
+// $('#modal-dialog').on('shown.bs.modal', function () {
+//   calculateJamiSummaDollar();
+// });
+
+function cleanNumberString(value) {
+  value = String(value || '').replace(/\s+/g, '').replace(/,/g, '.');
+
+  // faqat raqam va bitta nuqta qoldiramiz
+  let result = '';
+  let dotUsed = false;
+
+  for (let i = 0; i < value.length; i++) {
+    let ch = value[i];
+
+    if (/\d/.test(ch)) {
+      result += ch;
+    } else if (ch === '.' && !dotUsed) {
+      result += ch;
+      dotUsed = true;
+    }
+  }
+
+  return result;
+}
+
+function formatNumberWithSpaces(value, allowDecimal) {
+  value = cleanNumberString(value);
+
+  if (!value) return '';
+
+  let parts = value.split('.');
+  let intPart = parts[0] || '';
+  let decPart = parts[1] || '';
+
+  intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+  if (allowDecimal && decPart !== '') {
+    return intPart + '.' + decPart;
+  }
+
+  return intPart;
+}
+
+$(document).ready(function () {
+  $('.js-format-number').each(function () {
+    let $input = $(this);
+
+    $input.attr('type', 'text');
+    $input.attr('autocomplete', 'off');
+    $input.attr('inputmode', $input.data('decimal') ? 'decimal' : 'numeric');
+
+    if ($input.val()) {
+      $input.val(formatNumberWithSpaces($input.val(), !!$input.data('decimal')));
+    }
+  });
+});
+
+$(document).on('input', '.js-format-number', function () {
+  let $input = $(this);
+  let allowDecimal = !!$input.data('decimal');
+  let raw = cleanNumberString($input.val());
+  let formatted = formatNumberWithSpaces(raw, allowDecimal);
+
+  $input.val(formatted);
+});
 
 function toFloat(val) {
   if (val === null || val === undefined) return NaN;
   val = String(val).trim();
-  // vergulni nuqtaga o‘tkazamiz
-  val = val.replace(',', '.');
+  val = val.replace(/\s+/g, '');   // probellarni olib tashlaydi
+  val = val.replace(/,/g, '.');    // vergulni nuqtaga aylantiradi
   return parseFloat(val);
 }
 
@@ -701,31 +1006,31 @@ $("#qarztul").submit(function(event){
   };
 
   let hasError = false;
-  let v1 = parseFloat($('input[name="tul_qarz_sum_dollar"]').val());
+let v1 = toFloat($('input[name="tul_qarz_sum_dollar"]').val());
   if (isNaN(v1) || v1 < 0) { $(".error_tul_qarz_sum_dollar").text("Jami Summa ($) ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_sum_dollar").text(""); }
 
-  let v2 = parseFloat($('input[name="tul_qarz_sum_transfer"]').val());
+  let v2 = toFloat($('input[name="tul_qarz_sum_transfer"]').val());
   if (isNaN(v2) || v2 < 0) { $(".error_tul_qarz_sum_transfer").text("Summa ($) ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_sum_transfer").text(""); }
 
-  let v3 = parseFloat($('input[name="tul_qarz_sum_som"]').val());
+  let v3 = toFloat($('input[name="tul_qarz_sum_som"]').val());
   if (isNaN(v3) || v3 < 0) { $(".error_tul_qarz_sum_som").text("Summa so'm ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_sum_som").text(""); }
 
-  let v4 = parseFloat($('input[name="tul_qarz_summ_cart"]').val());
+  let v4 = toFloat($('input[name="tul_qarz_summ_cart"]').val());
   if (isNaN(v4) || v4 < 0) { $(".error_tul_qarz_summ_cart").text("Summa karta ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_summ_cart").text(""); }
 
-  let v5 = parseFloat($('input[name="tul_qarz_summ_otkazma"]').val());
+  let v5 = toFloat($('input[name="tul_qarz_summ_otkazma"]').val());
   if (isNaN(v5) || v5 < 0) { $(".error_tul_qarz_summ_otkazma").text("Summa transfer ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_summ_otkazma").text(""); }
 
-  let v6 = parseFloat($('input[name="tul_qarz_zdacha_dollar"]').val());
+  let v6 = toFloat($('input[name="tul_qarz_zdacha_dollar"]').val());
   if (isNaN(v6) || v6 < 0) { $(".error_tul_qarz_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_zdacha_dollar").text(""); }
 
-  let v7 = parseFloat($('input[name="tul_qarz_zdacha_sum"]').val());
+  let v7 = toFloat($('input[name="tul_qarz_zdacha_sum"]').val());
   if (isNaN(v7) || v7 < 0) { $(".error_tul_qarz_zdacha_sum").text("Qaytim so'm ni kiriting."); hasError = true; }
   else { $(".error_tul_qarz_zdacha_sum").text(""); }
 
@@ -773,25 +1078,25 @@ $("#buy").submit(function(event){
   };
 
   let hasError = false;
-  let s1 = parseFloat($('input[name="summa_dollor"]').val());
+  let s1 = toFloat($('input[name="summa_dollor"]').val());
   if (isNaN(s1) || s1 < 0) { $(".error_summa_dollor").text("Jami to'langan summa ($) ni kiriting."); hasError = true; } else { $(".error_summa_dollor").text(""); }
 
-  let s2 = parseFloat($('input[name="summa_transfer"]').val());
+  let s2 = toFloat($('input[name="summa_transfer"]').val());
   if (isNaN(s2) || s2 < 0) { $(".error_summa_transfer").text("To'langan summa ($) ni kiriting."); hasError = true; } else { $(".error_summa_transfer").text(""); }
 
-  let s3 = parseFloat($('input[name="summa_som"]').val());
+  let s3 = toFloat($('input[name="summa_som"]').val());
   if (isNaN(s3) || s3 < 0) { $(".error_summa_som").text("To'langan summa so'mda ni kiriting."); hasError = true; } else { $(".error_summa_som").text(""); }
 
-  let s4 = parseFloat($('input[name="summa_karta"]').val());
+  let s4 = toFloat($('input[name="summa_karta"]').val());
   if (isNaN(s4) || s4 < 0) { $(".error_summa_karta").text("To'langan summa kartada ni kiriting."); hasError = true; } else { $(".error_summa_karta").text(""); }
 
-  let s5 = parseFloat($('input[name="summa_otkazma"]').val());
+  let s5 = toFloat($('input[name="summa_otkazma"]').val());
   if (isNaN(s5) || s5 < 0) { $(".error_summa_otkazma").text("To'langan summa o'tkazmada ni kiriting."); hasError = true; } else { $(".error_summa_otkazma").text(""); }
 
-  let s6 = parseFloat($('input[name="zdacha_dollar"]').val());
+  let s6 = toFloat($('input[name="zdacha_dollar"]').val());
   if (isNaN(s6) || s6 < 0) { $(".error_zdacha_dollar").text("Qaytim ($) ni kiriting."); hasError = true; } else { $(".error_zdacha_dollar").text(""); }
 
-  let s7 = parseFloat($('input[name="zdacha_sum"]').val());
+  let s7 = toFloat($('input[name="zdacha_sum"]').val());
   if (isNaN(s7) || s7 < 0) { $(".error_zdacha_sum").text("Qaytim (so'mda) ni kiriting."); hasError = true; } else { $(".error_zdacha_sum").text(""); }
 
   if (hasError) return false;
@@ -824,9 +1129,11 @@ $('#tasdiqCheckbox').on('change', function() {
 $(".buy_product").on('click', function(){
   let all_total = $("#backet").attr("data-count");
   let all_total_sum = $("#backet").attr("data-count-sum");
+  let all_total_som = $("#backet").attr("data-count-sum-som");
   let products_count = $("#backet").attr("data-increment");
 
   let product_details = [];
+
   $("#backet").children().each(function(){
     if($(this).attr("id") !== "add"){
       product_details.push({
@@ -839,29 +1146,43 @@ $(".buy_product").on('click', function(){
         count: $(this).children().eq(7).text(),
         all_sum: $(this).children().eq(8).text(),
         product_id: $(this).children().eq(9).text(),
-        brand_id: $(this).children().eq(10).text(),             // 🔥 yangi
-        product_category_id: $(this).children().eq(11).text(),  // 🔥 yangi
+        brand_id: $(this).children().eq(10).text(),
+        product_category_id: $(this).children().eq(11).text(),
       });
-
     }
   });
-  console.log("product_details:", product_details);
-  
+
   $('input[name="product_details"]').val(JSON.stringify(product_details));
+
   $('#count_porduct').text(products_count);
   $("#total_product").text(all_total);
-  $("#total_product_sum").text(all_total_sum);
+
+  // 🔥 YANGI (so'm bilan)
+  let totalDollarFormatted = parseFloat(all_total_sum || '0').toFixed(2);
+  let totalSomFormatted = parseInt(all_total_som || '0', 10).toLocaleString('ru-RU');
+
+  $("#total_product_sum").html(
+    totalDollarFormatted + "$ <span style='color:#888;'>(" + totalSomFormatted + ")</span>"
+  );
+
+  calculateJamiSummaDollar();
+  calculateSellQoldiq();
 
   if(all_total == 0){
     $("#modal-dialog-error").modal("toggle");
     return false;
   }
+
   $("#modal-dialog").modal("toggle");
 });
 
 $('.handle').on("click", function(){
   $(".error_message").text("");
-  $('input[name="maxsulot_narxi"]').val("");
+  $(".error_message_narx").text("");
+  $(".error_message_narx_som").text("");
+
+  $('input[name="maxsulot_narxi"]').val("").prop('disabled', false);
+  $('input[name="maxsulot_narxi_som"]').val("").prop('disabled', false);
   $('input[name="soni"]').val("");
   $('input[name="maxsulot_tipi"]').val("");
 
@@ -902,22 +1223,28 @@ $('.handle').on("click", function(){
 
 $(".submit").on("click", function(event){
   event.preventDefault();
+
   $(".error_message").text("");
   $(".error_message_narx").text("");
+  $(".error_message_narx_som").text("");
 
-  let count_product   = parseInt($('input[name="soni"]').val() || '0', 10);
-  let max_count     = parseInt($('input[name="max_count"]').val() || '0', 10);
-  let price           = $('input[name="maxsulot_narxi"]').val();
-  let maxsulot_joyi   = $('select[name="maxsulot_joyi"]').val();
-  let name            = $('#name').text();
-  let marka           = $('#marka').text();
-  let product_id      = $('input[name="product_id"]').val();
-  let size            = $('input[name="size"]').val();
-  let maxsulot_tipi   = $('input[name="maxsulot_tipi"]').val();
+  let count_product = parseInt(toFloat($('input[name="soni"]').val() || '0'), 10);
+  let max_count = parseInt(toFloat($('input[name="max_count"]').val() || '0'), 10);
 
-  let key       = $('input[name="key"]').val();
-  let countAll  = parseInt($("#backet").attr("data-count") || '0', 10);
-  let all_sum   = parseFloat($("#backet").attr("data-count-sum") || '0');
+  let price = $('input[name="maxsulot_narxi"]').val();
+  let price_som = $('input[name="maxsulot_narxi_som"]').val();
+
+  let maxsulot_joyi = $('select[name="maxsulot_joyi"]').val();
+  let name = $('#name').text();
+  let marka = $('#marka').text();
+  let product_id = $('input[name="product_id"]').val();
+  let size = $('input[name="size"]').val();
+  let maxsulot_tipi = $('input[name="maxsulot_tipi"]').val();
+
+  let key = $('input[name="key"]').val();
+  let countAll = parseInt($("#backet").attr("data-count") || '0', 10);
+  let all_sum = parseFloat($("#backet").attr("data-count-sum") || '0');
+  let all_sum_som = parseInt($("#backet").attr("data-count-sum-som") || '0', 10);
   let increment = parseInt($("#backet").attr("data-increment") || '0', 10) + 1;
 
   if (isNaN(count_product) || count_product <= 0) {
@@ -930,13 +1257,41 @@ $(".submit").on("click", function(event){
     return false;
   }
 
-  if (!String(price || '').length) {
+  if (!String(price || '').length && !String(price_som || '').length) {
     $(".error_message_narx").text("Mahsulot narxini kiriting.");
+    $(".error_message_narx_som").text("Mahsulot narxini kiriting.");
     return false;
   }
 
+  if (String(price || '').length && toFloat(price) <= 0) {
+    $(".error_message_narx").text("Dollar narxi 0 dan katta bo'lishi kerak.");
+    return false;
+  }
+
+  if (String(price_som || '').length && toFloat(price_som) <= 0) {
+    $(".error_message_narx_som").text("So'm narxi 0 dan katta bo'lishi kerak.");
+    return false;
+  }
+
+  let priceFloat = toFloat(price || '0');
+  let priceSomInt = parseInt(toFloat(price_som || '0'), 10);
+
+  let totalDollar = priceFloat * count_product;
+  let totalSom = priceSomInt * count_product;
+
+  let priceFormatted = priceFloat.toFixed(2);
+  let priceSomFormatted = priceSomInt.toLocaleString('ru-RU');
+
+  let totalDollarFormatted = totalDollar.toFixed(2);
+  let totalSomFormatted = totalSom.toLocaleString('ru-RU');
+
+  // jami qiymatlarni yangilaymiz
   countAll = countAll + count_product;
-  all_sum  = all_sum + (parseFloat(price || '0') * count_product);
+  all_sum = all_sum + totalDollar;
+  all_sum_som = all_sum_som + totalSom;
+
+  let jamiDollarFormatted = all_sum.toFixed(2);
+  let jamiSomFormatted = all_sum_som.toLocaleString('ru-RU');
 
   let count_old = parseInt($("#" + key).children().eq(4).text() || '0', 10);
   count_old = count_old - count_product;
@@ -946,7 +1301,7 @@ $(".submit").on("click", function(event){
     return false;
   }
 
-    // jadvaldagi warehouse count ni kamaytirish
+  // warehouse count kamaytirish
   $("#" + key).children().eq(4).text(count_old);
 
   var id = (key || '').split("_");
@@ -957,37 +1312,125 @@ $(".submit").on("click", function(event){
   let brand_id = $('input[name="brand_id"]').val() || '';
   let product_category_id = $('input[name="product_category_id"]').val() || '';
 
-
   $("#add").before(
-    "<tr>" +
-    "<td style='background-color:#efdfdf;'><b>" + increment + "</b></td>" +
-    "<td style='background-color:#efdfdf;'>" + maxsulot_joyi + "</td>" +
-    "<td style='background-color:#efdfdf;'><b>" + marka + "</b></td>" +
-    "<td style='background-color:#efdfdf;'>" + name + "</td>" +
-    "<td style='background-color:#efdfdf;'><b>" + size + "</b></td>" +
-    "<td style='background-color:#efdfdf;'>" + maxsulot_tipi + "</td>" +
-    "<td style='background-color:#efdfdf;'><b>" + price + "</b></td>" +
-    "<td style='background-color:#efdfdf;'>" + count_product + "</td>" +
-    "<td style='background-color:#efdfdf;'><b>" + Math.round(parseFloat(price || '0') * count_product * 100)/100 + "</b></td>" +
-    "<td style='display:none;'>" + product_id + "</td>" +
-    "<td style='display:none;' class='brand-id'>" + brand_id + "</td>" +
-    "<td style='display:none;' class='category-id'>" + product_category_id + "</td>" +
-    "<td style='background-color:#efdfdf;'><button class='btn btn-sm btn-danger delete-product'><i class='glyphicon glyphicon-remove'></i></button></td>" +
+    "<tr data-total-dollar='" + totalDollar + "' data-total-som='" + totalSom + "'>" +
+      "<td style='background-color:#efdfdf;'><b>" + increment + "</b></td>" +
+      "<td style='background-color:#efdfdf;'>" + maxsulot_joyi + "</td>" +
+      "<td style='background-color:#efdfdf;'><b>" + marka + "</b></td>" +
+      "<td style='background-color:#efdfdf;'>" + name + "</td>" +
+      "<td style='background-color:#efdfdf;'><b>" + size + "</b></td>" +
+      "<td style='background-color:#efdfdf;'>" + maxsulot_tipi + "</td>" +
+      "<td style='background-color:#efdfdf;'><b>" + priceFormatted + " <span style='color:#666;'>(" + priceSomFormatted + ")</span></b></td>" +
+      "<td style='background-color:#efdfdf;'>" + count_product + "</td>" +
+      "<td style='background-color:#efdfdf;'><b>" + totalDollarFormatted + " <span style='color:#666;'>(" + totalSomFormatted + ")</span></b></td>" +
+      "<td style='display:none;'>" + product_id + "</td>" +
+      "<td style='display:none;' class='brand-id'>" + brand_id + "</td>" +
+      "<td style='display:none;' class='category-id'>" + product_category_id + "</td>" +
+      "<td style='background-color:#efdfdf;'><button class='btn btn-sm btn-danger delete-product'><i class='glyphicon glyphicon-remove'></i></button></td>" +
     "</tr>"
   );
 
-
   $("#backet").attr("data-increment", increment);
   $("#backet").attr("data-count", countAll);
-  $("#backet").attr("data-count-sum", all_sum);
+  $("#backet").attr("data-count-sum", all_sum.toFixed(2));
+  $("#backet").attr("data-count-sum-som", all_sum_som);
+
   $("#all").text(countAll);
-  $("#all_sum").text(all_sum);
+  $("#all_sum").html(
+    jamiDollarFormatted + " <span style='color:#aaa;'>(" + jamiSomFormatted + ")</span>"
+  );
 
   $("#modal-dialog2").modal('toggle');
 });
 
+
+function getModalKurs() {
+  return toFloat($('input[name="modal_dollar_kurs"]').val() || '0');
+}
+
+function resetModalPriceInputsState() {
+  const $som = $('input[name="maxsulot_narxi_som"]');
+  const $dollar = $('input[name="maxsulot_narxi"]');
+
+  const somVal = ($som.val() || '').trim();
+  const dollarVal = ($dollar.val() || '').trim();
+
+  if (somVal !== '' && parseFloat(somVal) > 0) {
+    $dollar.prop('disabled', true);
+    $som.prop('disabled', false);
+  } else if (dollarVal !== '' && parseFloat(dollarVal) > 0) {
+    $som.prop('disabled', true);
+    $dollar.prop('disabled', false);
+  } else {
+    $som.prop('disabled', false);
+    $dollar.prop('disabled', false);
+  }
+}
+
+function convertSomToDollarInModal() {
+  let som = toFloat($('input[name="maxsulot_narxi_som"]').val() || '0');
+  let kurs = getModalKurs();
+
+  if (!som || som <= 0 || !kurs || kurs <= 0) {
+    $('input[name="maxsulot_narxi"]').val('');
+    resetModalPriceInputsState();
+    return;
+  }
+
+  let dollar = som / kurs;
+  dollar = Math.round(dollar * 100) / 100;
+
+  $('input[name="maxsulot_narxi"]').val(formatNumberWithSpaces(dollar.toFixed(2), true));
+  $('input[name="maxsulot_narxi"]').prop('disabled', true);
+  $('input[name="maxsulot_narxi_som"]').prop('disabled', false);
+}
+
+function convertDollarToSomInModal() {
+  let dollar = toFloat($('input[name="maxsulot_narxi"]').val() || '0');
+  let kurs = getModalKurs();
+
+  if (!dollar || dollar <= 0 || !kurs || kurs <= 0) {
+    $('input[name="maxsulot_narxi_som"]').val('');
+    resetModalPriceInputsState();
+    return;
+  }
+
+  let som = dollar * kurs;
+  som = Math.round(som);
+
+  $('input[name="maxsulot_narxi_som"]').val(formatNumberWithSpaces(som, false));
+  $('input[name="maxsulot_narxi_som"]').prop('disabled', true);
+  $('input[name="maxsulot_narxi"]').prop('disabled', false);
+}
+
+// So'm yozilsa => Dollar hisoblanadi, dollar input disable bo'ladi
+$(document).on('input', 'input[name="maxsulot_narxi_som"]', function () {
+  let val = ($(this).val() || '').trim();
+
+  if (val === '') {
+    $('input[name="maxsulot_narxi"]').val('').prop('disabled', false);
+    $('input[name="maxsulot_narxi_som"]').prop('disabled', false);
+    return;
+  }
+
+  convertSomToDollarInModal();
+});
+
+// Dollar yozilsa => So'm hisoblanadi, so'm input disable bo'ladi
+$(document).on('input', 'input[name="maxsulot_narxi"]', function () {
+  let val = ($(this).val() || '').trim();
+
+  if (val === '') {
+    $('input[name="maxsulot_narxi_som"]').val('').prop('disabled', false);
+    $('input[name="maxsulot_narxi"]').prop('disabled', false);
+    return;
+  }
+
+  convertDollarToSomInModal();
+});
+
 $(document).on('input', 'input[name="soni"]', function () {
-  let val = parseInt($(this).val() || '0', 10);
+  let val = parseInt(toFloat($(this).val() || '0'), 10);
   let max = parseInt($('input[name="max_count"]').val() || '0', 10);
   let maxsulot_tipi   = $('input[name="maxsulot_tipi"]').val();
 
@@ -1008,15 +1451,28 @@ $(document).on("click", ".delete-product", function() {
   let increment = parseInt($("#backet").attr("data-increment") || '0', 10);
 
   let currentCount = parseInt($("#backet").attr("data-count") || '0', 10);
-  let currentSum   = parseFloat($("#backet").attr("data-count-sum") || '0');
+  let currentSum = parseFloat($("#backet").attr("data-count-sum") || '0');
+  let currentSom = parseInt($("#backet").attr("data-count-sum-som") || '0', 10);
+
+  let rowDollar = parseFloat(row.attr('data-total-dollar') || '0');
+  let rowSom = parseInt(row.attr('data-total-som') || '0', 10);
 
   currentCount -= decrementCount;
-  currentSum   -= parseFloat(row.find("td:eq(6)").text() || '0') * decrementCount;
+  currentSum -= rowDollar;
+  currentSom -= rowSom;
 
   $("#backet").attr("data-count", currentCount);
-  $("#backet").attr("data-count-sum", currentSum);
+  $("#backet").attr("data-count-sum", currentSum.toFixed(2));
+  $("#backet").attr("data-count-sum-som", currentSom);
+
   $("#all").text(currentCount);
-  $("#all_sum").text(currentSum);
+
+  let totalDollarFormatted = currentSum.toFixed(2);
+  let totalSomFormatted = currentSom.toLocaleString('ru-RU');
+
+  $("#all_sum").html(
+    totalDollarFormatted + " <span style='color:#aaa;'>(" + totalSomFormatted + " so'm)</span>"
+  );
 
   row.remove();
   increment--;
@@ -1024,9 +1480,8 @@ $(document).on("click", ".delete-product", function() {
 
   let i = 1;
   $('#backet').find('tr').each(function() {
-    if($(this).attr('id') !== 'add'){
+    if ($(this).attr('id') !== 'add') {
       $(this).find("td:eq(0)").html(i);
-      if (i === increment) return false;
       i++;
     }
   });
@@ -1035,10 +1490,12 @@ $(document).on("click", ".delete-product", function() {
 document.getElementById('toggleSwitch')?.addEventListener('change', function() {
   var toggleContent = document.getElementById('toggleContent');
   var sellButton = document.getElementById('sellButton');
+
   if (this.checked) {
     toggleContent?.classList.remove('hidden');
     if (sellButton) sellButton.disabled = true;
-    $('input[name="tul_qarz_dollar_kurs"]').val($('#dollarToSum').val());
+
+    calculateQarzQoldiq();
   } else {
     toggleContent?.classList.add('hidden');
     if (sellButton) sellButton.disabled = false;
