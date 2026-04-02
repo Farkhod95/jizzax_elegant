@@ -1919,7 +1919,7 @@ class OrderAccountHistoryController extends Controller
                 $orderAccount->sum_dollar = $this->normalizeMoney($orderAccount->sum_dollar - $sum_dollar_old);
                 $orderAccount->sum_som = $this->normalizeMoney($orderAccount->sum_som - $sum_som_old);
                 $orderAccount->sum_cart = $this->normalizeMoney($orderAccount->sum_cart - $sum_cart_old);
-                $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma - $sum_otkazma_old);
+                // $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma - $sum_otkazma_old);
                 $orderAccount->sum_transfers = $this->normalizeMoney($orderAccount->sum_transfers - $sum_transfers_old);
                 $orderAccount->all_product_sum = $this->normalizeMoney($orderAccount->all_product_sum - $all_product_sum_old);
 
@@ -1941,7 +1941,7 @@ class OrderAccountHistoryController extends Controller
                 $orderAccount->sum_dollar = $this->normalizeMoney($orderAccount->sum_dollar + $real_paid_dollar_new);
                 $orderAccount->sum_som = $this->normalizeMoney($orderAccount->sum_som + $sum_som_new);
                 $orderAccount->sum_cart = $this->normalizeMoney($orderAccount->sum_cart + $sum_cart_new);
-                $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma + $sum_otkazma_new);
+                // $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma + $sum_otkazma_new);
                 $orderAccount->sum_transfers = $this->normalizeMoney($orderAccount->sum_transfers + $sum_transfers_new);
                 $orderAccount->all_product_sum = $this->normalizeMoney($orderAccount->all_product_sum + $all_product_summ_new);
 
