@@ -212,15 +212,40 @@ class OrderAccountController extends Controller
         $dates = $request->post('order_date');
         $exchange_rates   = $this->moneyToFloat($request->post('dollar_kurs'));
 
-        $discount_amounts = $this->moneyToFloat($request->post('chegirma_summa'));
-        $sum_dollars      = $this->moneyToFloat($request->post('summa_dollor'));
-        $dollar_sumda     = $this->moneyToFloat($request->post('dollar_sumda'));
-        $sum_soms         = $this->moneyToFloat($request->post('summa_som'));
-        $sum_carts        = $this->moneyToFloat($request->post('summa_karta'));
-        $sum_transferss   = $this->moneyToFloat($request->post('summa_transfer'));
-        $sum_otkazmas     = $this->moneyToFloat($request->post('summa_otkazma'));
-        $zdacha_dollar    = $this->moneyToFloat($request->post('zdacha_dollar'));
-        $zdacha_sum       = $this->moneyToFloat($request->post('zdacha_sum'));
+        $discount_amounts = round($this->moneyToFloat($request->post('chegirma_summa')), 2);
+
+        // FRONTDAGI readonly "Jami summa ($)" — bu mahsulotlarning umumiy summasi
+        $jami_summa_dollar = round($this->moneyToFloat($request->post('summa_dollor')), 2);
+
+        $dollar_sumda     = round($this->moneyToFloat($request->post('dollar_sumda')), 2); // agar ishlatilsa
+        $sum_soms         = round($this->moneyToFloat($request->post('summa_som')), 2);
+        $sum_carts        = round($this->moneyToFloat($request->post('summa_karta')), 2);
+        $sum_transferss   = round($this->moneyToFloat($request->post('summa_transfer')), 2); // dollar to'lov
+        $sum_otkazmas     = round($this->moneyToFloat($request->post('summa_otkazma')), 2);
+        $zdacha_dollar    = round($this->moneyToFloat($request->post('zdacha_dollar')), 2);
+        $zdacha_sum       = round($this->moneyToFloat($request->post('zdacha_sum')), 2);
+
+        // HAQIQIY to'lovni hisoblaymiz
+        $real_paid_dollar = 0;
+        if ($exchange_rates > 0) {
+            $real_paid_dollar =
+                $sum_transferss +
+                (($sum_soms + $sum_carts + $sum_otkazmas) / $exchange_rates) -
+                $zdacha_dollar -
+                ($zdacha_sum / $exchange_rates);
+        }
+
+        $real_paid_dollar = round($real_paid_dollar, 2);
+
+        if ($real_paid_dollar < 0) {
+            $real_paid_dollar = 0;
+        }
+
+        // Chegirma bilan yopilgan jami summa
+        $covered_total_dollar = round($real_paid_dollar + $discount_amounts, 2);
+
+        // Orderning umumiy summasi
+        $all_pay_summ = $jami_summa_dollar;
 
         $comment = $request->post('comment');
         $driver_info = $request->post('driver_info');
@@ -235,7 +260,7 @@ class OrderAccountController extends Controller
         $product_details = $request->post('product_details');
         $contact = json_decode($product_details, true);
 
-        $all_pay_summ = round($sum_dollars, 2);
+        
         // $contact = $post['OrderAccount']['allValue'];
         
         $client = Client::find()->where(['id' => $clients_id])->one();
@@ -260,7 +285,7 @@ class OrderAccountController extends Controller
             $orderAccount->all_summ_dollar = round($orderAccount->all_summ_dollar + $all_pay_summ, 2);
 
             $orderAccount->discount_amount = $orderAccount->discount_amount + (float)$discount_amounts;
-            $orderAccount->sum_dollar = $orderAccount->sum_dollar + (float)$sum_dollars;
+            $orderAccount->sum_dollar = $orderAccount->sum_dollar + (float)$real_paid_dollar;
             $orderAccount->dollar_sumda = $orderAccount->dollar_sumda + (float)$dollar_sumda;
             $orderAccount->sum_som = $orderAccount->sum_som + (float)$sum_soms;
             // $orderAccount->sum_otkazma = $orderAccount->sum_otkazma + (float)$sum_otkazmas;
@@ -279,7 +304,7 @@ class OrderAccountController extends Controller
             $orderAccountCrHistory->total_debt_old = $total_debts;
 
             $orderAccountCrHistory->discount_amount = $discount_amounts;
-            $orderAccountCrHistory->sum_dollar = $sum_dollars;
+            $orderAccountCrHistory->sum_dollar = $real_paid_dollar;
             $orderAccountCrHistory->dollar_sumda = $dollar_sumda;
             $orderAccountCrHistory->sum_som = $sum_soms;
             $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
@@ -300,11 +325,13 @@ class OrderAccountController extends Controller
             // $orderAccountCr->total_debt = $total_debts;
             $orderAccountCr->date = date('Y-m-d',strtotime($dates));
             $orderAccountCr->exchange_rate = $exchange_rates;
-            $orderAccountCr->all_summ_dollar = $all_pay_summ;
+            $orderAccountCr->all_summ_dollar = $all_pay_summ; // jami mahsulot summasi
+            $orderAccountCr->sum_dollar = $real_paid_dollar;  // real to'langan summa
+
             $orderAccountCr->number_of_orders = 1;
 
             $orderAccountCr->discount_amount = $discount_amounts;
-            $orderAccountCr->sum_dollar = $sum_dollars;
+            
             $orderAccountCr->dollar_sumda = $dollar_sumda;
             $orderAccountCr->sum_som = $sum_soms;
             $orderAccountCr->sum_cart = $sum_carts;
@@ -320,11 +347,12 @@ class OrderAccountController extends Controller
             $orderAccountCrHistory->date = date('Y-m-d',strtotime($dates));
             $orderAccountCrHistory->exchange_rate = $exchange_rates;
             $orderAccountCrHistory->all_summ_dollar = $all_pay_summ;
+            $orderAccountCrHistory->sum_dollar = $real_paid_dollar;
             $orderAccountCrHistory->number_of_orders = 1;
             $orderAccountCrHistory->total_debt_old = $total_debts;
 
             $orderAccountCrHistory->discount_amount = $discount_amounts;
-            $orderAccountCrHistory->sum_dollar = $sum_dollars;
+            
             $orderAccountCrHistory->dollar_sumda = $dollar_sumda;
             $orderAccountCrHistory->sum_som = $sum_soms;
             $orderAccountCrHistory->sum_otkazma = $sum_otkazmas;
@@ -479,7 +507,17 @@ class OrderAccountController extends Controller
             
             $orderAccountProf->all_product_sum = round($orderAccountProf->all_product_sum + $all_summ, 2);
 
-            $debt_delta = round($all_summ - $all_pay_summ - $discount_amounts, 2);
+            $debt_delta = round($all_summ - $covered_total_dollar, 2);
+            $new_total_debt = round($total_debts + $debt_delta, 2);
+
+            // juda kichik minus/plus qoldiq bo'lsa 0 qilamiz
+            if (abs($new_total_debt) <= 0.10) {
+                $new_total_debt = 0;
+            }
+
+            if (abs($debt_delta) <= 0.10) {
+                $debt_delta = 0;
+            }
             $new_total_debt = round($total_debts + $debt_delta, 2);
 
             // juda kichik minus/plus qoldiq bo'lsa 0 qilamiz
