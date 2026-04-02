@@ -1621,89 +1621,182 @@ class OrderAccountHistoryController extends Controller
      * @param integer $id
      * @return mixed
      */
+    private function normalizeMoney($value, $precision = 2)
+    {
+        $value = round((float)$value, $precision);
+
+        if (abs($value) <= 0.10) {
+            return 0.0;
+        }
+
+        return $value;
+    }
+
     public function actionUpdate($id, $type)
     {
-        $model = $this->findModel($id); 
+        $model = $this->findModel($id);
         $orderAccount = OrderAccount::find()->where(['client_id' => $model->client_id])->one();
+
+        if (!$orderAccount) {
+            throw new \yii\web\NotFoundHttpException('OrderAccount topilmadi.');
+        }
+
         $client_total_debt = $orderAccount->total_debt;
 
         $client_id = $model->client_id;
         $order_account_status_old = $model->order_account_status;
+
         $date_old = $model->date;
+        $exchange_rate_old = $this->normalizeMoney($model->exchange_rate);
+        $sum_dollar_old = $this->normalizeMoney($model->sum_dollar); // real paid dollar
+        $discount_amounts_old = $this->normalizeMoney($model->discount_amount);
+        $sum_som_old = $this->normalizeMoney($model->sum_som);
+        $sum_cart_old = $this->normalizeMoney($model->sum_cart);
+        $sum_otkazma_old = $this->normalizeMoney($model->sum_otkazma);
+        $sum_transfers_old = $this->normalizeMoney($model->sum_transfers);
+        $zdacha_dollar_old = $this->normalizeMoney($model->zdacha_dollar);
+        $zdacha_sum_old = $this->normalizeMoney($model->zdacha_sum);
 
-        $exchange_rate_old = $model->exchange_rate;
-        $sum_dollar_old = $model->sum_dollar;
-        $discount_amounts_old = $model->discount_amount;
-        
-        $total_debt_old = $model->total_debt_old;
-        $all_profit_dollar_old = $model->all_profit_dollar;
+        $total_debt_old = $this->normalizeMoney($model->total_debt_old);
+        $all_profit_dollar_old = $this->normalizeMoney($model->all_profit_dollar);
+        $all_product_sum_old = $this->normalizeMoney($model->all_product_sum);
 
-        $all_product_sum_old = $model->all_product_sum;
-        $all_pay_summ_old = round($sum_dollar_old + $discount_amounts_old, 2);
-        $all_product_qolgan_sum_old = $all_product_sum_old - $all_pay_summ_old;
+        $covered_total_old = $this->normalizeMoney($sum_dollar_old + $discount_amounts_old);
+        $old_today_debt = $this->normalizeMoney($all_product_sum_old - $covered_total_old);
+
         $client = Client::find()->where(['id' => $client_id])->one();
-        if ($model->load(Yii::$app->request->post())) {
-            $updateReason = Yii::$app->request->post('OrderAccountHistory')['comment'];
-            $driverInfo = Yii::$app->request->post('OrderAccountHistory')['driver_info'];
-            $fastOrder = Yii::$app->request->post('OrderAccountHistory')['fast_order'];
-            $total_debts_new = Yii::$app->request->post('OrderAccountHistory')['total_debt_old']?? 0;
-            $dates_new = Yii::$app->request->post('OrderAccountHistory')['date'];
-            $exchange_rates_new = Yii::$app->request->post('OrderAccountHistory')['exchange_rate']?? 0;
-            $discount_amounts_new = Yii::$app->request->post('OrderAccountHistory')['discount_amount']?? 0;
-            $sum_dollars_new = Yii::$app->request->post('OrderAccountHistory')['sum_dollar']?? 0;
-            $tasdiq_check_new = isset(Yii::$app->request->post('OrderAccountHistory')['order_account_status']) ? Yii::$app->request->post('OrderAccountHistory')['order_account_status'] : 1;
 
-            $productAccountHistory = ProductAccountHistory::find()->where(['order_account_history_id' => $id])->all();
+        if ($model->load(Yii::$app->request->post())) {
+            $post = Yii::$app->request->post('OrderAccountHistory', []);
+
+            $updateReason = $post['comment'] ?? '';
+            $driverInfo = $post['driver_info'] ?? '';
+            $fastOrder = isset($post['fast_order']) ? (int)$post['fast_order'] : 0;
+
+            $total_debts_new      = $this->normalizeMoney($post['total_debt_old'] ?? 0);
+            $dates_new            = $post['date'] ?? date('Y-m-d');
+            $exchange_rates_new   = $this->normalizeMoney($post['exchange_rate'] ?? 0);
+
+            if ($exchange_rates_new <= 0) {
+                $exchange_rates_new = 1;
+            }
+
+            $discount_amounts_new = $this->normalizeMoney($post['discount_amount'] ?? 0);
+
+            // Formadagi mahsulot jami
+            $all_product_summ_new = $this->normalizeMoney($post['sum_all_pro'] ?? 0);
+
+            // To'lovlar
+            $sum_transfers_new = $this->normalizeMoney($post['sum_transfers'] ?? 0); // dollar payment
+            $sum_som_new       = $this->normalizeMoney($post['sum_som'] ?? 0);
+            $sum_cart_new      = $this->normalizeMoney($post['sum_cart'] ?? 0);
+            $sum_otkazma_new   = $this->normalizeMoney($post['sum_otkazma'] ?? 0);
+
+            // Qaytim
+            $zdacha_dollar_new = $this->normalizeMoney($post['zdacha_dollar'] ?? 0);
+            $zdacha_sum_new    = $this->normalizeMoney($post['zdacha_sum'] ?? 0);
+
+            $tasdiq_check_new = isset($post['order_account_status']) ? (int)$post['order_account_status'] : 1;
+
+            // Real to'langan summa ($)
+            $real_paid_dollar_new =
+                $sum_transfers_new +
+                (($sum_som_new + $sum_cart_new + $sum_otkazma_new) / $exchange_rates_new) -
+                $zdacha_dollar_new -
+                ($zdacha_sum_new / $exchange_rates_new);
+
+            $real_paid_dollar_new = $this->normalizeMoney($real_paid_dollar_new);
+
+            if ($real_paid_dollar_new < 0) {
+                $real_paid_dollar_new = 0;
+            }
+
+            $covered_total_new = $this->normalizeMoney($real_paid_dollar_new + $discount_amounts_new);
+
+            $productAccountHistory = ProductAccountHistory::find()
+                ->where(['order_account_history_id' => $id])
+                ->all();
+
+            // Eski history mahsulotlarini warehouse va ProductAccount dan rollback qilamiz
             foreach ($productAccountHistory as $value) {
                 $warehouseValue = Warehouse::find()
-                                    ->andWhere(['product_category_id' => $value->product_category_id])
-                                    ->andWhere(['brand_id' => $value->brand_id])
-                                    ->andWhere(['size' => $value->size])
-                                    ->andWhere(['type' => $value->type])->one();
+                    ->andWhere(['product_category_id' => $value->product_category_id])
+                    ->andWhere(['brand_id' => $value->brand_id])
+                    ->andWhere(['size' => $value->size])
+                    ->andWhere(['type' => $value->type])
+                    ->one();
+
                 if ($warehouseValue) {
-                    if ($value->type_sklad_id == 1) {
-                        $warehouseValue->count += $value->count;
-                        $warehouseValue->save(false);                          
+                    $warehouseValue->count += (int)$value->count;
+                    $warehouseValue->save(false);
+                }
+
+                $productAccount = ProductAccount::find()
+                    ->where([
+                        'order_account_id' => $orderAccount->id,
+                        'brand_id' => $value->brand_id,
+                        'product_category_id' => $value->product_category_id,
+                        'size' => $value->size,
+                        'type' => $value->type,
+                        'type_sklad_id' => $value->type_sklad_id,
+                    ])
+                    ->one();
+
+                if ($productAccount) {
+                    $productAccount->count = (int)$productAccount->count - (int)$value->count;
+                    $productAccount->profit = $this->normalizeMoney((float)$productAccount->profit - (float)$value->profit);
+
+                    if ($productAccount->count <= 0) {
+                        $productAccount->delete();
+                    } else {
+                        $productAccount->save(false);
                     }
                 }
-                ProductAccountHistory::find()->where(['id' => $value['id']])->one()->delete();
+
+                $value->delete();
             }
-            
-            $exchange_rates_new = is_numeric($exchange_rates_new) && $exchange_rates_new != 0 ? $exchange_rates_new : 1; // Avoid division by zero
-            $sum_dollars_new = is_numeric($sum_dollars_new) ? $sum_dollars_new : 0;
-            $discount_amounts_new = is_numeric($discount_amounts_new) ? $discount_amounts_new : 0;
-            $all_pay_summ_new = round($sum_dollars_new, 2);
-            
-            // OrderAccountHistory malumotlarini yangilash 
-            
+
+            // Modelni base fieldlar bilan yangilaymiz
             $model->client_id = $client_id;
-            $model->date = date('Y-m-d',strtotime($dates_new));
+            $model->date = date('Y-m-d', strtotime($dates_new));
             $model->exchange_rate = $exchange_rates_new;
-            $model->all_summ_dollar = $all_pay_summ_new;
+            $model->all_summ_dollar = $all_product_summ_new; // mahsulot jami
             $model->number_of_orders = 1;
 
             $model->discount_amount = $discount_amounts_new;
-            $model->sum_dollar = $sum_dollars_new;
-            $model->cr_date = date('Y-m-d',strtotime($dates_new));
-            // $model->cr_date_time = date('Y-m-d H:i:s',strtotime($dates_new.' '.date('H:i:s')));
-            $model->update_status = 2; // update_status= 2 bo'lsa o'zgarish bo'lgan lekin tasdiqlanmagan bo'ladi
+            $model->sum_dollar = $real_paid_dollar_new; // real paid dollar
+            $model->sum_som = $sum_som_new;
+            $model->sum_cart = $sum_cart_new;
+            $model->sum_otkazma = $sum_otkazma_new;
+            $model->sum_transfers = $sum_transfers_new;
+            $model->zdacha_dollar = $zdacha_dollar_new;
+            $model->zdacha_sum = $zdacha_sum_new;
+
+            $model->cr_date = date('Y-m-d', strtotime($dates_new));
+            $model->update_status = 2;
+            $model->driver_info = $driverInfo;
+            $model->fast_order = $fastOrder;
+            $model->order_commit = $updateReason;
             $model->save(false);
-            
+
             $all_profit_new = 0;
-            $all_profit_array_new = [];
-            $all_product_summ_new = 0;
+            $all_product_summ_new_real = 0;
             $status_order_dukon = 0;
             $status_order_sklad = 0;
             $hasLargePriceNew = false;
 
-            $allValues_new = Yii::$app->request->post('OrderAccountHistory')['allValue'] ?? null;
+            $allValues_new = $post['allValue'] ?? [];
 
             if ($allValues_new) {
                 foreach ($allValues_new as $value) {
-                    $value_price = (float)$value['price'];
-                    $value_count = (int)$value['count'];
-                    $value_size  = (float)$value['size'];
-                    $value_type  = (int)$value['type'];
+                    $value_price = $this->normalizeMoney($value['price'] ?? 0);
+                    $value_count = (int)($value['count'] ?? 0);
+                    $value_size  = (float)($value['size'] ?? 0);
+                    $value_type  = (int)($value['type'] ?? 0);
+
+                    if ($value_count <= 0) {
+                        continue;
+                    }
 
                     $brand_list = Brands::find()->where(['id' => $value['brand_id']])->one();
                     $product_category_list = ProductCategory::find()
@@ -1712,9 +1805,13 @@ class OrderAccountHistoryController extends Controller
                         ->one();
                     $type_sklad_list = TypeSklad::find()->where(['id' => $value['type_sklad_id']])->one();
 
-                    if ($value['type_sklad_id'] == 1) {
+                    if (!$brand_list || !$product_category_list || !$type_sklad_list) {
+                        continue;
+                    }
+
+                    if ((int)$value['type_sklad_id'] === 1) {
                         $status_order_sklad = 1;
-                    } elseif ($value['type_sklad_id'] == 2) {
+                    } elseif ((int)$value['type_sklad_id'] === 2) {
                         $status_order_dukon = 1;
                     }
 
@@ -1734,7 +1831,6 @@ class OrderAccountHistoryController extends Controller
                         ->andWhere(['type' => $value_type])
                         ->one();
 
-                    // Ombordagi haqiqiy narx (Prices jadvalidan)
                     $price_real = 0;
                     if ($warehouseValue) {
                         $real_prices_product = Prices::find()->where(['warehouse_id' => $warehouseValue->id])->one();
@@ -1743,138 +1839,150 @@ class OrderAccountHistoryController extends Controller
                         }
                     }
 
-                    // Narx nisbatini belgilash (istaganizcha shart)
                     if ($price_real > 0 && $value_price < $price_real) {
-                    // if ($value_price < $price_real) {
                         $hasLargePriceNew = true;
                     }
 
-                    // 🔥 Har bir qatordagi foyda
                     $lineProfit = $price_real > 0
                         ? ($value_price - $price_real) * $value_count
                         : 0;
 
-                    // Yangi ProductAccount
+                    $lineProfit = $this->normalizeMoney($lineProfit);
+
                     if (!$productAccount) {
                         $relative = new ProductAccount();
-                        $relative->order_account_id         = $orderAccount->id;
+                        $relative->order_account_id = $orderAccount->id;
                         $relative->order_account_history_id = $model->id;
-                        $relative->brand_id                 = $brand_list->id;
-                        $relative->product_category_id      = $product_category_list->id;
-                        $relative->size                     = $value_size;
-                        $relative->count                    = $value_count;
-                        $relative->type                     = $value_type;
-                        $relative->price                    = $value_price;
-                        $relative->real_price               = $price_real;
-                        $relative->type_sklad_id            = $type_sklad_list->id;
-                        $relative->is_debtor                = $hasLargePriceNew ? 1 : 0;
-                        $relative->profit                   = round($lineProfit, 2);
-                        $relative->cr_date                  = date('Y-m-d', strtotime($dates_new));
+                        $relative->brand_id = $brand_list->id;
+                        $relative->product_category_id = $product_category_list->id;
+                        $relative->size = $value_size;
+                        $relative->count = $value_count;
+                        $relative->type = $value_type;
+                        $relative->price = $value_price;
+                        $relative->real_price = $price_real;
+                        $relative->type_sklad_id = $type_sklad_list->id;
+                        $relative->is_debtor = $hasLargePriceNew ? 1 : 0;
+                        $relative->profit = $lineProfit;
+                        $relative->cr_date = date('Y-m-d', strtotime($dates_new));
                         $relative->save(false);
                     } else {
-                        // Mavjud yozuvga yangi miqdor va foyda qo‘shamiz
-                        $productAccount->count      = $productAccount->count + $value_count;
-                        $productAccount->price      = $value_price;
+                        $productAccount->count = (int)$productAccount->count + $value_count;
+                        $productAccount->price = $value_price;
                         $productAccount->real_price = $price_real;
-                        $productAccount->is_debtor  = $hasLargePriceNew ? 1 : 0;
-                        $productAccount->profit     = round($productAccount->profit + $lineProfit, 2);
+                        $productAccount->is_debtor = $hasLargePriceNew ? 1 : 0;
+                        $productAccount->profit = $this->normalizeMoney((float)$productAccount->profit + $lineProfit);
                         $productAccount->save(false);
                     }
 
-                    // History yozuvi
                     $relativeHistory = new ProductAccountHistory();
-                    $relativeHistory->order_account_id         = $orderAccount->id;
+                    $relativeHistory->order_account_id = $orderAccount->id;
                     $relativeHistory->order_account_history_id = $model->id;
-                    $relativeHistory->brand_id                 = $brand_list->id;
-                    $relativeHistory->product_category_id      = $product_category_list->id;
-                    $relativeHistory->size                     = $value_size;
-                    $relativeHistory->count                    = $value_count;
-                    $relativeHistory->given_count              = $value_count;
-                    $relativeHistory->type                     = $value_type;
-                    $relativeHistory->price                    = $value_price;
-                    $relativeHistory->real_price               = $price_real;
-                    $relativeHistory->type_sklad_id            = $type_sklad_list->id;
-                    $relativeHistory->profit                   = round($lineProfit, 2);
-                    $relativeHistory->is_debtor                = $hasLargePriceNew ? 1 : 0;
-                    $relativeHistory->cr_date                  = date('Y-m-d', strtotime($dates_new));
+                    $relativeHistory->brand_id = $brand_list->id;
+                    $relativeHistory->product_category_id = $product_category_list->id;
+                    $relativeHistory->size = $value_size;
+                    $relativeHistory->count = $value_count;
+                    $relativeHistory->given_count = $value_count;
+                    $relativeHistory->type = $value_type;
+                    $relativeHistory->price = $value_price;
+                    $relativeHistory->real_price = $price_real;
+                    $relativeHistory->type_sklad_id = $type_sklad_list->id;
+                    $relativeHistory->profit = $lineProfit;
+                    $relativeHistory->is_debtor = $hasLargePriceNew ? 1 : 0;
+                    $relativeHistory->cr_date = date('Y-m-d', strtotime($dates_new));
                     $relativeHistory->save(false);
 
-                    // Ombor sonini kamaytirish
-                    if ($warehouseValue && $type_sklad_list->id == 1) {
-                        $warehouseValue->count = $warehouseValue->count - $value_count;
+                    if ($warehouseValue) {
+                        $warehouseValue->count = (int)$warehouseValue->count - $value_count;
                         $warehouseValue->save(false);
                     }
 
-                    // Umumiy summalarni yig‘ish
-                    $all_profit_new         += $lineProfit;
-                    $all_profit_array_new[]  = $lineProfit;
-                    $all_product_summ_new   += $value_price * $value_count;
+                    $all_profit_new += $lineProfit;
+                    $all_product_summ_new_real += ($value_price * $value_count);
                 }
             }
 
+            $all_profit_new = $this->normalizeMoney($all_profit_new);
+            $all_product_summ_new_real = $this->normalizeMoney($all_product_summ_new_real);
+
+            // agar frontdagi sum_all_pro bilan real yig'indi farq qilsa, realini olamiz
+            $all_product_summ_new = $all_product_summ_new_real;
 
             $model->status_order_dukon = $status_order_dukon;
             $model->status_order_sklad = $status_order_sklad;
-
-            // YANGI: large_prise flagini yozish (1/0)
             $model->large_price = $hasLargePriceNew ? 1 : 0;
-            $model->driver_info = $driverInfo;
-            $model->fast_order = $fastOrder;
-            $model->save(false);
+
             if ($model->order_account_status == 1) {
-                 // Eski ma'lumotlarni tozalash
-                //  if ($orderAccount->total_debt !=0) {
+                // 1) Eski tasdiqlangan order effectini olib tashlaymiz
                 $orderAccount->number_of_orders = $orderAccount->number_of_orders - 1;
-                $orderAccount->all_summ_dollar = round($orderAccount->all_summ_dollar - $all_pay_summ_old, 2);
-                $orderAccount->discount_amount = $orderAccount->discount_amount - (float)$discount_amounts_old;
-                $orderAccount->sum_dollar = $orderAccount->sum_dollar - (float)$sum_dollar_old;
-                $orderAccount->all_product_sum = $orderAccount->all_product_sum - $all_product_sum_old;
-                $orderAccount->total_debt = $client_total_debt - ($all_product_sum_old - $all_pay_summ_old);
-                $orderAccount->total_debt_old = $client_total_debt - ($all_product_sum_old - $all_pay_summ_old);
+                $orderAccount->all_summ_dollar = $this->normalizeMoney($orderAccount->all_summ_dollar - $all_product_sum_old);
+                $orderAccount->discount_amount = $this->normalizeMoney($orderAccount->discount_amount - $discount_amounts_old);
+                $orderAccount->sum_dollar = $this->normalizeMoney($orderAccount->sum_dollar - $sum_dollar_old);
+                $orderAccount->sum_som = $this->normalizeMoney($orderAccount->sum_som - $sum_som_old);
+                $orderAccount->sum_cart = $this->normalizeMoney($orderAccount->sum_cart - $sum_cart_old);
+                $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma - $sum_otkazma_old);
+                $orderAccount->sum_transfers = $this->normalizeMoney($orderAccount->sum_transfers - $sum_transfers_old);
+                $orderAccount->all_product_sum = $this->normalizeMoney($orderAccount->all_product_sum - $all_product_sum_old);
+
                 if ($client->is_profit_loss == 1) {
                     $orderAccount->all_profit_dollar = 0;
-                }else{
-                    $orderAccount->all_profit_dollar = $orderAccount->all_profit_dollar - $all_profit_dollar_old;
+                } else {
+                    $orderAccount->all_profit_dollar = $this->normalizeMoney($orderAccount->all_profit_dollar - $all_profit_dollar_old);
                 }
-                
-                $orderAccount->save(false);
-                //  }
-                
-                // Yangi ma'lumotlarni qo'shish
-                $orderAccount->last_order_date = date('Y-m-d',strtotime($dates_new));
+
+                $orderAccount->total_debt = $this->normalizeMoney($client_total_debt - $old_today_debt);
+                $orderAccount->total_debt_old = $orderAccount->total_debt;
+
+                // 2) Yangi effectni qo‘shamiz
+                $orderAccount->last_order_date = date('Y-m-d', strtotime($dates_new));
                 $orderAccount->exchange_rate = $exchange_rates_new;
                 $orderAccount->number_of_orders = $orderAccount->number_of_orders + 1;
-                $orderAccount->all_summ_dollar = round($orderAccount->all_summ_dollar + $all_pay_summ_new, 2);
-                $orderAccount->discount_amount = $orderAccount->discount_amount + (float)$discount_amounts_new;
-                $orderAccount->sum_dollar = $orderAccount->sum_dollar + (float)$sum_dollars_new;
+                $orderAccount->all_summ_dollar = $this->normalizeMoney($orderAccount->all_summ_dollar + $all_product_summ_new);
+                $orderAccount->discount_amount = $this->normalizeMoney($orderAccount->discount_amount + $discount_amounts_new);
+                $orderAccount->sum_dollar = $this->normalizeMoney($orderAccount->sum_dollar + $real_paid_dollar_new);
+                $orderAccount->sum_som = $this->normalizeMoney($orderAccount->sum_som + $sum_som_new);
+                $orderAccount->sum_cart = $this->normalizeMoney($orderAccount->sum_cart + $sum_cart_new);
+                $orderAccount->sum_otkazma = $this->normalizeMoney($orderAccount->sum_otkazma + $sum_otkazma_new);
+                $orderAccount->sum_transfers = $this->normalizeMoney($orderAccount->sum_transfers + $sum_transfers_new);
+                $orderAccount->all_product_sum = $this->normalizeMoney($orderAccount->all_product_sum + $all_product_summ_new);
+
                 if ($client->is_profit_loss == 1) {
                     $orderAccount->all_profit_dollar = 0;
-                }else{
-                    $orderAccount->all_profit_dollar = round($orderAccount->all_profit_dollar + array_sum($all_profit_array_new), 2);
+                } else {
+                    $orderAccount->all_profit_dollar = $this->normalizeMoney($orderAccount->all_profit_dollar + $all_profit_new);
                 }
-                $orderAccount->all_product_sum = round($orderAccount->all_product_sum + $all_product_summ_new, 2);
-                $orderAccount->total_debt_old =$client_total_debt - ($all_product_sum_old - $all_pay_summ_old);
-                // $orderAccount->total_debt = round($orderAccount->total_debt + ($all_product_summ_new - ($all_pay_summ_new + $discount_amounts_new)), 2);
-                $orderAccount->total_debt = $orderAccount->total_debt + ($all_product_summ_new - ($all_pay_summ_new + $discount_amounts_new));
-                // $orderAccount->total_debt = $total_debt_old + ($all_product_summ_new - ($all_pay_summ_new + $discount_amounts_new));
-                // $orderAccount->total_debt = $orderAccount->total_debt_old + ($all_product_summ_new - ($all_pay_summ_new + $discount_amounts_new));
+
+                $new_today_debt = $this->normalizeMoney($all_product_summ_new - $covered_total_new);
+
+                $orderAccount->total_debt_old = $orderAccount->total_debt;
+                $orderAccount->total_debt = $this->normalizeMoney($orderAccount->total_debt + $new_today_debt);
                 $orderAccount->save(false);
+
                 if ($client->is_profit_loss == 1) {
                     $model->all_profit_dollar = 0;
-                }else{
-                    $model->all_profit_dollar = round(array_sum($all_profit_array_new), 2);
+                } else {
+                    $model->all_profit_dollar = $all_profit_new;
                 }
-                
-                $model->total_debt_today = round(($all_product_summ_new - ($all_pay_summ_new + $discount_amounts_new)), 2);
-                $model->total_debt = $total_debt_old + ($all_product_summ_new - ($model->all_summ_dollar + $model->discount_amount));
-                $model->total_debt_old = $total_debt_old;
+
                 $model->all_product_sum = $all_product_summ_new;
+                $model->all_summ_dollar = $all_product_summ_new;
+                $model->sum_dollar = $real_paid_dollar_new;
+                $model->total_debt_today = $this->normalizeMoney($all_product_summ_new - $covered_total_new);
+                $model->total_debt_old = $total_debt_old;
+                $model->total_debt = $this->normalizeMoney($total_debt_old + $model->total_debt_today);
                 $model->order_account_status = $tasdiq_check_new;
                 $model->save(false);
 
+                $paidWithDiscount = $this->normalizeMoney($model->sum_dollar + $model->discount_amount);
+
                 $elegantHistoryUpdate = new ElegantHistoryUpdate();
-                $elegantHistoryUpdate->title = $model->client->fio . " ning ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanadagi buyurtmasi o'zgartirildi...";
-                $elegantHistoryUpdate->comment = $updateReason . ' <br><b style="color:#e97171">' . 'Ostatka: '. $model->total_debt_old .'$, '. 'Mahsulot summasi: '. ($all_product_summ_new).'$, '. 'To\'langan summa: '. ($model->all_summ_dollar + $model->discount_amount) .'$, '. 'Qolgan qarz: '. $model->total_debt.'$ </b>';
+                $elegantHistoryUpdate->title = $model->client->fio . " ning " . \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') . " sanadagi buyurtmasi o'zgartirildi...";
+                $elegantHistoryUpdate->comment =
+                    $updateReason .
+                    ' <br><b style="color:#e97171">' .
+                    'Ostatka: ' . $this->normalizeMoney($model->total_debt_old) . '$, ' .
+                    'Mahsulot summasi: ' . $this->normalizeMoney($all_product_summ_new) . '$, ' .
+                    'To\'langan summa: ' . $paidWithDiscount . '$, ' .
+                    'Qolgan qarz: ' . $this->normalizeMoney($model->total_debt) . '$ </b>';
                 $elegantHistoryUpdate->status = 1;
                 $elegantHistoryUpdate->type = 2;
                 $elegantHistoryUpdate->order_account_history_id = $model->id;
@@ -1882,53 +1990,6 @@ class OrderAccountHistoryController extends Controller
 
                 $previousDebt = $model->total_debt;
 
-                // // Har bir sana uchun bir marta DebtRepayment summasini hisoblash
-                // $debtRepaymentsByDate = DebtRepayment::find()
-                //     ->where(['client_id' => $model->client_id])
-                //     ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
-                //     ->groupBy('date')
-                //     ->select(['date', 'SUM(all_summ_dollar) AS total_repayment'])
-                //     ->asArray()
-                //     ->all();
-
-
-                // $debtRepaymentsMap = array_column($debtRepaymentsByDate, 'total_repayment', 'date'); // ['2024-11-18' => 1000]
-
-                // // Buyurtmalarni qayta hisoblash
-                // $nextOrders = OrderAccountHistory::find()
-                //     ->where(['client_id' => $model->client_id])
-                //     ->andWhere([
-                //         'or',
-                //         ['>', 'date', $model->date],
-                //         ['and', ['date' => $model->date], ['>', 'id', $model->id]]
-                //     ])->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
-                //     ->orderBy(['date' => SORT_ASC, 'id' => SORT_ASC])
-                //     ->all();
-
-                
-                
-                // foreach ($nextOrders as $nextOrder) {
-                //     // echo "<pre>";
-                //     // print_r($nextOrder->client_id);
-                //     // print_r($nextOrder->date);
-                //     // echo "<pre>";
-                //     if (isset($debtRepaymentsMap[$nextOrder->date])) {
-                //         $value = $debtRepaymentsMap[$nextOrder->date]; // Qiymatni olish
-                //         unset($debtRepaymentsMap[$nextOrder->date]); // Elementni o‘chirish
-                //         // echo "O'chirilgan sana: $nextOrder->date, qiymat: $value\n";
-                //     } else {
-                //         $value = 0;
-                //         // echo "Sana $nextOrder->date mavjud emas.\n";
-                //     }
-
-                //     $nextOrder->total_debt_old = $previousDebt;
-                //     $nextOrder->total_debt_today = $nextOrder->all_product_sum - $nextOrder->all_summ_dollar - $nextOrder->discount_amount;
-                //     $nextOrder->total_debt = $nextOrder->total_debt_old + $nextOrder->total_debt_today - $value;
-
-                //     // Yangilangan total_debt ni keyingi buyurtma uchun saqlang
-                //     $previousDebt = $nextOrder->total_debt;
-                //     $nextOrder->save();
-                // }
                 $nextOrders = OrderAccountHistory::find()
                     ->where(['client_id' => $model->client_id])
                     ->andWhere([
@@ -1941,67 +2002,71 @@ class OrderAccountHistoryController extends Controller
                     ->all();
 
                 foreach ($nextOrders as $nextOrder) {
-
-                    // Shu buyurtma vaqtidan KEYIN yaratilgan DebtRepayment lar yig'indisi
                     $summaDebt = (float) DebtRepayment::find()
                         ->where(['client_id' => $model->client_id])
                         ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
-                        ->andWhere(['>', 'cr_date_time', $nextOrder->cr_date_time]) // qat'iy > (katta bo'lgan)
+                        ->andWhere(['>', 'cr_date_time', $nextOrder->cr_date_time])
                         ->sum('all_summ_dollar');
 
-                    // hech narsa topilmasa null qaytadi — 0 ga tenglashtiramiz
                     $summaDebt = $summaDebt ?: 0.0;
 
                     $nextOrder->total_debt_old = $previousDebt;
-                    $nextOrder->total_debt_today = round(
-                        (float)$nextOrder->all_product_sum - ((float)$nextOrder->all_summ_dollar + (float)$nextOrder->discount_amount),
-                        2
+                    $nextOrder->total_debt_today = $this->normalizeMoney(
+                        (float)$nextOrder->all_product_sum - ((float)$nextOrder->sum_dollar + (float)$nextOrder->discount_amount)
                     );
-                    $nextOrder->total_debt = round(
-                        $nextOrder->total_debt_old + $nextOrder->total_debt_today - $summaDebt,
-                        2
+                    $nextOrder->total_debt = $this->normalizeMoney(
+                        $nextOrder->total_debt_old + $nextOrder->total_debt_today - $summaDebt
                     );
 
-                    // Keyingi buyurtma uchun yuguruvchi qarz
                     $previousDebt = $nextOrder->total_debt;
                     $nextOrder->save(false);
                 }
 
-
-                $client = Client::findOne($client_id);
-
                 if ($client && $client->keshbek) {
-
                     $keshbekClient = KeshbekHistory::find()
                         ->where(['order_account_history_id' => $model->id])
                         ->one();
 
-                    // Agar oldin keshbek yozuvi bo'lmasa – yangisini yaratamiz
                     if ($keshbekClient === null) {
                         $keshbekClient = new KeshbekHistory();
                         $keshbekClient->client_id = $client_id;
                         $keshbekClient->order_account_history_id = $model->id;
-                        $keshbekClient->keshbek = $client->keshbek; // foiz
+                        $keshbekClient->keshbek = $client->keshbek;
                     }
 
-                    $keshbekClient->keshbek_sum = round(($all_product_summ_new * $keshbekClient->keshbek) / 100, 2);
+                    $keshbekClient->keshbek_sum = $this->normalizeMoney(($all_product_summ_new * $keshbekClient->keshbek) / 100);
                     $keshbekClient->cr_date = date('Y-m-d', strtotime($dates_new));
                     $keshbekClient->save(false);
                 }
-            }else{
+            } else {
+                $model->all_product_sum = $all_product_summ_new;
+                $model->all_summ_dollar = $all_product_summ_new;
+                $model->sum_dollar = $real_paid_dollar_new;
+                $model->total_debt_today = $this->normalizeMoney($all_product_summ_new - $covered_total_new);
+                $model->total_debt_old = $total_debt_old;
+                $model->total_debt = $this->normalizeMoney($total_debt_old + $model->total_debt_today);
+                $model->order_account_status = $tasdiq_check_new;
+                $model->save(false);
+
                 $elegantHistoryUpdate = new ElegantHistoryUpdate();
-                $elegantHistoryUpdate->title = $model->client->fio . " ning ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanadagi buyurtmasi o'zgartirildi...";
+                $elegantHistoryUpdate->title = $model->client->fio . " ning " . \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') . " sanadagi buyurtmasi o'zgartirildi...";
                 $elegantHistoryUpdate->comment = $updateReason;
                 $elegantHistoryUpdate->status = 1;
                 $elegantHistoryUpdate->type = 2;
                 $elegantHistoryUpdate->order_account_history_id = $model->id;
                 $elegantHistoryUpdate->save(false);
             }
+
             Yii::$app->session->setFlash('success', 'Ma\'lumotlar muvaffaqiyatli yangilandi.');
             return $this->redirect(['index']);
         }
 
-        return $this->render('update', ['model' => $model, 'client_total_debt' => $model->total_debt_old?$model->total_debt_old:0, 'order_account_status_old'=> $order_account_status_old, 'type' => $type]);
+        return $this->render('update', [
+            'model' => $model,
+            'client_total_debt' => $model->total_debt_old ? $model->total_debt_old : 0,
+            'order_account_status_old' => $order_account_status_old,
+            'type' => $type
+        ]);
     }
 
 
