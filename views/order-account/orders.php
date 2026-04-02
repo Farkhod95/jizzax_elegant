@@ -757,19 +757,20 @@ function calculateSellQoldiq() {
 
   let chegirmaDollar = toFloat($('input[name="chegirma_summa"]').val() || '0');
 
-  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0');
-  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');
-  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');
-  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');
+  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0'); // $
+  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');      // so'm
+  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');    // so'm
+  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');  // so'm
 
-  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');
-  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');
+  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');  // $
+  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');     // so'm
 
   if (!dollarKurs || dollarKurs <= 0) {
     $("#sell_qoldiq_full").html('0.00$ <span style="color:#888;">(0)</span>');
     return;
   }
 
+  // ===== DOLLAR BO'YICHA =====
   let jamiKerakDollar = jamiDollar - chegirmaDollar;
   if (jamiKerakDollar < 0) jamiKerakDollar = 0;
 
@@ -789,9 +790,26 @@ function calculateSellQoldiq() {
 
   qoldiqDollar = Math.round(qoldiqDollar * 100) / 100;
 
-  let jamiKerakSom = Math.round(jamiKerakDollar * dollarKurs);
-  let sofTulovSom  = Math.round(sofTulovDollar * dollarKurs);
-  let qoldiqSom    = jamiKerakSom - sofTulovSom;
+  // ===== SO'M BO'YICHA =====
+  let chegirmaSom = Math.round(chegirmaDollar * dollarKurs);
+
+  let jamiKerakSom = jamiSom - chegirmaSom;
+  if (jamiKerakSom < 0) jamiKerakSom = 0;
+
+  let tulovSom =
+      Math.round(summaTransfer * dollarKurs) +
+      Math.round(summaSom) +
+      Math.round(summaKarta) +
+      Math.round(summaOtkazma);
+
+  let qaytimSom =
+      Math.round(zdachaDollar * dollarKurs) +
+      Math.round(zdachaSom);
+
+  let sofTulovSom = tulovSom - qaytimSom;
+  if (sofTulovSom < 0) sofTulovSom = 0;
+
+  let qoldiqSom = jamiKerakSom - sofTulovSom;
   if (qoldiqSom < 0) qoldiqSom = 0;
 
   $("#sell_qoldiq_full").html(
