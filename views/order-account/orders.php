@@ -750,32 +750,36 @@ $('#cars').on('change', function(e){
 function calculateSellQoldiq() {
   let dollarKurs = toFloat($('input[name="dollar_kurs"]').val() || '0');
 
-  let jamiDollar = toFloat($('#backet').attr('data-count-sum') || '0');      // exact dollar total
-  let jamiSom    = parseInt($('#backet').attr('data-count-sum-som') || '0', 10); // exact som total
+  let jamiDollar = toFloat($('#backet').attr('data-count-sum') || '0');
+  let jamiSom    = parseInt($('#backet').attr('data-count-sum-som') || '0', 10);
 
   let chegirmaDollar = toFloat($('input[name="chegirma_summa"]').val() || '0');
 
-  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0'); // $
-  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');      // so'm
-  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');    // so'm
-  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');  // so'm
+  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0');
+  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');
+  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');
+  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');
 
-  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');  // $
-  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');     // so'm
+  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');
+  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');
 
   if (!dollarKurs || dollarKurs <= 0) {
     $("#sell_qoldiq_full").html('0.00$ <span style="color:#888;">(0)</span>');
     return;
   }
 
-  // ===== DOLLAR BO'YICHA QOLDIQ =====
   let jamiKerakDollar = jamiDollar - chegirmaDollar;
   if (jamiKerakDollar < 0) jamiKerakDollar = 0;
 
-  let tulovDollarPart = summaTransfer + ((summaSom + summaKarta + summaOtkazma) / dollarKurs);
-  let qaytimDollarPart = zdachaDollar + (zdachaSom / dollarKurs);
+  let tulovDollar =
+      summaTransfer +
+      ((summaSom + summaKarta + summaOtkazma) / dollarKurs);
 
-  let sofTulovDollar = tulovDollarPart - qaytimDollarPart;
+  let qaytimDollar =
+      zdachaDollar +
+      (zdachaSom / dollarKurs);
+
+  let sofTulovDollar = tulovDollar - qaytimDollar;
   if (sofTulovDollar < 0) sofTulovDollar = 0;
 
   let qoldiqDollar = jamiKerakDollar - sofTulovDollar;
@@ -783,32 +787,13 @@ function calculateSellQoldiq() {
 
   qoldiqDollar = Math.round(qoldiqDollar * 100) / 100;
 
-  // ===== SO'M BO'YICHA QOLDIQ =====
-  let chegirmaSom = Math.round(chegirmaDollar * dollarKurs);
-  let jamiKerakSom = jamiSom - chegirmaSom;
-  if (jamiKerakSom < 0) jamiKerakSom = 0;
-
-  let tulovSomPart =
-      Math.round(summaTransfer * dollarKurs) +
-      Math.round(summaSom) +
-      Math.round(summaKarta) +
-      Math.round(summaOtkazma);
-
-  let qaytimSomPart =
-      Math.round(zdachaDollar * dollarKurs) +
-      Math.round(zdachaSom);
-
-  let sofTulovSom = tulovSomPart - qaytimSomPart;
-  if (sofTulovSom < 0) sofTulovSom = 0;
-
-  let qoldiqSom = jamiKerakSom - sofTulovSom;
+  let jamiKerakSom = Math.round(jamiKerakDollar * dollarKurs);
+  let sofTulovSom  = Math.round(sofTulovDollar * dollarKurs);
+  let qoldiqSom    = jamiKerakSom - sofTulovSom;
   if (qoldiqSom < 0) qoldiqSom = 0;
 
-  let dollarFormatted = qoldiqDollar.toFixed(2);
-  let somFormatted = qoldiqSom.toLocaleString('ru-RU');
-
   $("#sell_qoldiq_full").html(
-    dollarFormatted + "$ <span style='color:#888;'>(" + somFormatted + ")</span>"
+    qoldiqDollar.toFixed(2) + "$ <span style='color:#888;'>(" + qoldiqSom.toLocaleString('ru-RU') + ")</span>"
   );
 }
 
@@ -816,13 +801,13 @@ $(document).on(
   'input',
   'input[name="chegirma_summa"], input[name="summa_transfer"], input[name="summa_som"], input[name="summa_karta"], input[name="summa_otkazma"], input[name="zdacha_dollar"], input[name="zdacha_sum"]',
   function () {
-    calculateJamiSummaDollar();
+    syncSellTotalFromBasket();
     calculateSellQoldiq();
   }
 );
 
 $('#modal-dialog').on('shown.bs.modal', function () {
-  calculateJamiSummaDollar();
+  syncSellTotalFromBasket();
   calculateSellQoldiq();
 });
 
@@ -873,44 +858,20 @@ $(document).on(
   }
 );
 
-function calculateJamiSummaDollar() {
-  let dollarKurs    = toFloat($('input[name="dollar_kurs"]').val() || '0');
-  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0');
-  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');
-  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');
-  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');
-  let chegirma      = toFloat($('input[name="chegirma_summa"]').val() || '0');
-  let zdachaDollar  = toFloat($('input[name="zdacha_dollar"]').val() || '0');
-  let zdachaSom     = toFloat($('input[name="zdacha_sum"]').val() || '0');
-
-  if (!dollarKurs || dollarKurs <= 0) {
-    $('input[name="summa_dollor"]').val('');
-    return;
-  }
-
-  let jamiTulovDollar =
-      summaTransfer +
-      ((summaSom + summaKarta + summaOtkazma) / dollarKurs) +
-      chegirma -
-      zdachaDollar -
-      (zdachaSom / dollarKurs);
-
-  if (jamiTulovDollar < 0) jamiTulovDollar = 0;
-
-  jamiTulovDollar = Math.round(jamiTulovDollar * 100) / 100;
-
+function syncSellTotalFromBasket() {
+  let jamiDollar = toFloat($('#backet').attr('data-count-sum') || '0');
   $('input[name="summa_dollor"]').val(
-    formatNumberWithSpaces(jamiTulovDollar.toFixed(2), true)
+    formatNumberWithSpaces(jamiDollar.toFixed(2), true)
   );
 }
 
-$(document).on(
-  'input',
-  'input[name="summa_transfer"], input[name="summa_som"], input[name="summa_karta"], input[name="summa_otkazma"], input[name="chegirma_summa"], input[name="dollar_kurs"]',
-  function () {
-    calculateJamiSummaDollar();
-  }
-);
+// $(document).on(
+//   'input',
+//   'input[name="summa_transfer"], input[name="summa_som"], input[name="summa_karta"], input[name="summa_otkazma"], input[name="chegirma_summa"], input[name="dollar_kurs"]',
+//   function () {
+//     calculateJamiSummaDollar();
+//   }
+// );
 
 // $('#modal-dialog').on('shown.bs.modal', function () {
 //   calculateJamiSummaDollar();
@@ -1167,7 +1128,7 @@ $(".buy_product").on('click', function(){
     totalDollarFormatted + "$ <span style='color:#888;'>(" + totalSomFormatted + ")</span>"
   );
 
-  calculateJamiSummaDollar();
+  syncSellTotalFromBasket();
   calculateSellQoldiq();
 
   if(all_total == 0){
