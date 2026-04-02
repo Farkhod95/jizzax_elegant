@@ -1170,7 +1170,7 @@ $('.handle').on("click", function(){
   if (toFloat(count) < 0) count = 0;
 
   $('input[name="product_id"]').val(product_id);
-  $('input[name="soni"]').val('');
+  $('input[name="soni"]').val(count);
   $('input[name="size"]').val(size);
   $('input[name="maxsulot_tipi"]').val(maxsulot_tipi);
   $('input[name="key"]').val(rowDomId);
