@@ -247,6 +247,7 @@ class OrderAccountHistoryController extends Controller
             'dataProvider' => $dataProvider,
         ]);
     }
+
     public function actionOrderAndDebt()
     {
         $selectedFio = Yii::$app->request->get('customer_name');
@@ -263,27 +264,22 @@ class OrderAccountHistoryController extends Controller
                 'sum_otkazma',
                 'sum_cart',
                 'sum_transfers',
-                'sum_otkazma',
                 'cr_date_time AS datetime',
                 'client_id',
-
-                'created_by',              // ✅ qo‘shildi
-                'all_profit_dollar',       // ✅ qo‘shildi
-
+                'created_by',
+                'all_profit_dollar',
                 'all_product_sum',
                 'all_summ_dollar',
                 'total_debt',
+                'zdacha_sum',
+                'zdacha_dollar',
 
                 new \yii\db\Expression('0 AS debt_sum_som'),
                 new \yii\db\Expression('0 AS debt_summ_cart'),
                 new \yii\db\Expression('0 AS debt_sum_transfers'),
+                new \yii\db\Expression('0 AS debt_sum_otkazma'),
 
-                new \yii\db\Expression('0 AS sum_paid_som'),
-                new \yii\db\Expression('0 AS sum_paid_cart'),
-                new \yii\db\Expression('0 AS sum_paid_transfers'),
-                new \yii\db\Expression('0 AS sum_paid_otkazma'),
                 new \yii\db\Expression('0 AS paid_debt'),
-
                 new \yii\db\Expression("'Buyurtma qilgan' AS action")
             ])
             ->andWhere(['<>', 'is_delete', 1])
@@ -293,8 +289,12 @@ class OrderAccountHistoryController extends Controller
             ]);
 
         if ($startDate && $endDate) {
-            // Agar cr_date_time datetime bo‘lsa, date input bilan to‘liq qamrab olish uchun:
-            $orderQuery->andWhere(['between', 'cr_date_time', $startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            $orderQuery->andWhere([
+                'between',
+                'cr_date_time',
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59'
+            ]);
         }
 
         $orders = $orderQuery->asArray()->all();
@@ -306,24 +306,23 @@ class OrderAccountHistoryController extends Controller
                 'sum_som AS debt_sum_som',
                 'summ_cart AS debt_summ_cart',
                 'sum_transfers AS debt_sum_transfers',
-                'sum_otkazma AS debt_sum_otkazmas',
+                'sum_otkazma AS debt_sum_otkazma',
                 'cr_date_time AS datetime',
                 'client_id',
-
-                'created_by', // ✅ agar DebtRepayment jadvalida bo‘lsa; bo‘lmasa pastdagi 0 expression bilan almashtiring
+                'created_by',
+                'total_debt',
+                'summ_dollar AS paid_debt',
+                'zdacha_sum',
+                'zdacha_dollar',
 
                 new \yii\db\Expression('0 AS sum_som'),
                 new \yii\db\Expression('0 AS sum_otkazma'),
                 new \yii\db\Expression('0 AS sum_cart'),
                 new \yii\db\Expression('0 AS sum_transfers'),
-                new \yii\db\Expression('0 AS sum_otkazma'),
                 new \yii\db\Expression('0 AS all_product_sum'),
                 new \yii\db\Expression('0 AS all_summ_dollar'),
+                new \yii\db\Expression('0 AS all_profit_dollar'),
 
-                new \yii\db\Expression('0 AS all_profit_dollar'), // ✅ repaymentda foyda yo‘q
-
-                'total_debt',
-                'summ_dollar AS paid_debt',
                 new \yii\db\Expression("'Qarz to‘lagan' AS action")
             ])
             ->where(['<>', 'is_delete', 1])
@@ -333,7 +332,12 @@ class OrderAccountHistoryController extends Controller
             ]);
 
         if ($startDate && $endDate) {
-            $repaymentQuery->andWhere(['between', 'cr_date_time', $startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            $repaymentQuery->andWhere([
+                'between',
+                'cr_date_time',
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59'
+            ]);
         }
 
         $repayments = $repaymentQuery->asArray()->all();
@@ -347,7 +351,7 @@ class OrderAccountHistoryController extends Controller
         });
 
         // 5. client_id lar asosida mijozlarni olish
-        $clientIds = array_unique(array_column($rows, 'client_id'));
+        $clientIds = array_unique(array_filter(array_column($rows, 'client_id')));
 
         $clientsMap = \app\models\Client::find()
             ->where(['id' => $clientIds])
@@ -360,7 +364,7 @@ class OrderAccountHistoryController extends Controller
         }
         unset($row);
 
-        // ✅ 6. created_by userlarni olish va map qilish (name + surname)
+        // 6. created_by userlarni olish va map qilish
         $createdByIds = array_unique(array_filter(array_column($rows, 'created_by')));
 
         $usersMap = \app\models\Users::find()
@@ -1319,14 +1323,13 @@ class OrderAccountHistoryController extends Controller
     }
 
     public function actionExportOrder($cr_date)
-    {    
-        // $orders = OrderAccountHistory::find()->where(['cr_date' => $cr_date])->orderBy(['cr_date'=>SORT_DESC])->all();
+    {
         $orders = OrderAccountHistory::find()
             ->where(['cr_date' => $cr_date])
             ->andWhere(['or',
-        ['!=', 'is_worker', 1],
-        ['is', 'is_worker', null]
-    ])
+                ['!=', 'is_worker', 1],
+                ['is', 'is_worker', null]
+            ])
             ->orderBy(['cr_date' => SORT_DESC])
             ->all();
 
@@ -1337,17 +1340,27 @@ class OrderAccountHistoryController extends Controller
         $dollar_sumda = 0;
         $sum_carts = 0;
         $sum_transferss = 0;
+
+        // Qaytimlar
+        $sum_zdacha_sum = 0;
+        $sum_zdacha_dollar = 0;
+
         foreach ($orders as $value) {
-            $sum_dollars = $sum_dollars + $value['sum_dollar'];
-            $sum_soms = $sum_soms + $value['sum_som'];
-            $dollar_sumdas = $dollar_sumdas + $value['dollar_sumda'];
-            $dollar_sumda = $dollar_sumda + $value['dollar_sumda'];
-            $sum_carts= $sum_carts + $value['sum_cart'];
-            $sum_transferss = $sum_transferss + $value['sum_transfers'];
-            $sum_otkazmas = $sum_otkazmas + $value['sum_otkazma'];
+            $sum_dollars += (float)$value['sum_dollar'];
+            $sum_soms += (float)$value['sum_som'];
+            $dollar_sumdas += (float)$value['dollar_sumda'];
+            $dollar_sumda += (float)$value['dollar_sumda'];
+            $sum_carts += (float)$value['sum_cart'];
+            $sum_transferss += (float)$value['sum_transfers'];
+            $sum_otkazmas += (float)$value['sum_otkazma'];
+
+            // Qaytim
+            $sum_zdacha_sum += (float)$value['zdacha_sum'];
+            $sum_zdacha_dollar += (float)$value['zdacha_dollar'];
         }
 
         $exchangeRate = ExchangeRate::find()->orderBy(['id' => SORT_ASC])->one();
+
         $debtRepayments = DebtRepayment::find()
             ->where(['date' => $cr_date])
             ->andWhere(['or',
@@ -1363,35 +1376,57 @@ class OrderAccountHistoryController extends Controller
         $debt_sum_otkazmas = 0;
         $debt_sum_transferss = 0;
         $rep_total_debt = 0;
+
+        // Qarz to‘lovlari qaytimlari
+        $debt_sum_zdacha_sum = 0;
+        $debt_sum_zdacha_dollar = 0;
+
         foreach ($debtRepayments as $value) {
-            $debt_sum_dollars = $debt_sum_dollars + $value['summ_dollar'];
-            $debt_sum_soms = $debt_sum_soms + $value['sum_som'];
-            $debt_sum_carts= $debt_sum_carts + $value['summ_cart'];
-            $debt_sum_otkazmas = $debt_sum_otkazmas + $value['sum_otkazma'];
-            $debt_sum_transferss = $debt_sum_transferss + $value['sum_transfers'];
-            $rep_total_debt = $debt_sum_dollars + $debt_sum_soms/$exchangeRate->dollar + $debt_sum_carts/$exchangeRate->dollar + $debt_sum_transferss/$exchangeRate->dollar;
+            $debt_sum_dollars += (float)$value['summ_dollar'];
+            $debt_sum_soms += (float)$value['sum_som'];
+            $debt_sum_carts += (float)$value['summ_cart'];
+            $debt_sum_otkazmas += (float)$value['sum_otkazma'];
+            $debt_sum_transferss += (float)$value['sum_transfers'];
+
+            // Qaytim
+            $debt_sum_zdacha_sum += (float)$value['zdacha_sum'];
+            $debt_sum_zdacha_dollar += (float)$value['zdacha_dollar'];
+
+            $rep_total_debt =
+                $debt_sum_dollars
+                + $debt_sum_soms / $exchangeRate->dollar
+                + $debt_sum_carts / $exchangeRate->dollar
+                + $debt_sum_transferss / $exchangeRate->dollar;
         }
 
         return $this->render('export_order', [
-            'orders' => $orders, 
-            'cr_date' => $cr_date, 
+            'orders' => $orders,
+            'cr_date' => $cr_date,
 
-            'sum_dollars' => $sum_dollars, 
-            'sum_soms' => $sum_soms, 
-            'sum_otkazmas' => $sum_otkazmas, 
-            'dollar_sumdas' => $dollar_sumdas, 
-            'dollar_sumda' => $dollar_sumda, 
-            'sum_carts' => $sum_carts, 
-            'sum_transferss' => $sum_transferss, 
+            'sum_dollars' => $sum_dollars,
+            'sum_soms' => $sum_soms,
+            'sum_otkazmas' => $sum_otkazmas,
+            'dollar_sumdas' => $dollar_sumdas,
+            'dollar_sumda' => $dollar_sumda,
+            'sum_carts' => $sum_carts,
+            'sum_transferss' => $sum_transferss,
 
-            'debtRepayments' => $debtRepayments, 
+            // buyurtma qaytimi
+            'sum_zdacha_sum' => $sum_zdacha_sum,
+            'sum_zdacha_dollar' => $sum_zdacha_dollar,
 
-            'debt_sum_dollars' => $debt_sum_dollars, 
-            'debt_sum_soms' => $debt_sum_soms, 
-            'debt_sum_carts' => $debt_sum_carts, 
+            'debtRepayments' => $debtRepayments,
+
+            'debt_sum_dollars' => $debt_sum_dollars,
+            'debt_sum_soms' => $debt_sum_soms,
+            'debt_sum_carts' => $debt_sum_carts,
             'debt_sum_otkazmas' => $debt_sum_otkazmas,
-            'debt_sum_transferss' => $debt_sum_transferss, 
-            'rep_total_debt' => $rep_total_debt, 
+            'debt_sum_transferss' => $debt_sum_transferss,
+            'rep_total_debt' => $rep_total_debt,
+
+            // qarz qaytimi
+            'debt_sum_zdacha_sum' => $debt_sum_zdacha_sum,
+            'debt_sum_zdacha_dollar' => $debt_sum_zdacha_dollar,
 
             'exchangeRate' => $exchangeRate
         ]);
