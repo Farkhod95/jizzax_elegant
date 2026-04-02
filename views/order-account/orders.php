@@ -193,7 +193,8 @@ input:checked + .slider:before {
                   foreach ($warehouses as $model1) {
                   ?>
                     <tr class="handle"
-                      id="<?= $model->brand->name . "_" . $i ?>"
+                      id="warehouse-row-<?= $model1->id ?>"
+                      data-row-id="warehouse-row-<?= $model1->id ?>"
                       data-name="<?= strtolower($model1->product_category_id ? $model1->productCategory->name : '') ?>"
                       data-brand-id="<?= $model1->brand_id ?>"
                       data-category-id="<?= $model1->product_category_id ?>">
@@ -406,6 +407,7 @@ input:checked + .slider:before {
           <input type="hidden" name="product_id">
           <input type="hidden" name="size">
           <input type="hidden" name="key">
+          <input type="hidden" name="row_dom_id">
           <input type="hidden" name="maxsulot_tipi">
           <input type="hidden" name="brand_id">
           <input type="hidden" name="product_category_id">
@@ -1149,35 +1151,34 @@ $('.handle').on("click", function(){
   $('input[name="soni"]').val("");
   $('input[name="maxsulot_tipi"]').val("");
 
-  let maxsulot_tipi = $(this).children().eq(5).eq(0).text();
-  let count = $(this).children().eq(4).text();
-  let mark = $(this).children().eq(1).text();
-  let name = $(this).children().eq(2).text();
-  let size = $(this).children().eq(3).text();
-  let product_id = $(this).children().eq(6).text();
-  // YANGI QO‘SHIMCHA: brand_id va product_category_id ni data-* dan olish
+  let maxsulot_tipi = $(this).children().eq(5).text().trim();
+  let count = $(this).children().eq(4).text().trim();
+  let mark = $(this).children().eq(1).text().trim();
+  let name = $(this).children().eq(2).text().trim();
+  let size = $(this).children().eq(3).text().trim();
+  let product_id = $(this).children().eq(6).text().trim();
+
   let brand_id = $(this).data('brand-id') || '';
   let product_category_id = $(this).data('category-id') || '';
+  let rowDomId = $(this).attr('id');
 
   $("#marka").text(mark);
   $("#name").text(name);
   $("#size").text(size);
   $("#maxsulot_tipi").text(maxsulot_tipi);
 
-  if (count < 0) count = 0;
+  if (toFloat(count) < 0) count = 0;
 
   $('input[name="product_id"]').val(product_id);
-  $('input[name="soni"]').val(count);
+  $('input[name="soni"]').val('');
   $('input[name="size"]').val(size);
   $('input[name="maxsulot_tipi"]').val(maxsulot_tipi);
-  $('input[name="key"]').val($(this).attr('id'));
-  // brand_id va category_id ni ham formaga yozamiz
+  $('input[name="key"]').val(rowDomId);
+  $('input[name="row_dom_id"]').val(rowDomId);
   $('input[name="brand_id"]').val(brand_id);
   $('input[name="product_category_id"]').val(product_category_id);
-
-    // MUHIM: warehouse count ni hidden inputga yozamiz
   $('input[name="max_count"]').val(count);
-    // inputga ham max va min beramiz
+
   $('input[name="soni"]').attr('max', count);
   $('input[name="soni"]').attr('min', 1);
 
@@ -1198,13 +1199,14 @@ $(".submit").on("click", function(event){
   let price_som = $('input[name="maxsulot_narxi_som"]').val();
 
   let maxsulot_joyi = $('select[name="maxsulot_joyi"]').val();
-  let name = $('#name').text();
-  let marka = $('#marka').text();
+  let name = $('#name').text().trim();
+  let marka = $('#marka').text().trim();
   let product_id = $('input[name="product_id"]').val();
   let size = $('input[name="size"]').val();
   let maxsulot_tipi = $('input[name="maxsulot_tipi"]').val();
 
-  let key = $('input[name="key"]').val();
+  let rowDomId = $('input[name="row_dom_id"]').val();
+
   let countAll = parseInt($("#backet").attr("data-count") || '0', 10);
   let all_sum = parseFloat($("#backet").attr("data-count-sum") || '0');
   let all_sum_som = parseInt($("#backet").attr("data-count-sum-som") || '0', 10);
@@ -1236,6 +1238,21 @@ $(".submit").on("click", function(event){
     return false;
   }
 
+  let $row = $('#' + rowDomId);
+
+  if (!$row.length) {
+    $(".error_message").text("Mahsulot qatori topilmadi.");
+    return false;
+  }
+
+  let count_old = parseInt(toFloat($row.children().eq(4).text() || '0'), 10);
+  count_old = count_old - count_product;
+
+  if (count_old < 0) {
+    $(".error_message").text("Mahsulot soni ombordagi sondan katta bo'lishi mumkin emas.");
+    return false;
+  }
+
   let priceFloat = toFloat(price || '0');
   let priceSomInt = parseInt(toFloat(price_som || '0'), 10);
 
@@ -1248,7 +1265,6 @@ $(".submit").on("click", function(event){
   let totalDollarFormatted = totalDollar.toFixed(2);
   let totalSomFormatted = totalSom.toLocaleString('ru-RU');
 
-  // jami qiymatlarni yangilaymiz
   countAll = countAll + count_product;
   all_sum = all_sum + totalDollar;
   all_sum_som = all_sum_som + totalSom;
@@ -1256,21 +1272,7 @@ $(".submit").on("click", function(event){
   let jamiDollarFormatted = all_sum.toFixed(2);
   let jamiSomFormatted = all_sum_som.toLocaleString('ru-RU');
 
-  let count_old = parseInt($("#" + key).children().eq(4).text() || '0', 10);
-  count_old = count_old - count_product;
-
-  if (count_old < 0) {
-    $(".error_message").text("Mahsulot soni ombordagi sondan katta bo'lishi mumkin emas.");
-    return false;
-  }
-
-  // warehouse count kamaytirish
-  $("#" + key).children().eq(4).text(count_old);
-
-  var id = (key || '').split("_");
-  var aVal = $("." + id[0] + "-amount").children().eq(2).text();
-  aVal = (parseInt(aVal || '0', 10) - count_product);
-  $("." + id[0] + "-amount").children().eq(2).text(aVal);
+  $row.children().eq(4).text(count_old);
 
   let brand_id = $('input[name="brand_id"]').val() || '';
   let product_category_id = $('input[name="product_category_id"]').val() || '';
@@ -1303,7 +1305,7 @@ $(".submit").on("click", function(event){
     jamiDollarFormatted + " <span style='color:#aaa;'>(" + jamiSomFormatted + ")</span>"
   );
 
-  $("#modal-dialog2").modal('toggle');
+  $("#modal-dialog2").modal('hide');
 });
 
 
