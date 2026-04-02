@@ -148,7 +148,7 @@ $urlTypesBySz = Url::to(['order-account-history/types-by-size']);           // b
           <?= $form->field($model, 'date')->textInput(['required'=>true,'readonly'=>true]) ?>
         </div>
         <div class="col-md-3">
-          <?= $form->field($model, 'exchange_rate')->textInput(['type'=>'number','required'=>true]) ?>
+          <?= $form->field($model, 'exchange_rate')->textInput(['type'=>'number','readonly'=>true]) ?>
         </div>
       </div>
 
