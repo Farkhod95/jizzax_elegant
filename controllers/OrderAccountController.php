@@ -111,82 +111,135 @@ class OrderAccountController extends Controller
         return $qarz_sum;
     }
 
-    public function actionQarztul(){
-        // Requestni chop etish
-        
+    public function actionQarztul()
+    {
         $request = Yii::$app->request;
-        $clients_id = $request->post('customer_name');
-        $qarz_client_summ = $request->post('qarz_client_summ');
+
+        $clients_id = (int)$request->post('customer_name');
+        $qarz_client_summ = round($this->moneyToFloat($request->post('qarz_client_summ')), 2);
         $qarz_tul_date = $request->post('qarz_tul_date');
-        $dollar_kurs = $request->post('tul_qarz_dollar_kurs');
 
-        $tul_qarz_sikidka = $request->post('tul_qarz_sikidka');
-        $tul_qarz_sum_dollar = $request->post('tul_qarz_sum_dollar');
-        $tul_qarz_sum_som = $request->post('tul_qarz_sum_som');
-        $tul_qarz_summ_cart = $request->post('tul_qarz_summ_cart');
-        $tul_qarz_summ_otkazma = $request->post('tul_qarz_summ_otkazma');
-        $tul_qarz_sum_transfer = $request->post('tul_qarz_sum_transfer');
-        $tul_qarz_zdacha_dollar = $request->post('tul_qarz_zdacha_dollar');
-        $tul_qarz_zdacha_sum = $request->post('tul_qarz_zdacha_sum');
-
-        $all_tulangan_summa_dollar = round($tul_qarz_sum_dollar + $tul_qarz_sikidka,2);
-        // echo '<pre>';
-        // print_r($all_tulangan_summa_dollar);
-        // echo '</pre>';
-        $client = Client::find()->where(['id' => $clients_id])->one();
         $exchangeRate = ExchangeRate::find()->where(['id' => 1])->one();
-        $dollar_kurs =  $exchangeRate->dollar;
-      
-        // $orderAccountHistory = OrderAccountHistory::find()->where(['client_id' => $clients_id])->all();
-        $orderAccountHistory = OrderAccountHistory::find()
-            ->where(['client_id' => $clients_id])
-            ->andWhere(['or',
-                ['!=', 'is_worker', 1],
-                ['is', 'is_worker', null]
-            ])
-            ->all();
+        $dollar_kurs = $exchangeRate ? (float)$exchangeRate->dollar : 0;
 
-        foreach ($orderAccountHistory as $value) {
-            $value->is_debt = 1;
-            $value->save(false);
+        $tul_qarz_sikidka       = round($this->moneyToFloat($request->post('tul_qarz_sikidka')), 2);
+        $tul_qarz_sum_dollar    = round($this->moneyToFloat($request->post('tul_qarz_sum_dollar')), 2); // readonly jami yopilgan summa
+        $tul_qarz_sum_som       = round($this->moneyToFloat($request->post('tul_qarz_sum_som')), 2);
+        $tul_qarz_summ_cart     = round($this->moneyToFloat($request->post('tul_qarz_summ_cart')), 2);
+        $tul_qarz_summ_otkazma  = round($this->moneyToFloat($request->post('tul_qarz_summ_otkazma')), 2);
+        $tul_qarz_sum_transfer  = round($this->moneyToFloat($request->post('tul_qarz_sum_transfer')), 2);
+        $tul_qarz_zdacha_dollar = round($this->moneyToFloat($request->post('tul_qarz_zdacha_dollar')), 2);
+        $tul_qarz_zdacha_sum    = round($this->moneyToFloat($request->post('tul_qarz_zdacha_sum')), 2);
+
+        $client = Client::find()->where(['id' => $clients_id])->one();
+        if (!$client) {
+            throw new \yii\web\NotFoundHttpException('Mijoz topilmadi.');
         }
+
         $orderAccount = OrderAccount::find()->where(['client_id' => $clients_id])->one();
-        
-        $model = new DebtRepayment();  
-        $model->client_id = $clients_id;
-        $model->order_account_id = $orderAccount->id;
-        $model->date = $qarz_tul_date;
-        $model->total_debt_old = $qarz_client_summ;
-        $model->exchange_rate = $dollar_kurs;
+        if (!$orderAccount) {
+            throw new \yii\web\NotFoundHttpException('Mijozning qarz hisobi topilmadi.');
+        }
 
-        $model->discount_amount = $tul_qarz_sikidka;
+        if ($dollar_kurs <= 0) {
+            throw new \yii\web\BadRequestHttpException('Dollar kursi noto‘g‘ri.');
+        }
 
-        $model->summ_dollar = $tul_qarz_sum_dollar;
-        $model->sum_som = $tul_qarz_sum_som;
-        $model->summ_cart = $tul_qarz_summ_cart;
-        $model->sum_otkazma = $tul_qarz_summ_otkazma;
-        $model->sum_transfers = $tul_qarz_sum_transfer;
-        $model->zdacha_dollar = $tul_qarz_zdacha_dollar;
-        $model->zdacha_sum = $tul_qarz_zdacha_sum;
+        // Haqiqiy to'lov (chegirmasiz)
+        $real_paid_dollar =
+            $tul_qarz_sum_transfer +
+            (($tul_qarz_sum_som + $tul_qarz_summ_cart + $tul_qarz_summ_otkazma) / $dollar_kurs) -
+            $tul_qarz_zdacha_dollar -
+            ($tul_qarz_zdacha_sum / $dollar_kurs);
 
-        $model->all_summ_dollar = $all_tulangan_summa_dollar;
+        $real_paid_dollar = round($real_paid_dollar, 2);
 
-        $orderAccount->total_debt = $orderAccount->total_debt - $all_tulangan_summa_dollar;
-        $orderAccount->date_last_debt_payment = $qarz_tul_date;
-        $orderAccount->save();
+        if ($real_paid_dollar < 0) {
+            $real_paid_dollar = 0;
+        }
 
-        $tul_qarz_sikidkatext = $tul_qarz_sikidka !=0? (", ".$tul_qarz_sikidka." $ chegirma qilib berildi"): "";
-        $elegantHistoryUpdate = new ElegantHistoryUpdate();
-        $elegantHistoryUpdate->title = $client->fio . " ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanada qarz to'ladi...";
-        $elegantHistoryUpdate->comment = $all_tulangan_summa_dollar. " $ qarz to'ladi". $tul_qarz_sikidkatext;
-        $elegantHistoryUpdate->status = 3;
-        $elegantHistoryUpdate->type = 2;
-        $elegantHistoryUpdate->save(false);
+        // Jami yopilgan summa = haqiqiy to'lov + chegirma
+        $covered_total_dollar = round($real_paid_dollar + $tul_qarz_sikidka, 2);
 
-        $model->total_debt = $orderAccount->total_debt;
-        $model->save(false);
-        
-        return $this->redirect(['/debt-repayment/index']);
+        // Frontdagi readonly bilan majburiy bir xil bo'lsin
+        if (abs($covered_total_dollar - $tul_qarz_sum_dollar) > 0.05) {
+            $tul_qarz_sum_dollar = $covered_total_dollar;
+        }
+
+        $transaction = Yii::$app->db->beginTransaction();
+
+        try {
+            $orderAccountHistory = OrderAccountHistory::find()
+                ->where(['client_id' => $clients_id])
+                ->andWhere(['or',
+                    ['!=', 'is_worker', 1],
+                    ['is', 'is_worker', null]
+                ])
+                ->all();
+
+            foreach ($orderAccountHistory as $value) {
+                $value->is_debt = 1;
+                $value->save(false);
+            }
+
+            $model = new DebtRepayment();
+            $model->client_id = $clients_id;
+            $model->order_account_id = $orderAccount->id;
+            $model->date = $qarz_tul_date;
+            $model->total_debt_old = $qarz_client_summ;
+            $model->exchange_rate = $dollar_kurs;
+
+            $model->discount_amount = $tul_qarz_sikidka;
+
+            // Bu yerda jami yopilgan summa saqlanadi
+            $model->summ_dollar = $tul_qarz_sum_dollar;
+
+            // Turlari bo'yicha to'lovlar
+            $model->sum_som = $tul_qarz_sum_som;
+            $model->summ_cart = $tul_qarz_summ_cart;
+            $model->sum_otkazma = $tul_qarz_summ_otkazma;
+            $model->sum_transfers = $tul_qarz_sum_transfer;
+
+            $model->zdacha_dollar = $tul_qarz_zdacha_dollar;
+            $model->zdacha_sum = $tul_qarz_zdacha_sum;
+
+            // Jami yopilgan summa
+            $model->all_summ_dollar = $tul_qarz_sum_dollar;
+
+            $new_total_debt = round($orderAccount->total_debt - $tul_qarz_sum_dollar, 2);
+
+            if ($new_total_debt < 0 && abs($new_total_debt) <= 0.05) {
+                $new_total_debt = 0;
+            }
+
+            if ($new_total_debt < 0) {
+                $new_total_debt = 0;
+            }
+
+            $orderAccount->total_debt = $new_total_debt;
+            $orderAccount->date_last_debt_payment = $qarz_tul_date;
+            $orderAccount->save(false);
+
+            $model->total_debt = $new_total_debt;
+            $model->save(false);
+
+            $tul_qarz_sikidkatext = $tul_qarz_sikidka != 0
+                ? (", " . $tul_qarz_sikidka . " $ chegirma qilib berildi")
+                : "";
+
+            $elegantHistoryUpdate = new ElegantHistoryUpdate();
+            $elegantHistoryUpdate->title = $client->fio . " " . \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') . " sanada qarz to'ladi...";
+            $elegantHistoryUpdate->comment = $tul_qarz_sum_dollar . " $ qarz to'ladi" . $tul_qarz_sikidkatext;
+            $elegantHistoryUpdate->status = 3;
+            $elegantHistoryUpdate->type = 2;
+            $elegantHistoryUpdate->save(false);
+
+            $transaction->commit();
+            return $this->redirect(['/debt-repayment/index']);
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     private function moneyToFloat($value): float
@@ -214,7 +267,7 @@ class OrderAccountController extends Controller
 
         $discount_amounts = round($this->moneyToFloat($request->post('chegirma_summa')), 2);
 
-        // FRONTDAGI readonly "Jami summa ($)" — bu mahsulotlarning umumiy summasi
+        // FRONTDAGI readonly "Jami summa ($)" — Umumiy to'langan summa dollarda
         $jami_summa_dollar = round($this->moneyToFloat($request->post('summa_dollor')), 2);
 
         $dollar_sumda     = round($this->moneyToFloat($request->post('dollar_sumda')), 2); // agar ishlatilsa
@@ -244,7 +297,7 @@ class OrderAccountController extends Controller
         // Chegirma bilan yopilgan jami summa
         $covered_total_dollar = round($real_paid_dollar + $discount_amounts, 2);
 
-        // Orderning umumiy summasi
+        // Umumiy to'langan summa dollarda
         $all_pay_summ = $jami_summa_dollar;
 
         $comment = $request->post('comment');
@@ -256,6 +309,7 @@ class OrderAccountController extends Controller
         $tasdiq_check = $request->post('tasdiq_check');
         
         $count = $request->post('count');
+        // Mahsulot umumiy summasi 
         $all_sum = $request->post('all_sum');
         $product_details = $request->post('product_details');
         $contact = json_decode($product_details, true);

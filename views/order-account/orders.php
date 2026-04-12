@@ -289,7 +289,7 @@ input:checked + .slider:before {
 
                 <div class="col-sm-4">
                   <label><h5><b>Jami Summa ($):</b></h5></label>
-                  <input type="text" class="form-control js-format-number" name="tul_qarz_sum_dollar"/>
+                  <input type="text" class="form-control js-format-number" name="tul_qarz_sum_dollar" readonly/>
                   <span class="error_tul_qarz_sum_dollar text-danger err-space"></span>
                 </div>
 
@@ -486,7 +486,15 @@ input:checked + .slider:before {
           <div class="form-group row m-b-15">
             <label class="col-sm-4 col-form-label"><h4><b>Narxi ($)</b></h4></label>
             <div class="col-sm-8">
-              <input type="number" step="0.01" class="form-control js-format-number" required name="maxsulot_narxi" placeholder=""/>
+              <input
+                type="text"
+                inputmode="decimal"
+                class="form-control js-format-number"
+                data-decimal="1"
+                required
+                name="maxsulot_narxi"
+                placeholder=""
+              />
               <span class="error_message_narx text-danger"></span>
             </div>
           </div>
@@ -834,13 +842,15 @@ $('#modal-dialog').on('shown.bs.modal', function () {
 
 function calculateQarzQoldiq() {
   let jamiQarzDollar = toFloat($("#qarz_client_summ").text() || '0');
-  let dollarKurs = toFloat($('input[name="tul_qarz_dollar_kurs"]').val() || '0');
+  let dollarKurs     = toFloat($('input[name="tul_qarz_dollar_kurs"]').val() || '0');
 
-  let skidkaDollar = toFloat($('input[name="tul_qarz_sikidka"]').val() || '0');
+  let skidkaDollar   = toFloat($('input[name="tul_qarz_sikidka"]').val() || '0');
   let transferDollar = toFloat($('input[name="tul_qarz_sum_transfer"]').val() || '0');
-  let sumSom = toFloat($('input[name="tul_qarz_sum_som"]').val() || '0');
-  let sumCart = toFloat($('input[name="tul_qarz_summ_cart"]').val() || '0');
-  let sumOtkazma = toFloat($('input[name="tul_qarz_summ_otkazma"]').val() || '0');
+  let sumSom         = toFloat($('input[name="tul_qarz_sum_som"]').val() || '0');
+  let sumCart        = toFloat($('input[name="tul_qarz_summ_cart"]').val() || '0');
+  let sumOtkazma     = toFloat($('input[name="tul_qarz_summ_otkazma"]').val() || '0');
+  let zdachaDollar   = toFloat($('input[name="tul_qarz_zdacha_dollar"]').val() || '0');
+  let zdachaSom      = toFloat($('input[name="tul_qarz_zdacha_sum"]').val() || '0');
 
   if (!dollarKurs || dollarKurs <= 0) {
     $("#qarz_qoldiq_dollar").text("0.00");
@@ -849,18 +859,25 @@ function calculateQarzQoldiq() {
     return;
   }
 
-  let somJami = sumSom + sumCart + sumOtkazma;
-  let somDollar = somJami / dollarKurs;
+  // Haqiqiy to'lov (chegirmasiz)
+  let realPaidDollar =
+      transferDollar +
+      ((sumSom + sumCart + sumOtkazma) / dollarKurs) -
+      zdachaDollar -
+      (zdachaSom / dollarKurs);
 
-  let paidDollar = skidkaDollar + transferDollar + somDollar;
+  realPaidDollar = Math.round(realPaidDollar * 100) / 100;
+  if (realPaidDollar < 0) realPaidDollar = 0;
 
-  // Jami summa ($) ni ham avtomatik yozamiz
+  // Jami yopilgan summa = haqiqiy to'lov + chegirma
+  let coveredTotalDollar = realPaidDollar + skidkaDollar;
+  coveredTotalDollar = Math.round(coveredTotalDollar * 100) / 100;
+
   $('input[name="tul_qarz_sum_dollar"]').val(
-    formatNumberWithSpaces(paidDollar.toFixed(2), true)
+    formatNumberWithSpaces(coveredTotalDollar.toFixed(2), true)
   );
 
-  let qoldiqDollar = jamiQarzDollar - paidDollar;
-
+  let qoldiqDollar = jamiQarzDollar - coveredTotalDollar;
   if (qoldiqDollar < 0) qoldiqDollar = 0;
 
   qoldiqDollar = Math.round(qoldiqDollar * 100) / 100;
@@ -872,16 +889,36 @@ function calculateQarzQoldiq() {
 
 $(document).on(
   'input',
-  'input[name="tul_qarz_sikidka"], input[name="tul_qarz_sum_transfer"], input[name="tul_qarz_sum_som"], input[name="tul_qarz_summ_cart"], input[name="tul_qarz_summ_otkazma"], input[name="tul_qarz_dollar_kurs"]',
+  'input[name="tul_qarz_sikidka"], input[name="tul_qarz_sum_transfer"], input[name="tul_qarz_sum_som"], input[name="tul_qarz_summ_cart"], input[name="tul_qarz_summ_otkazma"], input[name="tul_qarz_zdacha_dollar"], input[name="tul_qarz_zdacha_sum"], input[name="tul_qarz_dollar_kurs"]',
   function () {
     calculateQarzQoldiq();
   }
 );
 
 function syncSellTotalFromBasket() {
-  let jamiDollar = toFloat($('#backet').attr('data-count-sum') || '0');
+  let dollarKurs    = toFloat($('input[name="dollar_kurs"]').val() || '0');
+  let chegirmaDollar = toFloat($('input[name="chegirma_summa"]').val() || '0');
+  let summaTransfer = toFloat($('input[name="summa_transfer"]').val() || '0');
+  let summaSom      = toFloat($('input[name="summa_som"]').val() || '0');
+  let summaKarta    = toFloat($('input[name="summa_karta"]').val() || '0');
+  let summaOtkazma  = toFloat($('input[name="summa_otkazma"]').val() || '0');
+
+  if (!dollarKurs || dollarKurs <= 0) {
+    $('input[name="summa_dollor"]').val('');
+    return;
+  }
+
+  let jamiTulovDollar =
+      chegirmaDollar +
+      summaTransfer +
+      (summaSom / dollarKurs) +
+      (summaKarta / dollarKurs) +
+      (summaOtkazma / dollarKurs);
+
+  jamiTulovDollar = Math.round(jamiTulovDollar * 100) / 100;
+
   $('input[name="summa_dollor"]').val(
-    formatNumberWithSpaces(jamiDollar.toFixed(2), true)
+    formatNumberWithSpaces(jamiTulovDollar.toFixed(2), true)
   );
 }
 
@@ -923,14 +960,22 @@ function formatNumberWithSpaces(value, allowDecimal) {
 
   if (!value) return '';
 
+  let hasTrailingDot = allowDecimal && value.endsWith('.');
+
   let parts = value.split('.');
   let intPart = parts[0] || '';
   let decPart = parts[1] || '';
 
   intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
-  if (allowDecimal && decPart !== '') {
-    return intPart + '.' + decPart;
+  if (allowDecimal) {
+    if (hasTrailingDot) {
+      return intPart + '.';
+    }
+
+    if (decPart !== '') {
+      return intPart + '.' + decPart;
+    }
   }
 
   return intPart;

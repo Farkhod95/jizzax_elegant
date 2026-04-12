@@ -164,30 +164,30 @@ class DebtRepayment extends \yii\db\ActiveRecord
                     
                     <td style="width: 10px;"></td>
                     <th nowrap style="text-align: left; color:#474ba0">To\'langan summa dollarda ($):</th>
-                    <td ><b style="color:#474ba0">{summ_dollar} $</b></td>
+                    <td ><b style="color:#474ba0">{sum_transfers} $</b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">'.$discount_amount_sum.'</th>
                     <td ><b style="color:#f59c1" >'.$discount_amount_sum_val.'</b></td>
                     
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left;color:#474ba0"></th>
-                    <td  ><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left;color:#474ba0">'.$tulan_sum_som .'</th>
+                    <td  ><b style="color:#474ba0">{sum_som} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="text-align: left; width: 150px;color:#f59c1">Jami to\'langan summa ($):</th>
                     <td ><b style="color:#f59c1" >{all_summ_dollar} $,</b></td>
 
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left; color:#474ba0"></th>
-                    <td ><b style="color:#474ba0"> </b></td>
+                    <th nowrap style="text-align: left;color:#474ba0">'.$tulan_sum_karta .'</th>
+                    <td  ><b style="color:#474ba0">{summ_cart} </b></td>
                 </tr>
                 <tr>
                     <th nowrap style="font-size:16px;text-align: left; width: 150px;color:red">Qolgan qarz ($): </th>
                     <td ><b style="font-size:16px;color:red" >{total_debt} $,</b></td>
                     <td style="width: 10px;"></td>
-                    <th nowrap style="text-align: left;color:#474ba0"></th>
-                    <td><b style="color:#474ba0"></b></td>
+                    <th nowrap style="text-align: left;color:#474ba0">'.$tulan_sum_otkazma .'</th>
+                    <td  ><b style="color:#474ba0">{sum_otkazma} </b></td>
                 </tr>                         
             </table>
       ';

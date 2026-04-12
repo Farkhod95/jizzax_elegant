@@ -150,11 +150,13 @@ $rows = $provider->getModels();
                                     $sum_paid_cart = 0;
                                     $sum_paid_transfers = 0;
                                     $sum_paid_otkazma = 0;
+                                    $sum_discount_order = 0;
 
                                     $sum_paid_debt_som = 0;
                                     $sum_paid_debt_cart = 0;
                                     $sum_paid_debt_transfers = 0;
                                     $sum_paid_debt_otkazma = 0;
+                                    $sum_discount_debt = 0;
 
                                     $sum_zdacha_sum_order = 0;
                                     $sum_zdacha_dollar_order = 0;
@@ -242,6 +244,9 @@ $rows = $provider->getModels();
                                         $sum_paid_debt_transfers += (float)($row['debt_sum_transfers'] ?? 0);
                                         $sum_paid_debt_otkazma += (float)($row['debt_sum_otkazma'] ?? 0);
 
+                                        $sum_discount_order += (float)($row['discount_amount'] ?? 0);
+                                        $sum_discount_debt += (float)($row['debt_discount_amount'] ?? 0);
+
                                         $sum_profit += (float)($row['all_profit_dollar'] ?? 0);
                                         $sum_total_debt += (float)($row['total_debt'] ?? 0);
 
@@ -269,25 +274,41 @@ $rows = $provider->getModels();
                                                 </span>
 
                                                 <div style="font-size:12px; color:#666; display:flex; flex-direction:column; gap:4px; padding-left:12px;">
-                                                    <span style="color:rgb(184, 27, 22);">
-                                                        Dollar ($): <?= number_format($sum_paid_transfers, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_transfers != 0): ?>
+                                                        <span style="color:rgb(184, 27, 22);">
+                                                            Dollar ($): <?= number_format($sum_paid_transfers, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#333;">
-                                                        Naqt: <?= number_format(($sum_paid_som - $sum_zdacha_sum_order), 2) ?>
-                                                    </span>
+                                                    <?php if ((float)($sum_paid_som - $sum_zdacha_sum_order) != 0): ?>
+                                                        <span style="color:#333;">
+                                                            Naqt: <?= number_format(($sum_paid_som - $sum_zdacha_sum_order), 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#007bff;">
-                                                        Karta: <?= number_format($sum_paid_cart, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_cart != 0): ?>
+                                                        <span style="color:#007bff;">
+                                                            Karta: <?= number_format($sum_paid_cart, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#007bff;">
-                                                        Transfer: <?= number_format($sum_paid_otkazma, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_otkazma != 0): ?>
+                                                        <span style="color:#007bff;">
+                                                            Transfer: <?= number_format($sum_paid_otkazma, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#ff9800;">
-                                                        Qaytim : <?= number_format($sum_zdacha_dollar_order, 2) ?>$ (<?= number_format($sum_zdacha_sum_order, 2) ?>)
-                                                    </span>
+                                                    <?php if ((float)$sum_discount_order != 0): ?>
+                                                        <span style="color:#ff5722;">
+                                                            Chegirma: <?= number_format($sum_discount_order, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+
+                                                    <?php if ((float)$sum_zdacha_dollar_order != 0 || (float)$sum_zdacha_sum_order != 0): ?>
+                                                        <span style="color:#ff9800;">
+                                                            Qaytim : <?= number_format($sum_zdacha_dollar_order, 2) ?>$ (<?= number_format($sum_zdacha_sum_order, 2) ?>)
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </td>
@@ -299,25 +320,41 @@ $rows = $provider->getModels();
                                                 </span>
 
                                                 <div style="font-size:12px; color:#666; display:flex; flex-direction:column; gap:4px; padding-left:12px;">
-                                                    <span style="color:rgb(184, 27, 22);">
-                                                        Dollar ($): <?= number_format($sum_paid_debt_transfers, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_debt_transfers != 0): ?>
+                                                        <span style="color:rgb(184, 27, 22);">
+                                                            Dollar ($): <?= number_format($sum_paid_debt_transfers, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#333;">
-                                                        Naqt: <?= number_format(($sum_paid_debt_som - $sum_zdacha_sum_debt), 2) ?>
-                                                    </span>
+                                                    <?php if ((float)($sum_paid_debt_som - $sum_zdacha_sum_debt) != 0): ?>
+                                                        <span style="color:#333;">
+                                                            Naqt: <?= number_format(($sum_paid_debt_som - $sum_zdacha_sum_debt), 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#007bff;">
-                                                        Karta: <?= number_format($sum_paid_debt_cart, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_debt_cart != 0): ?>
+                                                        <span style="color:#007bff;">
+                                                            Karta: <?= number_format($sum_paid_debt_cart, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#007bff;">
-                                                        Transfer: <?= number_format($sum_paid_debt_otkazma, 2) ?>
-                                                    </span>
+                                                    <?php if ((float)$sum_paid_debt_otkazma != 0): ?>
+                                                        <span style="color:#007bff;">
+                                                            Transfer: <?= number_format($sum_paid_debt_otkazma, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
 
-                                                    <span style="color:#ff9800;">
-                                                        Qaytim: <?= number_format($sum_zdacha_sum_debt, 2) ?>$ (<?= number_format($sum_zdacha_dollar_debt, 2) ?>)
-                                                    </span>
+                                                    <?php if ((float)$sum_discount_debt != 0): ?>
+                                                        <span style="color:#ff5722;">
+                                                            Chegirma: <?= number_format($sum_discount_debt, 2) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+
+                                                    <?php if ((float)$sum_zdacha_sum_debt != 0 || (float)$sum_zdacha_dollar_debt != 0): ?>
+                                                        <span style="color:#ff9800;">
+                                                            Qaytim: <?= number_format($sum_zdacha_sum_debt, 2) ?>$ (<?= number_format($sum_zdacha_dollar_debt, 2) ?>)
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </td>

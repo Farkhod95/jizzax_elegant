@@ -222,7 +222,7 @@ return [
                 }
             },
             'leadPrice' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2){
+                if(\Yii::$app->user->identity->permission == 1){
                     $url = Url::to(['/prices/update' , 'warehouse_id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-usd"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'Narx','class'=>'btn btn-warning btn-xs']);
                 }

@@ -62,8 +62,11 @@ $allMarkCount = 0
                                 <div class="alert alert-info show m-b-10">
                                     <b style="color:red"><?= $index ?> </b>. <i class="fa fa-user fa-2x" style="font-size: 16px;"></i>
                                     <a href="<?=Url::toRoute(['order-account-history/export-view', 'order_id'=> $model->id, 'cr_date' => $cr_date, 'customer_fio' => $model->client->fio])?>" class="alert-link" style="font-size: 14px; margin-left: 10px">
-                                            <?= $model->client->fio ?>, <?= date("H:i", strtotime($model->cr_date_time)) ?>
+                                            <?= $model->client->fio ?>, <?= date("H:i", strtotime($model->cr_date_time)) ?> 
                                     </a>
+                                    <?php if(Yii::$app->user->identity->permission == 1 || Yii::$app->user->identity->permission == 5|| Yii::$app->user->identity->permission == 2|| Yii::$app->user->identity->permission == 6){?>
+                                    <a href="<?= Url::to(['/order-account-history/print-date-client', 'id' => $model->id]) ?>" target ="_blank" class="btn btn-xs  btn-warning"> <i class="fa fa-download"></i> Chop qilish</a>
+                                    <?php }?>
                                 </div>
                             </div>
                         <?php 
@@ -85,7 +88,7 @@ $allMarkCount = 0
                             <!--</tr>-->
                              <tr>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan summa dollarda ($):</th>
-                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_transferss,2)?></b></td>
+                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_transferss,2)?> $</b></td>
                             </tr>
                             <tr>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan summa so'mda:</th>
@@ -99,6 +102,12 @@ $allMarkCount = 0
                                 <th nowrap style="text-align: left; color:#474ba0">To'langan summa transferda:</th>
                                 <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($sum_otkazmas, 2)?></b></td>
                             </tr>
+                            <?php if ((float)$sum_discount_amount != 0): ?>
+                            <tr>
+                                <th nowrap style="text-align: left; color:#ff5722">Chegirma ($):</th>
+                                <td><b style="color:#ff5722"><?= Yii::$app->formatter->asDecimal($sum_discount_amount, 2) ?> $</b></td>
+                            </tr>
+                            <?php endif; ?>
                             <tr>
                                 <th nowrap style="text-align: left; color:#474ba0">Qaytim:</th>
                                 <td><b style="color:#ff9800"><?= Yii::$app->formatter->asDecimal($sum_zdacha_dollar, 2) ?>$ (<?= Yii::$app->formatter->asDecimal($sum_zdacha_sum, 2) ?>)</b></td>
@@ -169,7 +178,7 @@ $allMarkCount = 0
                             <!--</tr>-->
                             <tr>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan qarz dollarda ($):</th>
-                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_transferss,2)?></b></td>
+                                <td   ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_transferss,2)?>  $</b></td>
                             </tr>
                             <tr>
                                 <th nowrap style="text-align: left;color:#474ba0">To'langan qarz so'mda:</th>
@@ -183,6 +192,12 @@ $allMarkCount = 0
                                 <th nowrap style="text-align: left; color:#474ba0">To'langan qarz transferda:</th>
                                 <td ><b style="color:#474ba0"><?= Yii::$app->formatter->asDecimal($debt_sum_otkazmas, 2)?></b></td>
                             </tr>
+                            <?php if ((float)$debt_sum_discount_amount != 0): ?>
+                            <tr>
+                                <th nowrap style="text-align: left; color:#ff5722">Chegirma ($):</th>
+                                <td><b style="color:#ff5722"><?= Yii::$app->formatter->asDecimal($debt_sum_discount_amount, 2) ?> $</b></td>
+                            </tr>
+                            <?php endif; ?>
                             <tr>
                                 <th nowrap style="text-align: left; color:#474ba0">Qaytim:</th>
                                 <td><b style="color:#ff9800"><?= Yii::$app->formatter->asDecimal($debt_sum_zdacha_dollar, 2) ?>$ (<?= Yii::$app->formatter->asDecimal($debt_sum_zdacha_sum, 2) ?>)</b></td>

@@ -138,7 +138,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         "label" => "Tizim boshqaruvi",
                         "url" => "#",
                         "icon" => "bars",
-                        'visible' => $model->permission == 1 || $model->permission == 6 ? true : false,
+                        'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 6 ? true : false,
                         "items" => [
                    
                       
@@ -146,19 +146,19 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'label' => 'Mahsulot toifalari', 
                                 'icon' => 'product-hunt', 
                                 'url' => ['/product-category/index'],
-                                'visible' => $model->permission == 1 || $model->permission == 6? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 6? true : false,
                             ],
                             [
                                 'label' => 'Modellar', 
                                 'icon' => 'bookmark', 
                                 'url' => ['/brands/index'],
-                                'visible' => $model->permission == 1  || $model->permission == 6? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2  || $model->permission == 6? true : false,
                             ],
                             [
                                 'label' => 'Mahsulot o\'lchami', 
                                 'icon' => 'list-ol', 
                                 'url' => ['/brands-size/index'],
-                                'visible' => $model->permission == 1  || $model->permission == 6? true : false,
+                                'visible' => $model->permission == 1 || $model->permission == 2  || $model->permission == 6? true : false,
                             ],
                         
                             [
