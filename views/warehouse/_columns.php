@@ -234,7 +234,7 @@ return [
                  }
              },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2){
+                if(\Yii::$app->user->identity->permission == 1 ){
                     $url = Url::to(['/warehouse/one-delete', 'id' => $model->id]);
                     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-danger btn-xs']);
                 }

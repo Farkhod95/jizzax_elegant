@@ -36,7 +36,7 @@ class MyTotalDebtController extends Controller
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
-                            return \app\models\Users::isAdminRight(Yii::$app->user->identity->id);
+                             return \app\models\Users::isMenejerRight(Yii::$app->user->identity->id);
                         },
                     ],
                 ],

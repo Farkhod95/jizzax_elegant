@@ -60,7 +60,7 @@ return [
                 return Html::a('<span class="glyphicon glyphicon-pencil "></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'zgartirish','class'=>'btn btn-warning btn-xs', 'target' => '_blank']);
             },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1  || \Yii::$app->user->identity->permission == 2){
+                if(\Yii::$app->user->identity->permission == 1 ){
                 $url = Url::to(['/product-category/delete', 'id' => $model->id]);
                     return Html::a('<span style="font-size: 12px;" class="glyphicon glyphicon-trash"></span>', $url, [
                         'role'=>'modal-remote','title'=>'O\'chirish','class'=>'btn btn-danger btn-xs' ,

@@ -118,11 +118,13 @@ return [
             //     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Buyurtmani bekor qilish','class'=>'btn btn-danger btn-xs']);
             // },
             'leadDelete' => function ($url, $model) {
+                if(\Yii::$app->user->identity->permission == 1){
                 $url = Url::to(['/my-total-debt/one-delete', 'id' => $model->id]);
                 return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'role'=>'modal-remote', 'data-toggle'=>'tooltip', 'title'=>'O\'chirish','class'=>'btn btn-danger btn-xs']);
+                }
             },
             'leadDeleteOld' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 5){
+                if(\Yii::$app->user->identity->permission == 1){
                     $consignor_name = "";
                     if ($model->consignor_id) {
                         $consignor_name = $model->consignor->name;

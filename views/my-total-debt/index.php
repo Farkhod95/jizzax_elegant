@@ -19,8 +19,9 @@ $totalDebtSum = MyTotalDebt::find()->sum('total_debt');
 ?>
 <div class="panel panel-inverse user-index">
     <div class="panel-heading">
-        <div class="panel-heading-btn">
+        <div class="panel-heading-btn"><?php if(\Yii::$app->user->identity->permission == 1){?>
             <a href="/my-total-debt/create" role="modal-remote" class="btn btn-xs  btn-success">Qarz qo'shish <i class="fa fa-plus"></i> </a>
+            <?php } ?>
             <a href="javascript:;" title="Во весь экран" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
             <a href="javascript:;" title="Обновить" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-repeat"></i></a>
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>

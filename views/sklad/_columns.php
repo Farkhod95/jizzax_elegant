@@ -323,7 +323,7 @@ return [
             //     return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [ 'data-pjax' => 0, 'data-toggle'=>'tooltip', 'title'=>'Buyurtmani bekor qilish','class'=>'btn btn-danger btn-xs']);
             // },
             'leadDelete' => function ($url, $model) {
-                if(\Yii::$app->user->identity->permission == 1 || \Yii::$app->user->identity->permission == 2 || \Yii::$app->user->identity->permission == 5|| $model->created_by == \Yii::$app->user->identity->id){
+                if(\Yii::$app->user->identity->permission == 1){
                     $consignor_name = "";
                     if ($model->consignor_id) {
                         $consignor_name = $model->consignor0->name;

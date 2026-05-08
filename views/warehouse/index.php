@@ -22,7 +22,7 @@ CrudAsset::register($this);
             <!-- <?php if(Yii::$app->user->identity->permission == 1){?>
                 <a href="/check/create" role="modal-remote" class="btn btn-xs  btn-warning">Tekshirildi <i class="fa fa-check"></i> </a>
             <?php }?> -->
-            <?php if(Yii::$app->user->identity->permission == 1){?>
+            <?php if(Yii::$app->user->identity->permission == 1 || Yii::$app->user->identity->permission == 2){?>
                 <!-- <a href="/check/create" role="modal-remote" class="btn btn-xs  btn-warning">Tekshirildi <i class="fa fa-check"></i> </a> -->
             
                 <a href="/sklad/create" class="btn btn-xs  btn-success">Qo'shish <i class="fa fa-plus"></i> </a>

@@ -122,7 +122,12 @@ return [
         'class' => 'kartik\grid\ActionColumn',
         'dropdown' => false,
         'header' => 'Harakatlar',
-        'template' => '{update} {delete}',
+               'template' => Yii::$app->user->identity->permission == 1 
+        ? '{update} {delete}' 
+        : '{update}',
+        'urlCreator' => function($action, $model, $key, $index) { 
+                return Url::to([$action,'id'=>$key]);
+        },
         'vAlign'=>'middle',
         'urlCreator' => function($action, $model, $key, $index) {
             return Url::to([$action,'id'=>$key]);

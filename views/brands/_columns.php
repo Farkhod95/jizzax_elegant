@@ -24,7 +24,12 @@ return [
         'dropdown' => false,
         'header' => 'Harakatlar',
         'vAlign'=>'middle',
-        'template' => '{update} {delete}',
+               'template' => Yii::$app->user->identity->permission == 1 
+        ? '{update} {delete}' 
+        : '{update}',
+        'urlCreator' => function($action, $model, $key, $index) { 
+                return Url::to([$action,'id'=>$key]);
+        },
         'urlCreator' => function($action, $model, $key, $index) { 
                 return Url::to([$action,'id'=>$key]);
         },
