@@ -285,7 +285,7 @@ return [
         'dropdown' => false,
         'header' => 'Harakatlar',
         'width' => '180px',
-        'template' => '{leadOrderStatus}  {leadView} {leadDelete}',
+        'template' => '{leadOrderStatus} {leadUpdate}  {leadView} {leadDelete}',
         'urlCreator' => function($action, $model, $key, $index) {
             return Url::to([$action,'id'=>$key]);
         },
