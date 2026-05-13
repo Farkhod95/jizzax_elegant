@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_jizzaxdb',
+    'dsn' => 'mysql:host=127.0.0.1;port=3308;dbname=host1836067_jizzaxdbnew',
     'username' => 'host1836067_user',
     'password' => 'elegant@q12we3',
     'charset' => 'utf8',
