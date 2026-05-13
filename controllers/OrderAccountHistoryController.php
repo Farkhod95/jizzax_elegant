@@ -1770,7 +1770,7 @@ class OrderAccountHistoryController extends Controller
             $model->client_id = $client_id;
             $model->date = date('Y-m-d', strtotime($dates_new));
             $model->exchange_rate = $exchange_rates_new;
-            $model->all_summ_dollar = $all_product_summ_new; // mahsulot jami
+            $model->all_summ_dollar = $covered_total_new; // mahsulot jami
             $model->number_of_orders = 1;
 
             $model->discount_amount = $discount_amounts_new;
@@ -1974,7 +1974,7 @@ class OrderAccountHistoryController extends Controller
                 }
 
                 $model->all_product_sum = $all_product_summ_new;
-                $model->all_summ_dollar = $all_product_summ_new;
+                $model->all_summ_dollar = $covered_total_new;
                 $model->sum_dollar = $real_paid_dollar_new;
                 $model->total_debt_today = $this->normalizeMoney($all_product_summ_new - $covered_total_new);
                 $model->total_debt_old = $total_debt_old;
@@ -2050,7 +2050,7 @@ class OrderAccountHistoryController extends Controller
                 }
             } else {
                 $model->all_product_sum = $all_product_summ_new;
-                $model->all_summ_dollar = $all_product_summ_new;
+                $model->all_summ_dollar = $covered_total_new;
                 $model->sum_dollar = $real_paid_dollar_new;
                 $model->total_debt_today = $this->normalizeMoney($all_product_summ_new - $covered_total_new);
                 $model->total_debt_old = $total_debt_old;
