@@ -717,9 +717,12 @@ class SkladController extends Controller
                                 ->andWhere(['product_category_id' => $value->product_category_id])
                                 ->andWhere(['type' => $value->type])
                                 ->andWhere(['size' => $value->size])->one();
-            $warehouse->count = $warehouse->count - $value->count;
-            $warehouse->save(false);
-            $value->delete();
+            if ($warehouse) {
+                $warehouse->count = $warehouse->count - $value->count;
+                $warehouse->save(false);
+                $value->delete();
+            }                
+           
         }
         $myTotalDebt = MyTotalDebt::find()->where(['consignor_id' => $model->consignor_id])->one();
         $myTotalDebt->total_debt = $myTotalDebt->total_debt - $model->my_total_debt;
