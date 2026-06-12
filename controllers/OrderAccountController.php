@@ -984,10 +984,10 @@ class OrderAccountController extends Controller
                         $all_summ = round($all_summ + $value['price'] * $value['count'], 2);
                     }
                     if ($warehouseValue) {
-                        if ($type_sklad_list->id == 1) {
-                            $warehouseValue->count = $warehouseValue->count - $value['count'];
-                            $warehouseValue->save(false);
-                        }
+                        // if ($type_sklad_list->id == 1) {
+                        $warehouseValue->count = $warehouseValue->count - $value['count'];
+                        $warehouseValue->save(false);
+                        // }
                     }
                         
                 }

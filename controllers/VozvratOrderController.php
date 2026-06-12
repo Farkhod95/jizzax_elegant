@@ -322,7 +322,8 @@ class VozvratOrderController extends Controller
             $relativeHistory->save(false);
 
             // Ombor soni
-            if ($warehouseValue && $type_sklad_list->id == 1) {
+            // if ($warehouseValue && $type_sklad_list->id == 1) {
+            if ($warehouseValue) {
                 $warehouseValue->count = $warehouseValue->count + $count;
                 $warehouseValue->save(false);
             }
@@ -337,20 +338,20 @@ class VozvratOrderController extends Controller
         $vozvratOrders->large_price = $hasLargePrice ? 1 : 0;
         $vozvratOrders->save();
 
-        if ($tasdiq_check == 1) {
-            if ($all_summ_dollar != $total_product_sum) {
-                $summ = $total_product_sum - $all_summ_dollar;
-                $orderAccount->total_debt_old = $total_debts;
-                $orderAccount->total_debt = round($total_debts - $summ, 2);
-                $orderAccount->save();
-            }
-           
+        if ((int)$tasdiq_check === 1) {
 
-            $vozvratOrders = VozvratOrder::find()->where(['id' => $vozvratOrder_id])->one();
-            $vozvratOrders->total_debt = round($total_debts - $all_summ, 2);
-            $vozvratOrders->all_summ_dollar = $all_summ_dollar;
-            $vozvratOrders->save();
-            
+            $vozvratOrders = VozvratOrder::findOne($vozvratOrder_id);
+
+            $newDebt = round(((float)$total_debts - (float)$total_product_sum + (float)$all_summ_dollar), 2);
+
+            $orderAccount->total_debt_old = (float)$total_debts;
+            $orderAccount->total_debt = $newDebt;
+            $orderAccount->date_last_debt_payment = date('Y-m-d', strtotime($dates));
+            $orderAccount->save(false);
+
+            $vozvratOrders->total_debt = $newDebt;
+            $vozvratOrders->all_summ_dollar = (float)$all_summ_dollar;
+            $vozvratOrders->save(false);
         }
         return $this->redirect(['/vozvrat-order/index']);
     }
@@ -581,7 +582,8 @@ class VozvratOrderController extends Controller
                     $relativeHistory->save(false);
 
                     // Ombor sonini kamaytirish
-                    if ($warehouseValue && $type_sklad_list->id == 1) {
+                    // if ($warehouseValue && $type_sklad_list->id == 1) {
+                    if ($warehouseValue) {
                         $warehouseValue->count = $warehouseValue->count - $value_count;
                         $warehouseValue->save(false);
                     }

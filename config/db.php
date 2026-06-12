@@ -14,9 +14,9 @@ return [
     // 'charset' => 'utf8', 
 
     // 'class' => 'yii\db\Connection',
-    // 'dsn' => 'mysql:host=localhost;dbname=jizzaxdb_13_05',
+    // 'dsn' => 'mysql:host=localhost;dbname=db_jizzax_12_06',
     // 'username' => 'root',
-    // 'password' => '',
+    // 'password' => 'root',
     // 'charset' => 'utf8', 
 ];
 
