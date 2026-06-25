@@ -33,6 +33,14 @@ class MyTotalDebtHistoryController extends Controller
                         'roles' => ['@'],
                     ],
                     [
+                        'actions' => ['all-index'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            return Yii::$app->user->identity->permission == 1 || Yii::$app->user->identity->permission == 2;
+                        },
+                    ],
+                    [
                         'allow' => true,
                         'roles' => ['@'],
                         'matchCallback' => function ($rule, $action) {
@@ -65,6 +73,17 @@ class MyTotalDebtHistoryController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'model' => $model,
+        ]);
+    }
+
+    public function actionAllIndex()
+    {
+        $searchModel = new MyTotalDebtHistorySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('all_index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 

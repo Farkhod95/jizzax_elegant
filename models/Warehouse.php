@@ -106,7 +106,7 @@ class Warehouse extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '2', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '2', 'type' => 'Pochka',],
         ],
@@ -117,7 +117,7 @@ class Warehouse extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '1', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '4', 'type' => 'Pochka',],
         ],
@@ -128,7 +128,7 @@ class Warehouse extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '1', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '4', 'type' => 'Pochka',],
         ],
@@ -139,7 +139,7 @@ class Warehouse extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '1', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '4', 'type' => 'Pochka',],
         ],
@@ -149,7 +149,7 @@ class Warehouse extends \yii\db\ActiveRecord
     public function getProductTypeForClientView($id)
     {
         if($id == 1) return 'Dona';
-        if($id == 2) return 'Karobka';
+        // if($id == 2) return 'Karobka';
         if($id == 3) return 'Komplekt';
         if($id == 4) return 'Pochka';
     }
@@ -157,7 +157,7 @@ class Warehouse extends \yii\db\ActiveRecord
     public function getProductTypeView($id)
     {
         if($id == 1) return 'Dona';
-        if($id == 2) return 'Karobka';
+        // if($id == 2) return 'Karobka';
         if($id == 3) return 'Komplekt';
         if($id == 4) return 'Pochka';
     }
@@ -216,7 +216,7 @@ class Warehouse extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '1', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '4', 'type' => 'Pochka',],
         ],
@@ -225,14 +225,14 @@ class Warehouse extends \yii\db\ActiveRecord
     public function getTypeView($id)
     {
         if($id == 1) return 'Dona';
-        if($id == 2) return 'Karobka';
+        // if($id == 2) return 'Karobka';
         if($id == 3) return 'Komplekt';
         if($id == 4) return 'Pochka';
     }
     public function getTypeClientView($id)
     {
         if($id == 1) return 'Dona';
-        if($id == 2) return 'Karobka';
+        // if($id == 2) return 'Karobka';
         if($id == 3) return 'Komplekt';
         if($id == 4) return 'Pochka';
     }

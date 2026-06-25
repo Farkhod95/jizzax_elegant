@@ -87,7 +87,7 @@ class WarehouseFile extends \yii\db\ActiveRecord
     {
         return ArrayHelper::map([
             ['id' => '1', 'type' => 'Dona',],
-            ['id' => '2', 'type' => 'Karobka',],
+            // ['id' => '2', 'type' => 'Karobka',],
             ['id' => '3', 'type' => 'Komplekt',],
             ['id' => '4', 'type' => 'Pochka',],
         ],
@@ -97,7 +97,7 @@ class WarehouseFile extends \yii\db\ActiveRecord
     public function getStatusTypeNameView($name)
     {
         if($name == 'Dona') return 1;
-        if($name == 'Karobka') return 2;
+        // if($name == 'Karobka') return 2;
         if($name == 'Komplekt') return 3;
         if($name == 'Pochka') return 4;
     }
@@ -105,7 +105,7 @@ class WarehouseFile extends \yii\db\ActiveRecord
     public function getStatusTypeView($id)
     {
         if($id == 1) return 'Dona';
-        if($id == 2) return 'Karobka';
+        // if($id == 2) return 'Karobka';
         if($id == 3) return 'Komplekt';
         if($id == 4) return 'Pochka';
     }

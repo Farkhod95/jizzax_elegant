@@ -8,7 +8,7 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'language' =>'uz-UZ',
-    'name' => 'Optom Do\'kon',
+    'name' => 'Jizzax Baza',
     'timeZone' =>'Asia/Tashkent',
     // 'defaultRoute' => \Yii::$app->user->permission == 1 ? '/site/index':'/site/product-list',
     'defaultRoute' => '/site/index',

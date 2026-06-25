@@ -124,6 +124,7 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                         'url' => ['/my-total-debt/index'],
                         'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
                     ],
+              
                     
                     
                     
@@ -258,7 +259,12 @@ $model = Users::findOne(Yii::$app->user->identity->id);
                                 'url' => ['/debt-repayment/index'],
                                 'visible' => $model->permission == 1 || $model->permission == 2 || $model->permission == 6   ? true : false,
                             ],
-                            
+                            [
+                                'label' => 'Mening to\'lagan qarzlarim', 
+                                'icon' => 'history', 
+                                'url' => ['/my-total-debt-history/all-index'],
+                                'visible' => $model->permission == 1 || $model->permission == 2 ? true : false,
+                            ],
                             [
                                 'label' => 'Klientlar tarixi', 
                                 'icon' => 'history', 
