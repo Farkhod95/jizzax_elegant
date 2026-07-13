@@ -74,6 +74,33 @@ class OrderAccountHistoryController extends Controller
         ];
     }
 
+    private function getHistoryCalcTime(OrderAccountHistory $model, $endOfDay = true)
+    {
+        if (!empty($model->cr_date_time)) {
+            return date('Y-m-d H:i:s', strtotime($model->cr_date_time));
+        }
+
+        $date = !empty($model->date) ? $model->date : $model->cr_date;
+        return date('Y-m-d', strtotime($date)) . ($endOfDay ? ' 23:59:59' : ' 00:00:00');
+    }
+
+    private function getDebtRepaymentTotalBetween($clientId, $fromTime, $toTime = null)
+    {
+        $timeExpression = "COALESCE(cr_date_time, CONCAT(`date`, ' 23:59:59'))";
+        $query = DebtRepayment::find()
+            ->where(['client_id' => $clientId])
+            ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+            ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+            ->andWhere($timeExpression . ' > :fromTime', [':fromTime' => $fromTime]);
+
+        if ($toTime !== null) {
+            $query->andWhere($timeExpression . ' <= :toTime', [':toTime' => $toTime]);
+        }
+
+        return (float)$query
+            ->select(new Expression('COALESCE(SUM(COALESCE(all_summ_dollar, 0) + COALESCE(discount_amount, 0)), 0)'))
+            ->scalar();
+    }
     /**
      * Lists all OrderAccountHistory models.
      * @return mixed
@@ -2281,16 +2308,17 @@ class OrderAccountHistoryController extends Controller
     {
         $request = Yii::$app->request;
         $model = $this->findModel($id);
-
-        $orderAccountHistory = OrderAccountHistory::find()->where(['id' => $id])->one();
+        $orderAccountHistory = $model;
         $orderAccount = OrderAccount::find()->where(['client_id' => $orderAccountHistory->client_id])->one();
-
-        $postData = Yii::$app->request->post('OrderAccountHistory');
-        $valueReason = isset($postData['comment']) ? $postData['comment'] : "No Data";
         $client = Client::find()->where(['id' => $orderAccountHistory->client_id])->one();
-        if($request->isAjax){
+
+        if (!$client) {
+            throw new NotFoundHttpException('Mijoz topilmadi.');
+        }
+
+        if ($request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
-            if($request->isGet){
+            if ($request->isGet) {
                 return [
                     'title'=> '<div style="text-align:center"><b style="font-size:16px;color:#707478">Haqiqatdan ham</b> <b style="font-size:18px;color:red">'.$model->client->fio.'</b> <b style="font-size:16px;color:#707478">ning buyurtmasini oʻchirib tashlamoqchimisiz?</b></div>',
                     'content'=>$this->renderAjax('delete_form', [
@@ -2298,52 +2326,160 @@ class OrderAccountHistoryController extends Controller
                     ]),
                     'footer'=> Html::button('Yopish',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
                                 Html::button('O\'chirish',['class'=>'btn btn-danger','type'=>"submit"])
-                ];         
-            }else if($valueReason){
-                if($orderAccount){
-                    $orderAccount->number_of_orders = $orderAccount->number_of_orders - 1;
-                    $orderAccount->all_summ_dollar = $orderAccount->all_summ_dollar - $orderAccountHistory->all_summ_dollar;
-        
-                    $orderAccount->discount_amount = $orderAccount->discount_amount - $orderAccountHistory->discount_amount;
-                    $orderAccount->sum_dollar = $orderAccount->sum_dollar - $orderAccountHistory->sum_dollar;
-                    $orderAccount->dollar_sumda = $orderAccount->dollar_sumda - $orderAccountHistory->dollar_sumda;
-                    $orderAccount->sum_som = $orderAccount->sum_som - $orderAccountHistory->sum_som;
-                    $orderAccount->sum_cart = $orderAccount->sum_cart - $orderAccountHistory->sum_cart;
-                    $orderAccount->sum_transfers = $orderAccount->sum_transfers - $orderAccountHistory->sum_transfers;
-        
-                    $orderAccount->all_product_sum = $orderAccount->all_product_sum - $orderAccountHistory->all_product_sum;
-                    $orderAccount->total_debt = $orderAccount->total_debt - $orderAccountHistory->total_debt_today;
-                    if ($client->is_profit_loss == 1) {
-                        $orderAccount->all_profit_dollar = 0;
-                    }else{
-                        $orderAccount->all_profit_dollar = $orderAccount->all_profit_dollar - $orderAccountHistory->all_profit_dollar;
-                    }
-                    $orderAccount->save(false);
+                ];
+            }
+
+            $postData = Yii::$app->request->post('OrderAccountHistory');
+            $valueReason = isset($postData['comment']) ? trim($postData['comment']) : '';
+            if ($valueReason === '') {
+                return [
+                    'title'=> '<div style="text-align:center"><b style="font-size:16px;color:#707478">Haqiqatdan ham</b> <b style="font-size:18px;color:red">'.$model->client->fio.'</b> <b style="font-size:16px;color:#707478">ning buyurtmasini oʻchirib tashlamoqchimisiz?</b></div><br/> <p style="font-size:14px;color:red;text-align:center">Izohni to\'ldiring...</p>',
+                    'content'=>$this->renderAjax('delete_form', [
+                        'model' => $model,
+                    ]),
+                    'footer'=> Html::button('Yopish',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
+                                Html::button('O\'chirish',['class'=>'btn btn-danger','type'=>"submit"])
+                ];
+            }
+
+            if (!$orderAccount) {
+                throw new NotFoundHttpException('Mijoz qarz hisobi topilmadi.');
+            }
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
+                $previousDebt = (float)$orderAccountHistory->total_debt_old;
+                $previousDebtTime = $this->getHistoryCalcTime($orderAccountHistory);
+
+                $orderAccount->number_of_orders = max(0, (int)$orderAccount->number_of_orders - 1);
+                $orderAccount->all_summ_dollar = round((float)$orderAccount->all_summ_dollar - (float)$orderAccountHistory->all_summ_dollar, 2);
+                $orderAccount->discount_amount = round((float)$orderAccount->discount_amount - (float)$orderAccountHistory->discount_amount, 2);
+                $orderAccount->sum_dollar = round((float)$orderAccount->sum_dollar - (float)$orderAccountHistory->sum_dollar, 2);
+                $orderAccount->dollar_sumda = round((float)$orderAccount->dollar_sumda - (float)$orderAccountHistory->dollar_sumda, 2);
+                $orderAccount->sum_som = round((float)$orderAccount->sum_som - (float)$orderAccountHistory->sum_som, 2);
+                $orderAccount->sum_cart = round((float)$orderAccount->sum_cart - (float)$orderAccountHistory->sum_cart, 2);
+                $orderAccount->sum_transfers = round((float)$orderAccount->sum_transfers - (float)$orderAccountHistory->sum_transfers, 2);
+                $orderAccount->all_product_sum = round((float)$orderAccount->all_product_sum - (float)$orderAccountHistory->all_product_sum, 2);
+                $orderAccount->total_debt = round((float)$orderAccount->total_debt - (float)$orderAccountHistory->total_debt_today, 2);
+                if ($client->is_profit_loss == 1) {
+                    $orderAccount->all_profit_dollar = 0;
+                } else {
+                    $orderAccount->all_profit_dollar = round((float)$orderAccount->all_profit_dollar - (float)$orderAccountHistory->all_profit_dollar, 2);
                 }
-        
+                $orderAccount->save(false);
+
                 $productAccountHistory = ProductAccountHistory::find()->where(['order_account_history_id' => $id])->all();
                 foreach ($productAccountHistory as $value) {
                     $warehouseValue = Warehouse::find()
-                                    ->andWhere(['product_category_id' => $value->product_category_id])
-                                    ->andWhere(['brand_id' => $value->brand_id])
-                                    ->andWhere(['size' => $value->size])
-                                    ->andWhere(['type' => $value->type])->one();
-                    if($warehouseValue){
-                        $warehouseValue->count = $warehouseValue->count + $value->count;
-                        $warehouseValue->save(false);
+                        ->andWhere(['product_category_id' => $value->product_category_id])
+                        ->andWhere(['brand_id' => $value->brand_id])
+                        ->andWhere(['size' => $value->size])
+                        ->andWhere(['type' => $value->type])
+                        ->one();
+                    if (!$warehouseValue) {
+                        throw new \RuntimeException(
+                            'Mahsulot skladdan topilmadi. Brand ID: ' . $value->brand_id .
+                            ', kategoriya ID: ' . $value->product_category_id .
+                            ', o\'lcham: ' . $value->size .
+                            ', tip: ' . ProductCategory::getTypeView($value->type) . '.'
+                        );
                     }
-                    ProductAccountHistory::find()->where(['id' => $value->id])->one()->delete();
+
+                    $warehouseValue->count = (float)$warehouseValue->count + (float)$value->count;
+                    $warehouseValue->save(false);
+
+                    $productAccount = ProductAccount::find()
+                        ->andWhere(['order_account_history_id' => $id])
+                        ->andWhere(['order_account_id' => $orderAccount->id])
+                        ->andWhere(['brand_id' => $value->brand_id])
+                        ->andWhere(['product_category_id' => $value->product_category_id])
+                        ->andWhere(['type' => $value->type])
+                        ->andWhere(['type_sklad_id' => $value->type_sklad_id])
+                        ->andWhere(['size' => $value->size])
+                        ->one();
+                    if (!$productAccount) {
+                        $productAccount = ProductAccount::find()
+                            ->andWhere(['order_account_id' => $orderAccount->id])
+                            ->andWhere(['brand_id' => $value->brand_id])
+                            ->andWhere(['product_category_id' => $value->product_category_id])
+                            ->andWhere(['type' => $value->type])
+                            ->andWhere(['type_sklad_id' => $value->type_sklad_id])
+                            ->andWhere(['size' => $value->size])
+                            ->one();
+                    }
+
+                    if (!$productAccount) {
+                        throw new \RuntimeException(
+                            'ProductAccount topilmadi. Brand ID: ' . $value->brand_id .
+                            ', kategoriya ID: ' . $value->product_category_id .
+                            ', o\'lcham: ' . $value->size .
+                            ', tip: ' . ProductCategory::getTypeView($value->type) . '.'
+                        );
+                    }
+
+                    $productAccount->count = (int)$productAccount->count - (int)$value->count;
+                    $productAccount->profit = round((float)$productAccount->profit - (float)$value->profit, 2);
+                    if ($productAccount->count <= 0) {
+                        $productAccount->delete();
+                    } else {
+                        if ((int)$productAccount->order_account_history_id === (int)$id) {
+                            $productAccount->order_account_history_id = null;
+                        }
+                        $productAccount->save(false);
+                    }
+
+                    $value->delete();
                 }
-                $productAccount = ProductAccount::find()->where(['order_account_history_id' => $id])->all();
-                foreach ($productAccount as $value) {
-                    ProductAccount::find()->where(['id' => $value->id])->one()->delete();
+
+                $leftProductAccounts = ProductAccount::find()->where(['order_account_history_id' => $id])->all();
+                if (!empty($leftProductAccounts)) {
+                    $ids = [];
+                    foreach ($leftProductAccounts as $leftProductAccount) {
+                        $ids[] = $leftProductAccount->id;
+                    }
+                    throw new \RuntimeException('Order historyga bog\'langan ProductAccount qatorlari qoldi: ' . implode(', ', $ids));
                 }
+
+                $nextOrders = OrderAccountHistory::find()
+                    ->where(['client_id' => $orderAccountHistory->client_id])
+                    ->andWhere([
+                        'or',
+                        ['>', 'date', $orderAccountHistory->date],
+                        ['and', ['date' => $orderAccountHistory->date], ['>', 'id', $orderAccountHistory->id]]
+                    ])
+                    ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+                    ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+                    ->orderBy(['date' => SORT_ASC, 'id' => SORT_ASC])
+                    ->all();
+
+                foreach ($nextOrders as $nextOrder) {
+                    $nextOrderTime = $this->getHistoryCalcTime($nextOrder, true);
+                    $summaDebt = $this->getDebtRepaymentTotalBetween($orderAccountHistory->client_id, $previousDebtTime, $nextOrderTime);
+
+                    $nextOrder->total_debt_old = $previousDebt;
+                    $nextOrder->total_debt_today = round(
+                        (float)$nextOrder->all_product_sum - ((float)$nextOrder->all_summ_dollar + (float)$nextOrder->discount_amount),
+                        2
+                    );
+                    $nextOrder->total_debt = round(
+                        (float)$nextOrder->total_debt_old + (float)$nextOrder->total_debt_today - $summaDebt,
+                        2
+                    );
+                    $previousDebt = $nextOrder->total_debt;
+                    $previousDebtTime = $nextOrderTime;
+                    $nextOrder->save(false);
+                }
+
+                $afterLastRepayment = $this->getDebtRepaymentTotalBetween($orderAccountHistory->client_id, $previousDebtTime);
+                $orderAccount->total_debt = round($previousDebt - $afterLastRepayment, 2);
+                $orderAccount->save(false);
+
                 $elegantHistoryUpdates = ElegantHistoryUpdate::find()->where(['order_account_history_id' => $id])->all();
                 foreach ($elegantHistoryUpdates as $update) {
                     $update->order_account_history_id = null;
                     $update->save(false);
                 }
-        
+
                 $elegantHistoryUpdate = new ElegantHistoryUpdate();
                 $elegantHistoryUpdate->title = $orderAccountHistory->client->fio . " ning ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanadagi buyurtmasi o'chirildi...";
                 $elegantHistoryUpdate->comment = $valueReason;
@@ -2356,20 +2492,19 @@ class OrderAccountHistoryController extends Controller
                     $keshbek->delete();
                 }
 
-
-                $this->findModel($id)->delete();
-                return ['forceClose'=>true,'forceReload'=>'#crud-datatable-pjax'];    
-            }else{
-                 return [
-                    'title'=> '<div style="text-align:center"><b style="font-size:16px;color:#707478">Haqiqatdan ham</b> <b style="font-size:18px;color:red">'.$model->client->fio.'</b> <b style="font-size:16px;color:#707478">ning buyurtmasini oʻchirib tashlamoqchimisiz?</b></div><br/> <p style="font-size:14px;color:red;text-align:center">Izohni to\'ldiring...</p>',
-                    'content'=>$this->renderAjax('delete_form', [
-                        'model' => $model,
-                    ]),
-                    'footer'=> Html::button('Yopish',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"]).
-                                Html::button('O\'chirish',['class'=>'btn btn-danger','type'=>"submit"])
-                ];        
+                $orderAccountHistory->delete();
+                $transaction->commit();
+                return ['forceClose'=>true,'forceReload'=>'#crud-datatable-pjax'];
+            } catch (\Throwable $e) {
+                $transaction->rollBack();
+                Yii::error($e->getMessage(), __METHOD__);
+                return [
+                    'title'=> '<div style="text-align:center"><b style="font-size:16px;color:red">O\'chirishda xatolik</b></div>',
+                    'content'=> '<div class="alert alert-danger">'.Html::encode($e->getMessage()).'</div>',
+                    'footer'=> Html::button('Yopish',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
+                ];
             }
-        }else{
+        } else {
             if ($model->load($request->post()) && $model->save()) {
                 return $this->redirect(['view', 'id' => $model->id]);
             } else {
@@ -2379,7 +2514,6 @@ class OrderAccountHistoryController extends Controller
             }
         }
     }
-
     public function actionTrash($id)
     {
         $request = Yii::$app->request;

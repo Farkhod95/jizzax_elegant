@@ -12,6 +12,7 @@ use \yii\web\Response;
 use yii\helpers\Html;
 use yii\filters\AccessControl;
 use app\models\OrderAccount;
+use app\models\OrderAccountHistory;
 use app\models\ElegantHistoryUpdate;
 /**
  * DebtRepaymentController implements the CRUD actions for DebtRepayment model.
@@ -66,6 +67,85 @@ class DebtRepaymentController extends Controller
         ]);
     }
 
+    private function getHistoryCalcTime(OrderAccountHistory $model, $endOfDay = true)
+    {
+        if (!empty($model->cr_date_time)) {
+            return date('Y-m-d H:i:s', strtotime($model->cr_date_time));
+        }
+
+        $date = !empty($model->date) ? $model->date : $model->cr_date;
+        return date('Y-m-d', strtotime($date)) . ($endOfDay ? ' 23:59:59' : ' 00:00:00');
+    }
+
+    private function getDebtRepaymentCalcTime(DebtRepayment $model)
+    {
+        if (!empty($model->cr_date_time)) {
+            return date('Y-m-d H:i:s', strtotime($model->cr_date_time));
+        }
+
+        return date('Y-m-d', strtotime($model->date)) . ' 23:59:59';
+    }
+
+    private function getDebtRepaymentTotalBetween($clientId, $fromTime, $toTime = null)
+    {
+        $timeExpression = "COALESCE(cr_date_time, CONCAT(`date`, ' 23:59:59'))";
+        $query = DebtRepayment::find()
+            ->where(['client_id' => $clientId])
+            ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+            ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+            ->andWhere($timeExpression . ' > :fromTime', [':fromTime' => $fromTime]);
+
+        if ($toTime !== null) {
+            $query->andWhere($timeExpression . ' <= :toTime', [':toTime' => $toTime]);
+        }
+
+        return (float)$query
+            ->select(new \yii\db\Expression('COALESCE(SUM(COALESCE(all_summ_dollar, 0) + COALESCE(discount_amount, 0)), 0)'))
+            ->scalar();
+    }
+
+    private function recalculateClientOrderDebtsFrom($clientId, $previousDebt, $previousTime)
+    {
+        $nextOrders = OrderAccountHistory::find()
+            ->where(['client_id' => $clientId])
+            ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+            ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+            ->andWhere("COALESCE(cr_date_time, CONCAT(`date`, ' 23:59:59')) > :previousTime", [':previousTime' => $previousTime])
+            ->orderBy(['date' => SORT_ASC, 'id' => SORT_ASC])
+            ->all();
+
+        foreach ($nextOrders as $nextOrder) {
+            $nextOrderTime = $this->getHistoryCalcTime($nextOrder, true);
+            $repaymentTotal = $this->getDebtRepaymentTotalBetween($clientId, $previousTime, $nextOrderTime);
+
+            $nextOrder->total_debt_old = $previousDebt;
+            $nextOrder->total_debt_today = round(
+                (float)$nextOrder->all_product_sum - ((float)$nextOrder->all_summ_dollar + (float)$nextOrder->discount_amount),
+                2
+            );
+            $nextOrder->total_debt = round(
+                (float)$nextOrder->total_debt_old + (float)$nextOrder->total_debt_today - $repaymentTotal,
+                2
+            );
+            $nextOrder->save(false);
+
+            $previousDebt = (float)$nextOrder->total_debt;
+            $previousTime = $nextOrderTime;
+        }
+
+        $afterLastRepayment = $this->getDebtRepaymentTotalBetween($clientId, $previousTime);
+        $orderAccount = OrderAccount::find()->where(['client_id' => $clientId])->one();
+        if ($orderAccount) {
+            $orderAccount->total_debt = round($previousDebt - $afterLastRepayment, 2);
+            $lastPaymentDate = DebtRepayment::find()
+                ->where(['client_id' => $clientId])
+                ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+                ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+                ->max('date');
+            $orderAccount->date_last_debt_payment = $lastPaymentDate ?: null;
+            $orderAccount->save(false);
+        }
+    }
     public function actionTrashO()
     {    
         $searchModel = new DebtRepaymentSearch(['is_delete' => 1]);
@@ -292,35 +372,62 @@ class DebtRepaymentController extends Controller
     public function actionDelete($id)
     {
         $request = Yii::$app->request;
-        $debtRepayment = DebtRepayment::find()->where(['id' => $id])->one();
+        $debtRepayment = $this->findModel($id);
         $orderAccount = OrderAccount::find()->where(['id' => $debtRepayment->order_account_id])->one();
-        $orderAccount->total_debt = $orderAccount->total_debt + $debtRepayment->all_summ_dollar;
-        $orderAccount->save();
-        $this->findModel($id)->delete();
+        if (!$orderAccount) {
+            throw new NotFoundHttpException('Mijoz qarz hisobi topilmadi.');
+        }
+        if (!$debtRepayment->client) {
+            throw new NotFoundHttpException('Mijoz topilmadi.');
+        }
 
-        $elegantHistoryUpdate = new ElegantHistoryUpdate();
-        $elegantHistoryUpdate->title = $debtRepayment->client->fio . " ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanada to'lagan qarzi o'chirildi...";
-        $elegantHistoryUpdate->comment = $debtRepayment->all_summ_dollar. " $ qarz to'lagani o'chirildi";
-        $elegantHistoryUpdate->status = 2;
-        $elegantHistoryUpdate->type = 2;
-        $elegantHistoryUpdate->save(false);
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            $clientId = (int)$debtRepayment->client_id;
+            $repaymentTime = $this->getDebtRepaymentCalcTime($debtRepayment);
+            $previousOrder = OrderAccountHistory::find()
+                ->where(['client_id' => $clientId])
+                ->andWhere(['or', ['!=', 'is_worker', 1], ['is', 'is_worker', null]])
+                ->andWhere(['or', ['is_delete' => null], ['<>', 'is_delete', 1]])
+                ->andWhere("COALESCE(cr_date_time, CONCAT(`date`, ' 23:59:59')) <= :repaymentTime", [':repaymentTime' => $repaymentTime])
+                ->orderBy(['date' => SORT_DESC, 'id' => SORT_DESC])
+                ->one();
+
+            $previousDebt = $previousOrder ? (float)$previousOrder->total_debt : 0.0;
+            $previousTime = $previousOrder ? $this->getHistoryCalcTime($previousOrder, true) : '1970-01-01 00:00:00';
+
+            $deletedAmount = round((float)$debtRepayment->all_summ_dollar + (float)$debtRepayment->discount_amount, 2);
+            $elegantHistoryUpdate = new ElegantHistoryUpdate();
+            $elegantHistoryUpdate->title = $debtRepayment->client->fio . " ". \Yii::$app->formatter->asDatetime(date('Y-m-d'), 'php:d.m.Y ') ." sanada to'lagan qarzi o'chirildi...";
+            $elegantHistoryUpdate->comment = $deletedAmount . " $ qarz to'lagani o'chirildi";
+            $elegantHistoryUpdate->status = 2;
+            $elegantHistoryUpdate->type = 2;
+            $elegantHistoryUpdate->save(false);
+
+            $debtRepayment->delete();
+            $this->recalculateClientOrderDebtsFrom($clientId, $previousDebt, $previousTime);
+            $transaction->commit();
+        } catch (\Throwable $e) {
+            $transaction->rollBack();
+            Yii::error($e->getMessage(), __METHOD__);
+            if($request->isAjax){
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return [
+                    'title'=> '<div style="text-align:center"><b style="font-size:16px;color:red">O\'chirishda xatolik</b></div>',
+                    'content'=> '<div class="alert alert-danger">'.Html::encode($e->getMessage()).'</div>',
+                    'footer'=> Html::button('Yopish',['class'=>'btn btn-default pull-left','data-dismiss'=>"modal"])
+                ];
+            }
+            throw $e;
+        }
 
         if($request->isAjax){
-            /*
-            *   Process for ajax request
-            */
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ['forceClose'=>true,'forceReload'=>'#crud-datatable-pjax'];
         }else{
-            /*
-            *   Process for non-ajax request
-            */
             return $this->redirect(['index']);
         }
-
-
     }
-
      /**
      * Delete multiple existing DebtRepayment model.
      * For ajax request will return json object
