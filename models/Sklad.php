@@ -296,7 +296,7 @@ class Sklad extends \yii\db\ActiveRecord
                 </tr>
                 <tr>
                     <th nowrap style="font-size:16px;text-align: left; width: 150px;color:red">Qolgan qarzim ($)</th>
-                    <td ><b style="font-size:16px;color:red" >{my_total_debt} $,</b></td>
+                    <td ><b style="font-size:16px;color:red" >{sklad_my_total_debt} $,</b></td>
                 </tr>
             </table> 
       ';
@@ -305,6 +305,7 @@ class Sklad extends \yii\db\ActiveRecord
         $text = str_replace ("{sum_dollar}", Yii::$app->formatter->asDecimal($model->sum_dollar,2), $text);
         $text = str_replace ("{discount_amount}", Yii::$app->formatter->asDecimal($model->discount_amount,2) , $text);
         $text = str_replace ("{my_total_debt}", Yii::$app->formatter->asDecimal($myTotalDebt->total_debt??0,2) , $text);
+        $text = str_replace ("{sklad_my_total_debt}", Yii::$app->formatter->asDecimal($model->my_total_debt??0,2) , $text);
         $text = str_replace ("{total_debt_old}", Yii::$app->formatter->asDecimal($model->old_my_total_debt??0,2) , $text);
         $text = str_replace ("{date}", $model->cr_date , $text);
         
